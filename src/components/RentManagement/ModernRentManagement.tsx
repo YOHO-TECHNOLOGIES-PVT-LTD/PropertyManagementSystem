@@ -18,11 +18,11 @@ import {
   ArrowUpRight,
   ArrowDownRight
 } from 'lucide-react';
-import ModernCard from '../components/ui/ModernCard';
-import ModernButton from '../components/ui/ModernButton';
-import PaymentModal from '../components/payments/PaymentModal';
-import PDFGenerator from '../components/reports/PDFGenerator';
-import { useNotifications } from '../components/notifications/NotificationService';
+import ModernCard from '../../components/ui/ModernCard';
+import ModernButton from '../../components/ui/ModernButton';
+import PaymentModal from '../../components/payments/PaymentModal';
+import PDFGenerator from '../../components/reports/PDFGenerator';
+import { useNotifications } from '../../components/notifications/NotificationService';
 
 const ModernRentManagement: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
