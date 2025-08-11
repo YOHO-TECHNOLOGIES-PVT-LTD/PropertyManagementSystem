@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { NavLink, useNavigate } from "react-router-dom";
+import { FONTS } from "../../constants/ui constants";
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const menuItems = [
@@ -87,7 +88,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                       <Icon size={20} />
                     </div>
                     {isOpen && (
-                      <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                      <span style={{...FONTS.headers}} className="text-sm font-medium text-gray-700 whitespace-nowrap font-bold ">
                         {item.label}
                       </span>
                     )}

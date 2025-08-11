@@ -1,21 +1,36 @@
-.clip-hex {
-  clip-path: polygon(
-    50% 0%,   /* Top */
-    93% 25%,  /* Top right */
-    93% 75%,  /* Bottom right */
-    50% 100%, /* Bottom */
-    7% 75%,   /* Bottom left */
-    7% 25%    /* Top left */
-  );
-  border-radius: 8px; /* adjust for more/less molding */
-}
+    @import url('https://fonts.googleapis.com/css2?family=Afacad:wght@400;500;600;700&display=swap');
+
+    * {
+      font-family: 'Afacad', sans-serif;
+    }
+
+    .clip-hex {
+      clip-path: polygon(50% 0%,
+          /* Top */
+          93% 25%,
+          /* Top right */
+          93% 75%,
+          /* Bottom right */
+          50% 100%,
+          /* Bottom */
+          7% 75%,
+          /* Bottom left */
+          7% 25%
+          /* Top left */
+        );
+      border-radius: 8px;
+      /* adjust for more/less molding */
+    }
 
 
-.no-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
-}
-.no-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-}
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+      /* Chrome, Safari */
+    }
 
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      /* IE and Edge */
+      scrollbar-width: none;
+      /* Firefox */
+    }
