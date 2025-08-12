@@ -15,7 +15,7 @@ import toast from "react-hot-toast";
 import { NavLink, useNavigate } from "react-router-dom";
 import { FONTS } from "../../constants/ui constants";
 
-const Sidebar = ({ isOpen, setIsOpen }) => {
+const Sidebar = ({ isOpen, setIsOpen }:any) => {
   const menuItems = [
     { icon: LayoutDashboard, path: "/", label: "DashBoard" },
     { icon: LandPlot, path: "/properties", label: "Properties" },
