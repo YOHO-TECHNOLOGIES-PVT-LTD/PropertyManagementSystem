@@ -2,7 +2,6 @@ export const COLORS = {
 	primary_purple: '#B200FF ', //navba/sidebar bg-color
 	secondary_white: '#F6F6F6 ', //table headerbg, hover bg-color, mostly for header content bg
     gray_light: "#7D7D7D",
-    
 	button_purple: '#B200FF', //add button, submit button,
     button_dark_green:"#13A5A5",
 	black: '#000000', //text color, card header, model header
