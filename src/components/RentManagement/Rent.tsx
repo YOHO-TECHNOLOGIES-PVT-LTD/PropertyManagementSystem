@@ -1,150 +1,6 @@
 import React, { useState, useMemo } from "react";
 
-const PaymentModal = ({ isOpen, onClose, tenant }: any) => {
-  const [paymentMethod, setPaymentMethod] = useState("UPI");
-  const [upiId, setUpiId] = useState("");
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvv, setCvv] = useState("");
-  const [bank, setBank] = useState("");
 
-  const paymentMethods = [
-    { name: "UPI" },
-    { name: "Card" },
-    { name: "Net Banking" },
-    { name: "Bank Transfer" },
-    { name: "Cheque" },
-    { name: "Cash" },
-  ];
-
-  if (!isOpen) return null;
-
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
-      <div className="bg-white w-full max-w-lg h-[90%] rounded-lg shadow-lg p-6">
-        {/* Header */}
-        <div className="flex justify-between items-center border-b pb-3 mb-4">
-          <h2 className="text-lg font-semibold">Process Payment</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-black">
-            ✕
-          </button>
-        </div>
-
-        {/* Tenant Details */}
-        <div className="mb-4">
-            <p>Payment Details</p>
-          <p className="text-gray-600">
-            <strong>Tenant:</strong> {tenant?.companyName}
-          </p>
-          <p className="text-gray-600">
-            <strong>Unit:</strong> {tenant?.Unit}
-          </p>
-          <p className="text-gray-600">
-            <strong>Amount:</strong> {tenant?.amount}
-          </p>
-        </div>
-
-        {/* Payment Method Selection */}
-        <div className="grid grid-cols-3 gap-2 mb-4">
-          {paymentMethods.map((method) => (
-            <button
-              key={method.name}
-              onClick={() => setPaymentMethod(method.name)}
-              className={`border rounded-lg py-2 text-sm ${
-                paymentMethod === method.name
-                  ? "border-purple-500 bg-purple-50"
-                  : "border-gray-300"
-              }`}
-            >
-              {method.name}
-            </button>
-          ))}
-        </div>
-
-        {/* Conditional Form Fields */}
-        {paymentMethod === "UPI" && (
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">UPI ID</label>
-            <input
-              type="text"
-              value={upiId}
-              onChange={(e) => setUpiId(e.target.value)}
-              placeholder="example@upi"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2"
-            />
-          </div>
-        )}
-
-        {paymentMethod === "Card" && (
-          <div className="space-y-3 mb-4">
-            <input
-              type="text"
-              placeholder="Card Number"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2"
-              value={cardNumber}
-              onChange={(e) => setCardNumber(e.target.value)}
-            />
-            <div className="flex gap-2">
-              <input
-                type="text"
-                placeholder="MM/YY"
-                className="w-1/2 border border-gray-300 rounded-lg px-3 py-2"
-                value={expiry}
-                onChange={(e) => setExpiry(e.target.value)}
-              />
-              <input
-                type="text"
-                placeholder="CVV"
-                className="w-1/2 border border-gray-300 rounded-lg px-3 py-2"
-                value={cvv}
-                onChange={(e) => setCvv(e.target.value)}
-              />
-            </div>
-          </div>
-        )}
-
-        {paymentMethod === "Net Banking" && (
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">Select Bank</label>
-            <select
-              value={bank}
-              onChange={(e) => setBank(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2"
-            >
-              <option value="">Select Bank</option>
-              <option value="SBI">State Bank of India</option>
-              <option value="HDFC">HDFC Bank</option>
-              <option value="ICICI">ICICI Bank</option>
-              <option value="Axis">Axis Bank</option>
-            </select>
-          </div>
-        )}
-
-        {/* Notes */}
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Notes (Optional)</label>
-          <textarea
-            className="w-full border border-gray-300 rounded-lg px-3 py-2"
-            placeholder="Add any additional notes"
-          ></textarea>
-        </div>
-
-        {/* Buttons */}
-        <div className="flex justify-end gap-2">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-100"
-          >
-            Cancel
-          </button>
-          <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
-            Process Payment
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const Rent = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -252,7 +108,7 @@ const Rent = () => {
                   <td className="px-4 py-3">{item.dueDate}</td>
                   <td className="px-4 py-3">
                     <span
-                      className={`px-3 py-1 rounded-md text-sm font-medium ${getStatusStyle(
+                      className={`px-3 py-1 rounded-md mt-5 text-sm font-medium ${getStatusStyle(
                         item.status
                       )}`}
                     >
@@ -267,25 +123,13 @@ const Rent = () => {
   >
     View
   </button>
+    <button
+    className="bg-purple-100 text-purple-600 px-3 py-1 rounded-lg"
+  >
+    Download
+  </button>
 
-  {item.status !== "Paid" && (
-    <>
-      <button
-        className="bg-purple-100 text-purple-600 px-3 py-1 rounded-lg"
-        onClick={() => {
-          setSelectedTenant(item);
-          setIsPaymentOpen(true);
-        }}
-      >
-        Pay
-      </button>
-      <button
-        className="bg-purple-100 text-purple-600 px-3 py-1 rounded-lg"
-      >
-        Remind
-      </button>
-    </>
-  )}
+  
 </td>
 
 
@@ -303,12 +147,6 @@ const Rent = () => {
         </table>
       </div>
 
-      {/* Payment Modal */}
-      <PaymentModal
-        isOpen={isPaymentOpen}
-        onClose={() => setIsPaymentOpen(false)}
-        tenant={selectedTenant}
-      />
     </div>
   );
 };
