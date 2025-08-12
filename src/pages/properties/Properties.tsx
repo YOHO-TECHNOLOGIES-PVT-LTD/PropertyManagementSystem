@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Card, CardContent } from '../../components/ui/card';
@@ -31,13 +31,36 @@ import {
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
-	DialogTrigger,
 } from '../../components/ui/dialog';
 import { Textarea } from '../../components/ui/textarea';
+import toast from 'react-hot-toast';
 
 type ModalMode = 'add' | 'view' | 'edit';
 
-const properties = [
+interface Property {
+	id: number;
+	name: string;
+	location: string;
+	image: string;
+	tag: string;
+	owner: {
+		name: string;
+		role: string;
+		avatar: string;
+		phone: string;
+		email: string;
+		address: string;
+	};
+	stats: {
+		totalUnits: number;
+		totalSquareFeet: number;
+		occupiedUnits: number;
+		vacantUnits: number;
+		occupancyRate: number;
+	};
+}
+
+const initialProperties: Property[] = [
 	{
 		id: 1,
 		name: 'Sunrise Apartments',
@@ -132,15 +155,18 @@ function Properties() {
 	const [selectedType, setSelectedType] = useState<string>('All Types');
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-	const [propertyToDelete, setPropertyToDelete] = useState<
-		(typeof properties)[0] | null
-	>(null);
+	const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(
+		null
+	);
 	const [modalMode, setModalMode] = useState<ModalMode>('add');
-	const [selectedProperty, setSelectedProperty] = useState<
-		(typeof properties)[0] | null
-	>(null);
+	const [selectedProperty, setSelectedProperty] = useState<Property | null>(
+		null
+	);
 	const [uploadedImage, setUploadedImage] = useState<string | null>(null);
 	const [imageFile, setImageFile] = useState<File | null>(null);
+	const [searchTerm, setSearchTerm] = useState('');
+	const [properties, setProperties] = useState<Property[]>(initialProperties);
+
 	const [formData, setFormData] = useState({
 		propertyName: '',
 		propertyType: '',
@@ -154,9 +180,18 @@ function Properties() {
 	});
 
 	const filteredProperties = properties.filter((property) => {
-		if (selectedType === 'All Types') return true;
-		if (selectedType === 'Apartments') return property.tag === 'Apartment';
-		return property.tag === selectedType;
+		// Filter by type
+		const typeMatch =
+			selectedType === 'All Types' || property.tag === selectedType;
+
+		// Filter by search term
+		const searchMatch =
+			searchTerm === '' ||
+			property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			property.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			property.owner.name.toLowerCase().includes(searchTerm.toLowerCase());
+
+		return typeMatch && searchMatch;
 	});
 
 	const handleInputChange = (field: string, value: string) => {
@@ -172,6 +207,7 @@ function Properties() {
 				setUploadedImage(e.target?.result as string);
 			};
 			reader.readAsDataURL(file);
+			toast.success('Image Uploaded');
 		}
 	};
 
@@ -194,12 +230,12 @@ function Properties() {
 		setIsModalOpen(true);
 	};
 
-	const openViewModal = (property: (typeof properties)[0]) => {
+	const openViewModal = (property: Property) => {
 		setModalMode('view');
 		setSelectedProperty(property);
 		setFormData({
 			propertyName: property.name,
-			propertyType: property.stats.totalUnits > 0 ? 'Apartments' : 'House',
+			propertyType: property.tag,
 			totalUnits: property.stats.totalUnits.toString(),
 			squareFeet: property.stats.totalSquareFeet.toString(),
 			address: property.location,
@@ -213,12 +249,12 @@ function Properties() {
 		setIsModalOpen(true);
 	};
 
-	const openEditModal = (property: (typeof properties)[0]) => {
+	const openEditModal = (property: Property) => {
 		setModalMode('edit');
 		setSelectedProperty(property);
 		setFormData({
 			propertyName: property.name,
-			propertyType: property.stats.totalUnits > 0 ? 'Apartments' : 'House',
+			propertyType: property.tag,
 			totalUnits: property.stats.totalUnits.toString(),
 			squareFeet: property.stats.totalSquareFeet.toString(),
 			address: property.location,
@@ -233,33 +269,68 @@ function Properties() {
 	};
 
 	const handleSubmit = async () => {
-		const submitFormData = new FormData();
-
-		submitFormData.append('propertyName', formData.propertyName);
-		submitFormData.append('propertyType', formData.propertyType);
-		submitFormData.append('totalUnits', formData.totalUnits);
-		submitFormData.append('squareFeet', formData.squareFeet);
-		submitFormData.append('address', formData.address);
-		submitFormData.append('ownerName', formData.ownerName);
-		submitFormData.append('email', formData.email);
-		submitFormData.append('phone', formData.phone);
-		submitFormData.append('ownerAddress', formData.ownerAddress);
-
-		if (imageFile) {
-			submitFormData.append('propertyImage', imageFile);
+		if (!formData.propertyName || !formData.propertyType || !formData.address) {
+			toast.error('Please fill in all required fields');
+			return;
 		}
 
 		try {
-			if (modalMode === 'edit') {
-				console.log('Updating property:', selectedProperty?.name);
-				console.log('Updated form data:', formData);
-			} else {
-				console.log('Creating new property');
-				console.log('Form data:', formData);
-			}
+			if (modalMode === 'edit' && selectedProperty) {
+				// Update existing property
+				const updatedProperties = properties.map((property) =>
+					property.id === selectedProperty.id
+						? {
+								...property,
+								name: formData.propertyName,
+								location: formData.address,
+								tag: formData.propertyType,
+								image: uploadedImage || property.image,
+								owner: {
+									...property.owner,
+									name: formData.ownerName,
+									email: formData.email,
+									phone: formData.phone,
+									address: formData.ownerAddress,
+								},
+								stats: {
+									...property.stats,
+									totalUnits: parseInt(formData.totalUnits) || 0,
+									totalSquareFeet: parseInt(formData.squareFeet) || 0,
+								},
+						  }
+						: property
+				);
 
-			console.log('Image file:', imageFile);
-			console.log('FormData object:', submitFormData);
+				setProperties(updatedProperties);
+				toast.success(`${formData.propertyName} details updated`);
+			} else {
+				// Add new property
+				const newProperty: Property = {
+					id: Math.max(...properties.map((p) => p.id)) + 1,
+					name: formData.propertyName,
+					location: formData.address,
+					image: uploadedImage || propertyImg1, // default image if none uploaded
+					tag: formData.propertyType,
+					owner: {
+						name: formData.ownerName,
+						role: 'OWNER/RENTAL',
+						avatar: '/professional-man.png',
+						phone: formData.phone,
+						email: formData.email,
+						address: formData.ownerAddress,
+					},
+					stats: {
+						totalUnits: parseInt(formData.totalUnits) || 0,
+						totalSquareFeet: parseInt(formData.squareFeet) || 0,
+						occupiedUnits: 0,
+						vacantUnits: parseInt(formData.totalUnits) || 0,
+						occupancyRate: 0,
+					},
+				};
+
+				setProperties([...properties, newProperty]);
+				toast.success('New property added successfully!');
+			}
 
 			setIsModalOpen(false);
 			setUploadedImage(null);
@@ -277,19 +348,23 @@ function Properties() {
 			});
 		} catch (error) {
 			console.error('Error submitting form:', error);
+			toast.error('An error occurred. Please try again.');
 		}
 	};
 
-	const handleDeleteClick = (property: (typeof properties)[0]) => {
+	const handleDeleteClick = (property: Property) => {
 		setPropertyToDelete(property);
 		setIsDeleteModalOpen(true);
 	};
 
 	const handleDeleteProperty = () => {
 		if (propertyToDelete) {
-			console.log('Deleting property:', propertyToDelete.name);
+			setProperties(
+				properties.filter((property) => property.id !== propertyToDelete.id)
+			);
 			setIsDeleteModalOpen(false);
 			setPropertyToDelete(null);
+			toast.success(`${propertyToDelete.name} deleted`);
 		}
 	};
 
@@ -306,6 +381,10 @@ function Properties() {
 		}
 	};
 
+	const resetSearch = () => {
+		setSearchTerm('');
+	};
+
 	return (
 		<div className='min-h-screen bg-gray-50 p-6'>
 			<div className='max-w-7xl mx-auto'>
@@ -315,12 +394,12 @@ function Properties() {
 						<div>
 							<h1 className='text-2xl font-bold text-[#000000]'>Properties</h1>
 							<p className='text-gray-600 text-sm mt-2'>
-								Manage Your Property Portfolio (4 Properties)
+								Manage Your Property Portfolio ({properties.length} Properties)
 							</p>
 						</div>
 
 						<Button
-							className='bg-purple-600 hover:bg-purple-700 text-white px-6'
+							className='bg-[#B200FF] hover:bg-[#B200FF] text-white px-6'
 							onClick={openAddModal}
 						>
 							<Plus className='w-4 h-4 mr-2' />
@@ -333,12 +412,22 @@ function Properties() {
 						<div className='relative max-w-md flex-1'>
 							<img
 								src={searchImg}
-								className='absolute left-3 top-6.5 transform -translate-y-1/2 text-gray-400 w-4 h-4'
+								className='absolute left-3 top-7 transform -translate-y-1/2 text-gray-400 w-4 h-4'
 							/>
 							<Input
-								placeholder='Search'
-								className='pl-10 bg-[#b200ff0d] border-[#b200ff0d] text-[#333333] placeholder-[#333333]'
+								placeholder='Search by property, location or owner'
+								className='pl-10 h-10 w-[80%] bg-[#b200ff0d] border-[#b200ff0d] text-[#333333] placeholder-[#333333] rounded-lg'
+								value={searchTerm}
+								onChange={(e) => setSearchTerm(e.target.value)}
 							/>
+							{searchTerm && (
+								<button
+									onClick={resetSearch}
+									className='absolute right-24 top-7 transform -translate-y-1/2 text-gray-400 hover:text-gray-600'
+								>
+									<X className='w-4 h-4' />
+								</button>
+							)}
 						</div>
 						<Select value={selectedType} onValueChange={setSelectedType}>
 							<SelectTrigger className='w-[140px] bg-[#B200FF1A] border-[#B200FF1A] text-[#B200FF] hover:bg-[#B200FF1A]'>
@@ -388,196 +477,205 @@ function Properties() {
 
 				{/* Properties Grid */}
 				<div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-					{filteredProperties.map((property) => (
-						<Card
-							key={property.id}
-							className='bg-white border-0 shadow-sm hover:shadow-md transition-shadow'
-						>
-							<CardContent className='p-0'>
-								{/* Owner Info */}
-								<div className='flex items-center justify-between mb-3 mx-3 -mt-3'>
-									<div className='flex items-center gap-3'>
-										<div>
-											<p className='font-medium text-[#000000] text-sm'>
-												{property.owner.name}
-											</p>
-											<div className='flex items-center gap-2 mt-2'>
+					{filteredProperties.length ? (
+						filteredProperties.map((property) => (
+							<Card
+								key={property.id}
+								className='bg-white border-0 shadow-lg hover:shadow-xl transition-shadow'
+							>
+								<CardContent className='p-0'>
+									{/* Owner Info */}
+									<div className='flex items-center justify-between mb-3 mx-3 -mt-3'>
+										<div className='flex items-center gap-3'>
+											<div>
+												<p className='font-medium text-[#000000] text-sm'>
+													{property.owner.name}
+												</p>
+												<div className='flex items-center gap-2 mt-2'>
+													<img
+														src={callImg}
+														alt='phone icon'
+														className='w-4 h-4 object-cover'
+													/>
+													<p className='text-xs text-gray-500'>
+														{property.owner.phone}
+													</p>
+												</div>
+											</div>
+										</div>
+										<div className='flex gap-2'>
+											<Button
+												size='sm'
+												variant='outline'
+												className='w-8 h-8 p-0 rounded-full border-[#0062FF] bg-[#0062FF]'
+												onClick={() => openEditModal(property)}
+											>
+												<img src={editImg} className='w-4 h-4' alt='edit' />
+											</Button>
+											<Button
+												size='sm'
+												variant='outline'
+												className='w-8 h-8 p-0 rounded-full border-[#EE2F2F] bg-[#EE2F2F]'
+												onClick={() => handleDeleteClick(property)}
+											>
+												<img src={trashImg} className='w-4 h-4' alt='trash' />
+											</Button>
+										</div>
+									</div>
+
+									{/* Property Image */}
+									<div className='relative'>
+										<img
+											src={property.image}
+											alt={property.name}
+											className='w-full h-58 object-cover rounded-xl'
+										/>
+										<Badge
+											variant='secondary'
+											className='absolute top-3 right-3 bg-white text-[#B200FF] hover:bg-white/90'
+										>
+											{property.tag}
+										</Badge>
+									</div>
+
+									<div className='p-2'>
+										{/* Property Info */}
+										<div className='mb-4 flex items-center justify-between mx-1'>
+											<h3 className='font-semibold text-[#000000] mb-1'>
+												{property.name}
+											</h3>
+											<div className='flex items-center gap-1'>
 												<img
-													src={callImg}
-													alt='phone icon'
-													className='w-4 h-4 object-cover'
+													src={locationImg}
+													alt='location icon'
+													className='w-4 h-4'
 												/>
-												<p className='text-xs text-gray-500'>
-													{property.owner.phone}
+												<p className='text-sm text-[#7D7D7D]'>
+													{property.location}
 												</p>
 											</div>
 										</div>
-									</div>
-									<div className='flex gap-2'>
-										<Button
-											size='sm'
-											variant='outline'
-											className='w-8 h-8 p-0 rounded-full border-[#0062FF] bg-[#0062FF]'
-											onClick={() => openEditModal(property)}
-										>
-											<img src={editImg} className='w-4 h-4' alt='edit' />
-										</Button>
-										<Button
-											size='sm'
-											variant='outline'
-											className='w-8 h-8 p-0 rounded-full border-[#EE2F2F] bg-[#EE2F2F]'
-											onClick={() => handleDeleteClick(property)}
-										>
-											<img src={trashImg} className='w-4 h-4' alt='trash' />
-										</Button>
-									</div>
-								</div>
 
-								{/* Property Image */}
-								<div className='relative'>
-									<img
-										src={property.image}
-										alt={property.name}
-										className='w-full h-58 object-cover rounded-xl'
-									/>
-									<Badge
-										variant='secondary'
-										className='absolute top-3 right-3 bg-white text-[#B200FF] hover:bg-white/90'
-									>
-										{property.tag}
-									</Badge>
-								</div>
+										{/* Stats */}
+										<div className='grid grid-cols-2 gap-4 mb-3 place-items-center'>
+											<div className='text-center flex items-center gap-2 w-48'>
+												<div className='mb-1 bg-[#006AFF26] p-2 rounded-full'>
+													<img
+														src={buildingBlue}
+														alt='building'
+														className='w-4 h-4'
+													/>
+												</div>
+												<p className='font-semibold text-[#716F6F]'>
+													Total Units{' '}
+													<span className='text-[#006AFF] ml-1'>
+														{property.stats.totalUnits}
+													</span>
+												</p>
+											</div>
+											<div className='text-center flex items-center gap-2 w-48'>
+												<div className='mb-1 bg-[#1EC95A26] p-2 rounded-full'>
+													<img
+														src={buildingGreen}
+														alt='building'
+														className='w-4 h-4'
+													/>
+												</div>
+												<p className='font-semibold text-[#716F6F]'>
+													Total Sq Ft{' '}
+													<span className='text-[#1EC95A] ml-1'>
+														{property.stats.totalSquareFeet}
+													</span>
+												</p>
+											</div>
+											<div className='text-center flex items-center gap-2 w-48'>
+												<div className='mb-1 bg-[#FF00E126] p-2 rounded-full'>
+													<img
+														src={buildingPink}
+														alt='building'
+														className='w-4 h-4'
+													/>
+												</div>
+												<p className='font-semibold text-[#716F6F]'>
+													Occupied{' '}
+													<span className='text-[#FF00E1] ml-1'>
+														{property.stats.occupiedUnits}
+													</span>
+												</p>
+											</div>
+											<div className='text-center flex items-center gap-2 w-48'>
+												<div className='mb-1 bg-[#006AFF26] p-2 rounded-full'>
+													<img
+														src={buildingBlue}
+														alt='building'
+														className='w-4 h-4'
+													/>
+												</div>
+												<p className='font-semibold text-[#716F6F]'>
+													Vacant{' '}
+													<span className='text-[#006AFF] ml-1'>
+														{property.stats.vacantUnits}
+													</span>
+												</p>
+											</div>
+										</div>
 
-								<div className='p-2'>
-									{/* Property Info */}
-									<div className='mb-4 flex items-center justify-between mx-1'>
-										<h3 className='font-semibold text-[#000000] mb-1'>
-											{property.name}
-										</h3>
-										<div className='flex items-center gap-1'>
-											<img
-												src={locationImg}
-												alt='location icon'
-												className='w-4 h-4'
+										{/* Occupancy Rate */}
+										<div className='mb-4'>
+											<div className='flex justify-between items-center mb-2'>
+												<span className='text-xs text-gray-600'>
+													Occupancy Rate
+												</span>
+												<span className='text-xs font-medium text-[#12804D]'>
+													{property.stats.occupancyRate}%
+												</span>
+											</div>
+											<Progress
+												value={property.stats.occupancyRate}
+												className='h-2 [&>div]:bg-[#12804D]'
 											/>
-											<p className='text-sm text-[#7D7D7D]'>
-												{property.location}
-											</p>
 										</div>
-									</div>
 
-									{/* Stats */}
-									<div className='grid grid-cols-2 gap-4 mb-3 place-items-center'>
-										<div className='text-center flex items-center gap-2 w-48'>
-											<div className='mb-1 bg-[#006AFF26] p-2 rounded-full'>
-												<img
-													src={buildingBlue}
-													alt='building'
-													className='w-4 h-4'
-												/>
-											</div>
-											<p className='font-semibold text-[#716F6F]'>
-												Total Units{' '}
-												<span className='text-[#006AFF] ml-1'>
-													{property.stats.totalUnits}
-												</span>
-											</p>
-										</div>
-										<div className='text-center flex items-center gap-2 w-48'>
-											<div className='mb-1 bg-[#1EC95A26] p-2 rounded-full'>
-												<img
-													src={buildingGreen}
-													alt='building'
-													className='w-4 h-4'
-												/>
-											</div>
-											<p className='font-semibold text-[#716F6F]'>
-												Total Sq Ft{' '}
-												<span className='text-[#1EC95A] ml-1'>
-													{property.stats.totalSquareFeet}
-												</span>
-											</p>
-										</div>
-										<div className='text-center flex items-center gap-2 w-48'>
-											<div className='mb-1 bg-[#FF00E126] p-2 rounded-full'>
-												<img
-													src={buildingPink}
-													alt='building'
-													className='w-4 h-4'
-												/>
-											</div>
-											<p className='font-semibold text-[#716F6F]'>
-												Occupied{' '}
-												<span className='text-[#FF00E1] ml-1'>
-													{property.stats.occupiedUnits}
-												</span>
-											</p>
-										</div>
-										<div className='text-center flex items-center gap-2 w-48'>
-											<div className='mb-1 bg-[#006AFF26] p-2 rounded-full'>
-												<img
-													src={buildingBlue}
-													alt='building'
-													className='w-4 h-4'
-												/>
-											</div>
-											<p className='font-semibold text-[#716F6F]'>
-												Vacant{' '}
-												<span className='text-[#006AFF] ml-1'>
-													{property.stats.vacantUnits}
-												</span>
-											</p>
-										</div>
+										{/* View Button */}
+										<Button
+											className='w-full bg-[#B200FF] hover:bg-[#B200FF] text-white'
+											onClick={() => openViewModal(property)}
+										>
+											<img src={eyeImg} alt='eye' className='w-4 h-4' />
+											<p className=''>View</p>
+										</Button>
 									</div>
-
-									{/* Occupancy Rate */}
-									<div className='mb-4'>
-										<div className='flex justify-between items-center mb-2'>
-											<span className='text-xs text-gray-600'>
-												Occupancy Rate
-											</span>
-											<span className='text-xs font-medium text-[#12804D]'>
-												{property.stats.occupancyRate}%
-											</span>
-										</div>
-										<Progress
-											value={property.stats.occupancyRate}
-											className='h-2 [&>div]:bg-[#12804D]'
-										/>
-									</div>
-
-									{/* View Button */}
-									<Button
-										className='w-full bg-[#B200FF] hover:bg-[#B200FF] text-white'
-										onClick={() => openViewModal(property)}
-									>
-										<img src={eyeImg} alt='eye' className='w-4 h-4' />
-										<p className=''>View</p>
-									</Button>
-								</div>
-							</CardContent>
-						</Card>
-					))}
+								</CardContent>
+							</Card>
+						))
+					) : (
+						<div className='col-span-2'>
+							<Card className='bg-white border-0 shadow-lg hover:shadow-lg transition-shadow p-8 text-center'>
+								<p className='text-lg'>
+									No properties found matching your criteria
+								</p>
+								<Button
+									variant='ghost'
+									className='text-[#B200FF]'
+									onClick={() => {
+										setSearchTerm('');
+										setSelectedType('All Types');
+									}}
+								>
+									Clear filters
+								</Button>
+							</Card>
+						</div>
+					)}
 				</div>
 
+				{/* Add/Edit/View Property Modal */}
 				<Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-					<DialogContent className='min-w-2xl max-h-[90vh] overflow-y-auto fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-lg shadow-xl'>
+					<DialogContent className='min-w-2xl max-h-[90vh] overflow-y-auto fixed top-11/12 left-13/16 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-lg shadow-xl no-scrollbar'>
 						<DialogHeader className='flex flex-row items-center justify-between space-y-0'>
 							<div className='flex items-center gap-2'>
 								<div className='p-2 bg-[#3065A426] rounded-full'>
-									<svg
-										className='w-4 h-4'
-										fill='none'
-										stroke='currentColor'
-										viewBox='0 0 24 24'
-									>
-										<path
-											strokeLinecap='round'
-											strokeLinejoin='round'
-											strokeWidth={2}
-											d='M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'
-										/>
-									</svg>
+									<img src={buildingBlue} alt='building' className='w-4 h-4' />
 								</div>
 								<DialogTitle className='text-lg font-semibold'>
 									{getModalTitle()}
@@ -591,7 +689,7 @@ function Properties() {
 								<div className='w-16 h-16 rounded-full flex items-center justify-center overflow-hidden'>
 									{uploadedImage ? (
 										<img
-											src={uploadedImage || '/placeholder.svg'}
+											src={uploadedImage}
 											alt='Property preview'
 											className='w-full h-full object-cover'
 										/>
@@ -615,19 +713,11 @@ function Properties() {
 												asChild
 											>
 												<span>
-													<svg
-														className='w-4 h-4 mr-2'
-														fill='none'
-														stroke='currentColor'
-														viewBox='0 0 24 24'
-													>
-														<path
-															strokeLinecap='round'
-															strokeLinejoin='round'
-															strokeWidth={2}
-															d='M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12'
-														/>
-													</svg>
+													<img
+														src={uploadImg}
+														alt='upload'
+														className='w-4 h-4'
+													/>
 													Upload Image
 												</span>
 											</Button>
@@ -640,19 +730,11 @@ function Properties() {
 							<div className='space-y-4'>
 								<div className='flex items-center gap-2 mb-4'>
 									<div className='p-2 bg-[#3065A426] rounded-full'>
-										<svg
+										<img
+											src={buildingBlue}
+											alt='building'
 											className='w-4 h-4'
-											fill='none'
-											stroke='currentColor'
-											viewBox='0 0 24 24'
-										>
-											<path
-												strokeLinecap='round'
-												strokeLinejoin='round'
-												strokeWidth={2}
-												d='M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'
-											/>
-										</svg>
+										/>
 									</div>
 									<h3 className='font-semibold text-[#000000]'>
 										Property Information
@@ -662,7 +744,7 @@ function Properties() {
 								<div className='grid grid-cols-2 gap-4'>
 									<div className='space-y-2'>
 										<label className='text-sm font-medium text-[#7D7D7D]'>
-											Property Name
+											Property Name <span className='text-red-500'>*</span>
 										</label>
 										<Input
 											placeholder='Property Name'
@@ -676,7 +758,7 @@ function Properties() {
 									</div>
 									<div className='space-y-2'>
 										<label className='text-sm font-medium text-[#7D7D7D]'>
-											Property Type
+											Property Type <span className='text-red-500'>*</span>
 										</label>
 										<Select
 											value={formData.propertyType}
@@ -685,22 +767,47 @@ function Properties() {
 											}
 											disabled={modalMode === 'view'}
 										>
-											<SelectTrigger className='bg-white text-[#7D7D7D]  border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000]'>
+											<SelectTrigger className='bg-white border border-[#E5E5E5] shadow-lg text-[#7D7D7D] font-semibold'>
 												<SelectValue placeholder='Property Type' />
 											</SelectTrigger>
 											<SelectContent>
-												<SelectItem value='Apartments'>Apartments</SelectItem>
-												<SelectItem value='Commercial'>Commercial</SelectItem>
-												<SelectItem value='Villa'>Villa</SelectItem>
-												<SelectItem value='House'>House</SelectItem>
-												<SelectItem value='Land'>Land</SelectItem>
+												<SelectItem
+													value='Apartments'
+													className='text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white'
+												>
+													Apartments
+												</SelectItem>
+												<SelectItem
+													value='Commercial'
+													className='text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white'
+												>
+													Commercial
+												</SelectItem>
+												<SelectItem
+													value='Villa'
+													className='text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white'
+												>
+													Villa
+												</SelectItem>
+												<SelectItem
+													value='House'
+													className='text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white'
+												>
+													House
+												</SelectItem>
+												<SelectItem
+													value='Land'
+													className='text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg bg-white'
+												>
+													Land
+												</SelectItem>
 											</SelectContent>
 										</Select>
 									</div>
 								</div>
 
 								<div className='grid grid-cols-2 gap-4'>
-									<div className='space-y-2'>
+									{/* <div className='space-y-2'>
 										<label className='text-sm font-medium text-[#7D7D7D]'>
 											Total Units
 										</label>
@@ -712,8 +819,9 @@ function Properties() {
 											}
 											className='bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000]'
 											disabled={modalMode === 'view'}
+											type='number'
 										/>
-									</div>
+									</div> */}
 									<div className='space-y-2'>
 										<label className='text-sm font-medium text-[#7D7D7D]'>
 											Square Feet
@@ -726,13 +834,14 @@ function Properties() {
 											}
 											className='bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000]'
 											disabled={modalMode === 'view'}
+											type='number'
 										/>
 									</div>
 								</div>
 
 								<div className='space-y-2'>
 									<label className='text-sm font-medium text-[#7D7D7D]'>
-										Address
+										Address <span className='text-red-500'>*</span>
 									</label>
 									<Textarea
 										placeholder='Enter Complete Address'
@@ -750,19 +859,11 @@ function Properties() {
 							<div className='space-y-4'>
 								<div className='flex items-center gap-2 mb-4'>
 									<div className='p-2 bg-[#3065A426] rounded-full'>
-										<svg
+										<img
+											src={buildingBlue}
+											alt='building'
 											className='w-4 h-4'
-											fill='none'
-											stroke='currentColor'
-											viewBox='0 0 24 24'
-										>
-											<path
-												strokeLinecap='round'
-												strokeLinejoin='round'
-												strokeWidth={2}
-												d='M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'
-											/>
-										</svg>
+										/>
 									</div>
 									<h3 className='font-semibold text-[#000000]'>
 										Owner Information
