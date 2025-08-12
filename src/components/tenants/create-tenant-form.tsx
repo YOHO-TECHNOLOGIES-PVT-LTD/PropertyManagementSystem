@@ -403,7 +403,7 @@ export default function AddTenantForm({ isOpen, onClose, onSubmit }: AddTenantFo
               <Button type="button" variant="outline" onClick={handleCancel} className="px-8 bg-transparent">
                 Cancel
               </Button>
-              <Button type="button" onClick={handleSubmit} className="px-8 bg-purple-600 hover:bg-purple-700">
+              <Button type="button" onClick={handleSubmit} className="px-8 bg-purple-600 hover:bg-purple-700 text-white">
                 Add Tenant
               </Button>
             </div>

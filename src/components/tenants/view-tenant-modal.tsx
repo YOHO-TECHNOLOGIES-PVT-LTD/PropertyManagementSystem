@@ -232,7 +232,7 @@ export default function ViewTenantModal({ isOpen, tenant, onClose }: ViewTenantM
             )}
 
             <div className="flex justify-end pt-4">
-              <Button onClick={onClose} className="px-8 bg-purple-600 hover:bg-purple-700">
+              <Button onClick={onClose} className="px-8 bg-purple-600 hover:bg-purple-700 text-white">
                 Close
               </Button>
             </div>

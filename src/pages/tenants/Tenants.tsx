@@ -16,6 +16,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../../components/ui/dialog"
+import cardimg1 from "../../assets/cardimg1.png"
+import cardimg2 from "../../assets/cardimg2.png"
+import cardimg3 from "../../assets/cardimg3.png"
+import cardimg4 from "../../assets/cardimg4.png"
+
 
 export default function Tenants() {
   const [showForm, setShowForm] = useState(false)
@@ -113,6 +118,7 @@ export default function Tenants() {
       bgColor: "bg-orange-100",
       circleColor1: "bg-orange-200",
       circleColor2: "bg-orange-300",
+      backgroundimage: cardimg1,
     },
     {
       label: "Paid this Month",
@@ -120,6 +126,7 @@ export default function Tenants() {
       bgColor: "bg-purple-100",
       circleColor1: "bg-purple-200",
       circleColor2: "bg-purple-300",
+      backgroundimage: cardimg2,
     },
     {
       label: "Pending Payments",
@@ -127,6 +134,7 @@ export default function Tenants() {
       bgColor: "bg-green-100",
       circleColor1: "bg-green-200",
       circleColor2: "bg-green-300",
+      backgroundimage: cardimg3,
     },
     {
       label: "Overdue",
@@ -134,6 +142,7 @@ export default function Tenants() {
       bgColor: "bg-pink-100",
       circleColor1: "bg-pink-200",
       circleColor2: "bg-pink-300",
+      backgroundimage: cardimg4,
     },
   ]
 
@@ -281,10 +290,16 @@ const handleConfirmDelete = () => {
                   <p className="text-3xl font-bold">{stat.value}</p>
                 </div>
               </div>
-              <div className={`absolute -top-4 -right-4 w-20 h-20 ${stat.circleColor1} rounded-full opacity-30`}></div>
               <div
-                className={`absolute -bottom-6 -right-6 w-24 h-24 ${stat.circleColor2} rounded-full opacity-20`}
-              ></div>
+              
+                                className="absolute inset-0 bg-no-repeat bg-[length:150%] opacity-35"
+                                style={{
+                                  backgroundImage: `url('${stat.backgroundimage}')`,
+                                  backgroundPosition: stat.backgroundimage === cardimg1 ? "100px 10px" : stat.backgroundimage === cardimg2 ? "-162px -130px" : stat.backgroundimage === cardimg3 ? "-340px -110px" : stat.backgroundimage === cardimg4 ? "-192px -150px" : "10px 10px",
+                                  transform: stat.backgroundimage === cardimg2 ? "rotate(180deg)" : stat.backgroundimage === cardimg3 ? "rotate(180deg)" : stat.backgroundimage === cardimg4 ? "rotate(180deg)" : "none",
+                                  backgroundSize: stat.backgroundimage === cardimg2 ? "110%" : stat.backgroundimage === cardimg3 ? "185%" : stat.backgroundimage === cardimg4 ? "140%" : "none",
+                                }}
+                              ></div>
             </div>
           ))}
         </div>
