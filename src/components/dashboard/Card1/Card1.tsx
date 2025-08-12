@@ -21,8 +21,6 @@ const Card1: React.FC<CardProps> = ({
 }) => {
   const percentageColor =
     percentage >= 0 ? "bg-green-500" : "bg-red-500";
-
-  // Format large numbers with commas and currency
   const formatValue =
     typeof value === "number"
       ? value.toLocaleString("en-IN", {
@@ -31,7 +29,7 @@ const Card1: React.FC<CardProps> = ({
       : value;
 
   return (
-    <div className="bg-white rounded-2xl shadow-md p-4 w-full min-w-[220px] flex flex-col justify-between">
+    <div className="bg-white rounded-2xl shadow-md p-4  w-[232px] h-[166px] flex flex-col justify-between font-">
       {/* Header */}
       <div className="flex gap-3 items-center">
         <div
@@ -39,11 +37,11 @@ const Card1: React.FC<CardProps> = ({
         >
           {icon}
         </div>
-        <h3 className="text-gray-700 font-medium">{title}</h3>
+        <h3 className="text-[#7D7D7D] font-medium">{title}</h3>
       </div>
 
       {/* Main Value */}
-      <div className="text-2xl font-bold text-black mt-3">
+      <div className="text-3xl font-bold text-black mt-3">
         {typeof value === "number" && title.toLowerCase().includes("revenue")
           ? `₹${formatValue}`
           : formatValue}
@@ -51,7 +49,7 @@ const Card1: React.FC<CardProps> = ({
 
       {/* Footer */}
       <div className="flex items-center justify-between mt-2">
-        <span className="text-sm text-gray-500">{subText}</span>
+        <span className="text-sm text-[#7D7D7D]">{subText}</span>
         <span
           className={`${percentageColor} text-white text-xs px-2 py-1 rounded-lg`}
         >
