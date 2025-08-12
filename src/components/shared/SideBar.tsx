@@ -9,6 +9,7 @@ import {
   BadgeIndianRupee,
   Handshake,
   MoveHorizontal,
+  Bolt,
   LogOut,
 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -21,6 +22,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { icon: FileText, path: "/tenants", label: "Tenants" },
     { icon: BadgeIndianRupee, path: "/rent", label: "Rent Management" },
     { icon: Handshake, path: "/lease", label: "Lease Management" },
+        { icon: Bolt, path: "/maintance", label: "Maintance" },
     { icon: TrendingUp, path: "/finance", label: "Financial Reports" },
     { icon: Bell, path: "/notifications", label: "Notifications" },
     { icon: Settings, path: "/settings", label: "Settings" },
