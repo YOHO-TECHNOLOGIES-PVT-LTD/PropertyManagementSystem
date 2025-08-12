@@ -87,7 +87,7 @@ const properties = [
 	},
 ];
 
-export function PropertyDashboard() {
+export function Properties() {
 	return (
 		<div className='min-h-screen bg-gray-50 p-6'>
 			<div className='max-w-7xl mx-auto'>
