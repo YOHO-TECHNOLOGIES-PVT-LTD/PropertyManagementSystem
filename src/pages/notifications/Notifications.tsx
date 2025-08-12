@@ -8,20 +8,21 @@ import {
   AlertTriangle,
   Search,
   ChevronDown,
-  Check,
-  X,
-  MoreHorizontal,
   Home,
   DollarSign,
   FileText,
   Wrench,
   BarChart3,
-  Badge,
+
 } from "lucide-react"
 import { Button } from "../../components/ui/button"
 import { Card, CardContent } from "../../components/ui/card"
 import { Input } from "../../components/ui/input"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu"
+import tickicon from "../../assets/tick-circle.png"
+import cancelicon from "../../assets/close-circle.png"
+import moreicon from "../../assets/more.png"
+import scope from "../../assets/search-normal.png"
 
 interface NotificationItem {
   id: string
@@ -110,17 +111,19 @@ const getNotificationIcon = (type: string) => {
 }
 
 const getPriorityColor = (priority: string) => {
-  switch (priority) {
-    case "High":
-      return "bg-red-100 text-red-800 border-red-200"
-    case "Medium":
-      return "bg-yellow-100 text-yellow-800 border-yellow-200"
-    case "Low":
-      return "bg-green-100 text-green-800 border-green-200"
+  switch (priority.toLowerCase()) {
+    case "high":
+      return "text-red-700 border-red-700 bg-[#EE2F2F1A]";
+    case "medium":
+      return "text-yellow-700 border-yellow-700 bg-[#FFC3001A]";
+    case "low":
+      return "text-green-700 border-green-700 bg-[#1CAF191A]";
     default:
-      return "bg-gray-100 text-gray-800 border-gray-200"
+      return "text-gray-700 border-gray-700 bg-gray-100";
   }
-}
+};
+
+
 
 const getNotificationBackground = (priority: string, isRead: boolean) => {
   if (isRead) return "bg-white"
@@ -143,12 +146,12 @@ function Notifications() {
   const totalNotifications = notifications.length
   const unreadNotifications = notifications.filter((n) => !n.isRead).length
   const highPriorityNotifications = notifications.filter((n) => n.priority === "High").length
-  const todayNotifications = 0 // Based on the image showing 0
+  const todayNotifications = 0 
 
   return (
-    <div className="w-6xl mx-auto ">
+    <div className="w-6xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between p-6 border-b border-gray-200">
+      <div className="flex items-center justify-between p-6 ">
         <div>
           <h1 className="text-2xl font-semibold text-gray-900">Notifications</h1>
           <p className="text-sm text-gray-600 mt-1">Stay Updated With Important Alerts And Messages</p>
@@ -156,8 +159,8 @@ function Notifications() {
         <Button className="bg-purple-600 hover:bg-purple-700 text-white">Mark All Read</Button>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-4 gap-4 p-6 border-b border-gray-200">
+      
+      <div className="grid grid-cols-4 gap-4 p-6 ">
         <Card className="bg-yellow-100 border-yellow-200">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -215,51 +218,123 @@ function Notifications() {
         </Card>
       </div>
 
-      {/* Search and Filters */}
-      <div className="flex items-center gap-4 p-6 border-b border-gray-200">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-          <Input
-            placeholder="Search"
-            value={searchQuery}
-            onChange={(e:any) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
+    
+      <div className="flex flex-col p-6 border-b border-gray-200">
+  {/* Row 1: Search left, filters right */}
+  <div className="flex items-center justify-between">
+    {/* Search Bar */}
+    <div className="relative w-64">
+      <img src={scope} className="absolute mt-2 left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+      <Input
+        placeholder="Search"
+        value={searchQuery}
+        onChange={(e: any) => setSearchQuery(e.target.value)}
+        className="pl-10"
+      />
+    </div>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="gap-2 bg-transparent">
-              All Types
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem>All Types</DropdownMenuItem>
-            <DropdownMenuItem>High Priority</DropdownMenuItem>
-            <DropdownMenuItem>Medium Priority</DropdownMenuItem>
-            <DropdownMenuItem>Low Priority</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+    {/* Filters on the right */}
+    <div className="flex items-center gap-2">
+      {/* All Types Dropdown */}
+      <DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button variant="outline" className="gap-2 bg-[#B200FF1A]">
+      All Types
+      <ChevronDown className="h-4 w-4" />
+    </Button>
+  </DropdownMenuTrigger>
 
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="gap-2 bg-transparent">
-              All
-              <ChevronDown className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuItem>All</DropdownMenuItem>
-            <DropdownMenuItem>Read</DropdownMenuItem>
-            <DropdownMenuItem>Unread</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+  <DropdownMenuContent
+    className="bg-transparent border-none shadow-none p-0 w-48"
+    align="start"
+  >
+    <div className="flex flex-col gap-2 bg-white p-2">
+      <DropdownMenuItem
+        className="rounded-xl border border-gray-200 px-4 py-2 cursor-pointer hover:bg-[#B200FF] hover:text-[white]"
+      >
+        All Types
+      </DropdownMenuItem>
 
-        <Button variant="link" className="text-blue-600 hover:text-blue-800">
-          View All
-        </Button>
-      </div>
+      <DropdownMenuItem
+        className="rounded-xl border border-gray-200 px-4 py-2 cursor-pointer hover:bg-[#B200FF] hover:text-[white]"
+      >
+        Rent Reminders
+      </DropdownMenuItem>
+
+      <DropdownMenuItem
+        className="rounded-xl border border-gray-200 px-4 py-2 cursor-pointer  text-black hover:bg-[#B200FF] hover:text-[white]"
+      >
+        Payment Conformation
+      </DropdownMenuItem>
+
+      <DropdownMenuItem
+        className="rounded-xl border border-gray-200 px-4 py-2 cursor-pointer hover:bg-[#B200FF] hover:text-[white]"
+      >
+        Lease Expiry
+      </DropdownMenuItem>
+
+      <DropdownMenuItem
+        className="rounded-xl border border-gray-200 px-4 py-2 cursor-pointer hover:bg-[#B200FF] hover:text-[white]"
+      >
+        Maintenance
+      </DropdownMenuItem>
+
+      <DropdownMenuItem
+        className="rounded-xl border border-gray-200 px-4 py-2 cursor-pointer hover:bg-[#B200FF] hover:text-[white]"
+      >
+        System
+      </DropdownMenuItem>
+    </div>
+  </DropdownMenuContent>
+</DropdownMenu>
+
+
+      {/* All Dropdown */}
+      <DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button variant="outline" className="gap-2 bg-[#B200FF1A]">
+      All
+      <ChevronDown className="h-4 w-4" />
+    </Button>
+  </DropdownMenuTrigger>
+
+  <DropdownMenuContent
+    className="bg-white border-none shadow-none p-0 w-48"
+    align="start"
+  >
+    <div className="flex flex-col gap-2 bg-transparent p-2">
+      <DropdownMenuItem
+        className="rounded-xl border border-gray-200 px-4 py-2 cursor-pointer text-black hover:bg-[#B200FF] hover:text-white"
+      >
+        All
+      </DropdownMenuItem>
+
+      <DropdownMenuItem
+        className="rounded-xl border border-gray-200 px-4 py-2 cursor-pointer text-black hover:bg-[#B200FF] hover:text-white"
+      >
+        Read
+      </DropdownMenuItem>
+
+      <DropdownMenuItem
+        className="rounded-xl border border-gray-200 px-4 py-2 cursor-pointer text-black hover:bg-[#B200FF] hover:text-white"
+      >
+        Unread
+      </DropdownMenuItem>
+    </div>
+  </DropdownMenuContent>
+</DropdownMenu>
+
+    </div>
+  </div>
+
+  
+  <div className="flex justify-end mt-2">
+    <Button variant="link" className="text-blue-600 hover:text-blue-800">
+      View All
+    </Button>
+  </div>
+</div>
+
 
       {/* Notifications List */}
       <div className="divide-y divide-gray-200">
@@ -281,10 +356,13 @@ function Notifications() {
                     <p className="text-xs text-gray-500">{notification.timestamp}</p>
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <Badge variant="outline" className={getPriorityColor(notification.priority)}>
-                      {notification.priority}
-                    </Badge>
+                  <div className="flex  gap-3">
+<span
+  className={`inline-flex items-center justify-center w-20 mr-50 px-2 py-1 text-sm rounded-md border ${getPriorityColor(notification.priority)}`}
+>
+  {notification.priority}
+</span>
+
 
                     <div className="flex items-center gap-1">
                       <Button
@@ -292,21 +370,21 @@ function Notifications() {
                         variant="ghost"
                         className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
                       >
-                        <Check className="h-4 w-4" />
+                        <img src={tickicon} className="h-6 w-6" />
                       </Button>
                       <Button
                         size="sm"
                         variant="ghost"
                         className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                       >
-                        <X className="h-4 w-4" />
+                         <img src={cancelicon}className="h-6 w-6" />
                       </Button>
                       <Button
                         size="sm"
                         variant="ghost"
                         className="h-8 w-8 p-0 text-gray-600 hover:text-gray-700 hover:bg-gray-50"
                       >
-                        <MoreHorizontal className="h-4 w-4" />
+                         <img src={moreicon} className="h-6 w-6" />
                       </Button>
                     </div>
                   </div>
