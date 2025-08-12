@@ -7,7 +7,7 @@ import Properties from '../pages/properties/Properties';
 import Tenants from '../pages/tenants/Tenants';
 import RentManagement from '../pages/rent management/RentManagement';
 import LeaseManagement from '../pages/lease management/LeaseManagement';
-import FinancialReports from '../pages/financial reports/FinancialReports';
+import FinancialReports from '../pages/financial reports/Reports';
 import Settings from '../pages/settings/Settings';
 
 function Approutes() {

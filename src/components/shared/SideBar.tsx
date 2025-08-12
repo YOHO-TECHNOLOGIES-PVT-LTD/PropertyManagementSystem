@@ -88,7 +88,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                       <Icon size={20} />
                     </div>
                     {isOpen && (
-                      <span style={{...FONTS.headers}} className="text-sm font-medium text-gray-700 whitespace-nowrap font-bold ">
+                      <span style={{...FONTS.sidebar}} className="text-sm font-medium text-gray-700 whitespace-nowrap font-bold ">
                         {item.label}
                       </span>
                     )}
