@@ -8,6 +8,14 @@ import { Search, Phone, Mail, DollarSign, Trash2 } from "lucide-react"
 import AddTenantForm, { type TenantFormData } from "../../components/tenants/create-tenant-form"
 import EditTenantForm from "../../components/tenants/edit-tenant-form"
 import ViewTenantModal, { type Tenant } from "../../components/tenants//view-tenant-modal"
+import trash from '../../assets/properties/trash.png'
+import edit from '../../assets/properties/edit.png'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../../components/ui/dialog"
 
 export default function Tenants() {
   const [showForm, setShowForm] = useState(false)
@@ -16,6 +24,8 @@ export default function Tenants() {
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
   const [filterType, setFilterType] = useState("All Types")
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [tenantToDelete, setTenantToDelete] = useState<Tenant | null>(null)
 
   const [tenants, setTenants] = useState<Tenant[]>([
     {
@@ -215,11 +225,18 @@ export default function Tenants() {
     setSelectedTenant(null)
   }
 
-  const handleDeleteTenant = (tenantId: string) => {
-    if (window.confirm("Are you sure you want to delete this tenant?")) {
-      setTenants((prev) => prev.filter((tenant) => tenant.id !== tenantId))
-    }
+  const handleDeleteClick = (tenant: Tenant) => {
+  setTenantToDelete(tenant)
+  setIsDeleteModalOpen(true)
+}
+
+const handleConfirmDelete = () => {
+  if (tenantToDelete) {
+    setTenants((prev) => prev.filter((tenant) => tenant.id !== tenantToDelete.id))
+    setIsDeleteModalOpen(false)
+    setTenantToDelete(null)
   }
+}
 
   const handleViewTenant = (tenant: Tenant) => {
     setSelectedTenant(tenant)
@@ -235,7 +252,7 @@ export default function Tenants() {
             <h1 className="text-2xl font-bold mb-2">Tenants</h1>
             <p className="text-gray-600">Manage your property tenants</p>
           </div>
-          <Button onClick={() => setShowForm(true)} className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2">
+          <Button onClick={() => setShowForm(true)} className="bg-[#b200ff] text-white px-6 py-2">
             Add Tenant
           </Button>
         </div>
@@ -284,10 +301,10 @@ export default function Tenants() {
             />
           </div>
           <Select value={filterType} onValueChange={setFilterType}>
-            <SelectTrigger className="w-48 border-gray-200">
+            <SelectTrigger className="w-48 border-gray-200 bg-white">
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white">
               <SelectItem value="All Types">All Types</SelectItem>
               <SelectItem value="Paid">Paid</SelectItem>
               <SelectItem value="Pending">Pending</SelectItem>
@@ -297,9 +314,9 @@ export default function Tenants() {
         </div>
 
         {/* Tenant Cards */}
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-2 gap-6 ">
           {tenants.map((tenant) => (
-            <div key={tenant.id} className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
+            <div key={tenant.id} className=" bg-white border border-gray-100 transition-shadow duration-200 shadow-[0_0_6px_rgba(0,0,0,0.1)] p-6">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-semibold text-sm">
@@ -312,22 +329,22 @@ export default function Tenants() {
                 </div>
                 <div className="flex gap-1">
                   <div
-                    className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-600 transition-colors"
+                    className="w-8 h-8 bg-[#0062ff] rounded-full flex items-center justify-center cursor-pointer hover:bg-blue-600 transition-colors"
                     onClick={() => handleEditTenant(tenant)}
                   >
-                    <Mail className="w-4 h-4 text-white" />
+                    <img src={edit} className="w-4 h-4 text-white" />
                   </div>
                   <div
-                    className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-red-600 transition-colors"
-                    onClick={() => handleDeleteTenant(tenant.id)}
+                    className="w-8 h-8 bg-[#ee2f2f] rounded-full flex items-center justify-center cursor-pointer hover:bg-red-600 transition-colors"
+                    onClick={() => handleDeleteClick(tenant)}
                   >
-                    <Trash2 className="w-4 h-4 text-white" />
+                    <img src={trash} className="w-4 h-4 text-white" />
                   </div>
                 </div>
               </div>
 
               <div className="flex justify-between mb-4">
-                {/* <div className="flex gap-3"> */}
+                <div className="flex gap-3">
                   <div className="flex items-center gap-2 text-xs text-gray-600">
                     <Mail className="w-3 h-3" />
                     {tenant.email}
@@ -336,9 +353,9 @@ export default function Tenants() {
                     <Phone className="w-3 h-3" />
                     {tenant.phone}
                   </div>
-                {/* </div> */}
+                </div>
 
-                {/* <div>
+                <div>
                   <span
                     className={`px-4 py-2 rounded text-xs font-medium ${
                       tenant.status === "Paid"
@@ -350,7 +367,7 @@ export default function Tenants() {
                   >
                     {tenant.status}
                   </span>
-                </div> */}
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3 mb-4">
@@ -361,16 +378,16 @@ export default function Tenants() {
                     </div>
                     <p className="text-xs text-gray-600">Monthly Rent</p>
                   </div>
-                  <p className="font-bold text-sm">{tenant.rent}</p>
+                  <p className="font-bold ml-8 text-lg text-[#006aff]">{tenant.rent}</p>
                 </div>
                 <div className="bg-green-50 p-3 rounded-lg">
                   <div className="flex items-center gap-2 mb-1">
                     <div className="w-5 h-5 bg-green-100 rounded flex items-center justify-center">
                       <DollarSign className="w-3 h-3 text-green-600" />
                     </div>
-                    <p className="text-xs text-gray-600">Security Deposit</p>
+                    <p className="text-xs text-[#1ec95a]">Security Deposit</p>
                   </div>
-                  <p className="font-bold text-sm">{tenant.deposit}</p>
+                  <p className="font-bold ml-8 text-lg text-[#1ec95a]">{tenant.deposit}</p>
                 </div>
               </div>
 
@@ -380,17 +397,17 @@ export default function Tenants() {
                   <span className="text-xs text-gray-600">Days Remaining</span>
                 </div>
                 <div className="flex justify-between items-center mb-2">
-                  <p className="text-xs text-gray-700">
+                  <p className="text-lg font-bold text-gray-700">
                     {tenant.leaseStart} - {tenant.leaseEnd}
                   </p>
-                  {tenant.daysRemaining > 0 && <p className="text-xs text-red-600 mt-1">{tenant.daysRemaining} Days</p>}
+                  {tenant.daysRemaining > 0 ? ( <p className="text-xl font-bold text-[#ee2f2f] mt-1">{tenant.daysRemaining} Days</p>) : <p className="text-xl font-bold text-[#ee2f2f] mt-1"> Expired</p> }
                 </div>
               </div>
 
-              <div className="mb-4">
-                <p className="text-red-600 text-xs font-medium mb-1">Emergency</p>
+              <div className="mb-4 bg-white border border-gray-100 transition-shadow duration-200 shadow-[0_0_6px_rgba(0,0,0,0.1)] px-4 py-2 rounded-xl">
+                <p className="text-[#ee2f2f] text-lg font-medium mb-1">Emergency</p>
                 <div className="flex justify-between">
-                  <p className="text-xs">{tenant.emergency}</p>
+                  <p className="text-xs font-bold">{tenant.emergency}</p>
                   <p className="text-xs text-gray-500">{tenant.emergencyPhone}</p>
                 </div>
               </div>
@@ -405,6 +422,38 @@ export default function Tenants() {
           ))}
         </div>
       </div>
+      <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <DialogContent className="max-w-md fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-lg shadow-xl p-6">
+          <DialogHeader className="space-y-0 pb-2">
+            <DialogTitle className="text-xl font-semibold text-[#000000]">
+              Delete Tenant
+            </DialogTitle>
+          </DialogHeader>
+              
+          <div className="space-y-4">
+            <p className="text-[#7D7D7D] leading-relaxed">
+              Are you sure you want to delete "{tenantToDelete?.name}"? This
+              action cannot be undone and will also remove all associated data.
+            </p>
+              
+            <div className="flex gap-3 justify-end">
+              <Button
+                variant="outline"
+                onClick={() => setIsDeleteModalOpen(false)}
+                className="px-6 rounded-lg bg-[#EBEFF3] text-[#7D7D7D] border border-[#7D7D7D] focus-visible:ring-[#000] focus-visible:border-[#000]"
+              >
+                Cancel
+              </Button>
+              <Button
+                className="bg-[#EE2F2F] hover:bg-[#EE2F2F] text-white focus-visible:ring-[#000] focus-visible:border-[#000] px-6 rounded-lg"
+                onClick={handleConfirmDelete}
+              >
+                Delete
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
