@@ -1,4 +1,4 @@
-import React from 'react'
+
 import { Route, Routes } from 'react-router-dom'
 import MainLayout from '../layout/MainLayout'
 import DashBoard from '../pages/dashboard/DashBoard'
@@ -12,6 +12,7 @@ import FinancialReports from '../pages/financial reports/FinancialReports'
 import Settings from '../pages/settings/Settings'
 
 function Approutes() {
+    
   return (
  <>
  <Routes>

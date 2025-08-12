@@ -5,12 +5,13 @@ import { useNavigate } from "react-router-dom";
 import Profileicon from "../../assets/profileicon.png";
 import pmsicon from "../../assets/pmsicon (2).png";
 
-export default function Navbar() {
+export default function Navbar({ isSidebarOpen, toggleSidebar }) {
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
   const profileRef = useRef(null);
   const notificationRef = useRef(null);
   const navigate = useNavigate();
 
+  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -37,15 +38,31 @@ export default function Navbar() {
 
   return (
     <div className="flex w-full gap-5">
-      {/* Left: Logo */}
-      <div className="flex items-center justify-center w-[80px] h-[80px] bg-white shadow-md rounded-br-xl rounded-bl-xl">
-        <img
-          src={pmsicon}
-          alt="logo"
-          className="h-[37px] w-[60px] cursor-pointer"
-          onClick={() => navigate("/")}
-        />
-      </div>
+      {/* Left: Logo + Name */}
+    <div
+  className={`flex items-center justify-start h-[80px] bg-white shadow-md rounded-br-xl rounded-bl-xl  ${isSidebarOpen?"px-4":"px-2"} cursor-pointer transition-all duration-300`}
+  style={{ width: isSidebarOpen ? "250px" : "80px" }}
+  onClick={toggleSidebar} // toggles only if NOT clicking logo
+>
+  <img
+  className="object-fit w-[65px]"
+    src={pmsicon}
+    alt="logo"
+    // style={{ width: isSidebarOpen ? "60px" : "80px",
+    //     height: isSidebarOpen ? "25px" : "40px",
+    //  }}
+    onClick={(e) => e.stopPropagation()} // prevents parent click
+  />
+  <span
+    className={`ml-3 text-lg font-semibold text-gray-800 whitespace-nowrap transition-all duration-300 ${
+      isSidebarOpen ? "opacity-100" : "opacity-0"
+    }`}
+  >
+    PMS Name
+  </span>
+</div>
+
+
 
       {/* Right: Search + Notification + Profile */}
       <div className="flex items-center justify-between h-[80px] flex-1 bg-white shadow-xl px-6 rounded-br-xl rounded-bl-xl">
@@ -64,10 +81,8 @@ export default function Navbar() {
           {/* Notification */}
           <div className="relative" ref={notificationRef}>
             <div
-              className="h-10 w-10 flex items-center justify-center rounded-full bg-blue-500 text-white cursor-pointer hover:bg-blue-600 transition-colors"
-              onClick={() => {
-                setShowNotificationDropdown(!showNotificationDropdown);
-              }}
+              className="h-10 w-10 flex items-center justify-center rounded-full bg-[#B200FF] text-white cursor-pointer hover:bg-purple-700 transition-colors"
+              onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
             >
               <FaRegBell className="h-[20px] w-[20px]" />
             </div>
@@ -110,7 +125,7 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Vertical Divider */}
+          {/* Divider */}
           <div className="h-10 border border-[#B200FF]"></div>
 
           {/* Profile */}
@@ -120,11 +135,17 @@ export default function Navbar() {
             ref={profileRef}
           >
             <div className="h-[48px] w-[48px] rounded-full overflow-hidden">
-              <img src={Profileicon} alt="profile" className="h-full w-full object-cover" />
+              <img
+                src={Profileicon}
+                alt="profile"
+                className="h-full w-full object-cover"
+              />
             </div>
             <div>
               <p className="text-[18px] font-semibold">Property Owner</p>
-              <p className="text-[#7D7D7D] text-[14px]">propertyowner@example.com</p>
+              <p className="text-[#7D7D7D] text-[14px]">
+                propertyowner@example.com
+              </p>
             </div>
           </div>
         </div>

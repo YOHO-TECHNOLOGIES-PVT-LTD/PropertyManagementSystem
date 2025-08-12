@@ -1,14 +1,13 @@
-import { BrowserRouter } from 'react-router-dom'
-import './App.css'
-import Approutes from './routes/Approutes'
-import { Toaster } from 'react-hot-toast'
+import { BrowserRouter } from "react-router-dom"
+import Approutes from "./routes/Approutes"
+import { Toaster } from "react-hot-toast"
+
 
 function App() {
-
-
-	return (
-		<>
-			<BrowserRouter>
+ 
+  return (
+    <>
+      <BrowserRouter>
 				
 					<Toaster
 						position='top-right'
@@ -37,8 +36,8 @@ function App() {
 					<Approutes />
 			
 			</BrowserRouter>
-		</>
-	)
+    </>
+  )
 }
 
 export default App
