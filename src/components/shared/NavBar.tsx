@@ -38,11 +38,10 @@ export default function Navbar({ isSidebarOpen, toggleSidebar }) {
 
   return (
     <div className="flex w-full gap-5">
-      {/* Left: Logo + Name */}
     <div
   className={`flex items-center justify-start h-[80px] bg-white shadow-md rounded-br-xl rounded-bl-xl  ${isSidebarOpen?"px-4":"px-2"} cursor-pointer transition-all duration-300`}
   style={{ width: isSidebarOpen ? "250px" : "80px" }}
-  onClick={toggleSidebar} // toggles only if NOT clicking logo
+  onClick={toggleSidebar} 
 >
   <img
   className="object-fit w-[65px]"
