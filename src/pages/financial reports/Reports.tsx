@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { COLORS, FONTS } from '../../constants/ui constants'
 import Download from '../../assets/Reports/Download.png'
 import Buildings from '../../assets/Reports/buildings.png'
@@ -10,6 +10,9 @@ import TenantReport from '../../components/Reports/TenantReport'
 import FinancialReport from '../../components/Reports/FinancialReport'
 import MaintenanceReport from '../../components/Reports/MaintenanceReport'
 import OccupancyReport from '../../components/Reports/OccupancyReport'
+import { useDispatch, useSelector } from 'react-redux'
+import { selectDashboardData } from '../../features/Dashboard/Reducer/Selector'
+import { DashboardThunks } from '../../features/Dashboard/Reducer/DashboardThunk'
 
 
 function Reports() {
@@ -23,6 +26,15 @@ function Reports() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState('Last 30 Days');
 
+  const ReportsData = useSelector(selectDashboardData);
+  const dispatch = useDispatch<any>();
+
+  console.log("ReportsData", ReportsData);
+
+  useEffect(() => {
+    dispatch(DashboardThunks());
+  }, [dispatch]);
+
   const options = [
     'Last 30 Days',
     'Last 3 Month',
@@ -35,6 +47,15 @@ function Reports() {
   const handleOptionClick = (option: any) => {
     setSelectedOption(option);
     setIsOpen(false);
+  };
+
+  const formatIndianNumber = (num: any) => {
+    if (num >= 10000000) {
+      return `${(num / 10000000).toFixed(2)} Cr`;
+    } else if (num >= 100000) {
+      return `${(num / 100000).toFixed(2)} Lakh`;
+    }
+    return num.toString();
   };
 
   return (
@@ -164,9 +185,11 @@ function Reports() {
       </div>
 
 
-      <div className='my-8 flex gap-4'>
+
+
+      {activeBtn === "occupancy" && <div className='my-8 flex gap-4'>
         <section
-          className="w-[350px] flex items-center shadow-[0px_0px_40px_0px_#9739E91A] rounded-xl px-6 py-5"
+          className="w-[350px] shadow-[0px_0px_40px_0px_#9739E91A] rounded-xl  py-1"
           style={{
             backgroundImage: `url(${Frame_1})`,
             backgroundPosition: 'center',
@@ -174,12 +197,18 @@ function Reports() {
             backgroundRepeat: 'no-repeat',
           }}
         >
-          <img src={Purple_Building} alt="Purp_build" className='w-[90px] h-[90px]' />
-          <p style={{ ...FONTS.card_headers }} className='text-[#7D7D7D]'>Total Revenue</p>
+          <div className='flex items-center'>
+            <img src={Purple_Building} alt="Purp_build" className='w-[90px] h-[90px]' />
+            <p style={{ ...FONTS.card_headers }} className='text-[#7D7D7D]'>Total Revenue</p>
+          </div>
+          <h1 style={{ ...FONTS.headers }} className="px-6">
+            {formatIndianNumber(600000)}
+          </h1>
+
         </section>
 
         <section
-          className="w-[350px] flex items-center shadow-[0px_0px_40px_0px_#9739E91A] rounded-xl px-6 py-5"
+          className="w-[350px] shadow-[0px_0px_40px_0px_#9739E91A] rounded-xl  py-1"
           style={{
             backgroundImage: `url(${Frame_2})`,
             backgroundPosition: 'center',
@@ -187,18 +216,22 @@ function Reports() {
             backgroundRepeat: 'no-repeat',
           }}
         >
-          <img src={Purple_Building} alt="Purp_build" className='w-[90px] h-[90px]' />
-          <p style={{ ...FONTS.card_headers }} className='text-[#7D7D7D]'>Total Expenses</p>
+          <div className='flex items-center'>
+            <img src={Purple_Building} alt="Purp_build" className='w-[90px] h-[90px]' />
+            <p style={{ ...FONTS.card_headers }} className='text-[#7D7D7D]'>Total Expenses</p>
+          </div>
+          <h1 style={{ ...FONTS.headers }} className="px-6">
+            6000000
+          </h1>
         </section>
-      </div>
+      </div>}
 
 
 
-
-      {activeBtn === "financial" && <FinancialReport/>}
-      {activeBtn === "occupancy" && <OccupancyReport/>}
-      {activeBtn === "tenant" && <TenantReport/>}
-      {activeBtn === "maintenance" && <MaintenanceReport/>}
+      {activeBtn === "financial" && <FinancialReport />}
+      {activeBtn === "occupancy" && <OccupancyReport />}
+      {activeBtn === "tenant" && <TenantReport />}
+      {activeBtn === "maintenance" && <MaintenanceReport />}
 
     </div>
   )
