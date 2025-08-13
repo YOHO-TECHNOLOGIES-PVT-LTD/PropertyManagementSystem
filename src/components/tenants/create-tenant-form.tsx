@@ -208,14 +208,23 @@ export default function AddTenantForm({ isOpen, onClose, onSubmit }: AddTenantFo
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="propertyName">Property Name</Label>
-                    <Input
-                      id="propertyName"
-                      value={formData.propertyName}
-                      onChange={(e) => handleInputChange("propertyName", e.target.value)}
-                      placeholder="Enter property name"
-                    />
-                  </div>
+                  <Label htmlFor="relationship">Property Name</Label>
+                  <Select
+                  
+                    value={formData.relationship}
+                    onValueChange={(value) => handleInputChange("relationship", value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Property" />
+                    </SelectTrigger>
+                    <SelectContent   >
+                      <SelectItem value="sunrise">Surise Property</SelectItem>
+                      <SelectItem value="bru">Bru Property</SelectItem>
+                      <SelectItem value="wahtaj">Wah Taj Property</SelectItem>
+                      
+                    </SelectContent>
+                  </Select>
+                </div>
                   <div className="space-y-2">
                     <Label htmlFor="tenantType">Tenant Type</Label>
                     <Input
