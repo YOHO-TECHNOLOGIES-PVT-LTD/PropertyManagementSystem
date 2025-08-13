@@ -13,6 +13,7 @@ const generateEndPoints = () => {
             get: "/api/property/:uuid",
             update: "/api/property/:uuid",
             delete: "/api/property/:uuid",
+            getProperty: "/api/property/get"
         },
         unit: {
             create: "/api/unit/create",
