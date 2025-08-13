@@ -35,7 +35,7 @@ export default function ActivityList({ data, getIconStyles, getStatusBadgeStyles
         {data.map((item) => (
           <div
             key={item.id}
-            className="grid grid-cols-[250px_1fr_1fr_1fr_1fr_120px] gap-4 p-4 border rounded-lg shadow-sm hover:shadow-md transition items-center"
+            className="grid grid-cols-[250px_1fr_1fr_1fr_1fr_120px] gap-4 p-4 border rounded-lg shadow-lg hover:shadow-md transition items-center"
           >
             {/* Company + icon */}
             <div className="flex items-center gap-3">
