@@ -47,11 +47,11 @@ const FinancialReport = () => {
                                 config={{
                                     series1: {
                                         label: "Revenue Stream 1",
-                                        color: "rgb(236, 72, 153)", // Pink color matching the image
+                                        color: "rgb(236, 72, 153)#EF5DA8", // Pink color matching the image
                                     },
                                     series2: {
                                         label: "Revenue Stream 2",
-                                        color: "rgb(147, 51, 234)", // Purple color matching the image
+                                        color: "#7B00FF", // Purple color matching the image
                                     },
                                 }}
                                 className="h-[300px] w-full"
@@ -80,20 +80,20 @@ const FinancialReport = () => {
                                         <Area
                                             type="monotone"
                                             dataKey="series1"
-                                            stroke="rgb(236, 72, 153)"
+                                            stroke="#EF5DA8"
                                             strokeWidth={8}
                                             fill="transparent"
                                             dot={false}
-                                            activeDot={{ r: 6, fill: "rgb(236, 72, 153)" }}
+                                            activeDot={{ r: 6, fill: "#EF5DA8" }}
                                         />
                                         <Area
                                             type="monotone"
                                             dataKey="series2"
-                                            stroke="rgb(147, 51, 234)"
+                                            stroke="#7B00FF"
                                             strokeWidth={8}
                                             fill="transparent"
                                             dot={false}
-                                            activeDot={{ r: 6, fill: "rgb(147, 51, 234)" }}
+                                            activeDot={{ r: 6, fill: "#7B00FF" }}
                                         />
                                     </AreaChart>
                                 </ResponsiveContainer>
