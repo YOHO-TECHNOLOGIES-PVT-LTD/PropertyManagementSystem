@@ -164,9 +164,11 @@ function Reports() {
       </div>
 
 
-      <div className='my-8 flex gap-4'>
+      
+
+      {activeBtn === "occupancy" &&  <div className='my-8 flex gap-4'>
         <section
-          className="w-[350px] flex items-center shadow-[0px_0px_40px_0px_#9739E91A] rounded-xl px-6 py-5"
+          className="w-[350px] shadow-[0px_0px_40px_0px_#9739E91A] rounded-xl  py-1"
           style={{
             backgroundImage: `url(${Frame_1})`,
             backgroundPosition: 'center',
@@ -174,12 +176,17 @@ function Reports() {
             backgroundRepeat: 'no-repeat',
           }}
         >
+          <div className='flex items-center'>
           <img src={Purple_Building} alt="Purp_build" className='w-[90px] h-[90px]' />
           <p style={{ ...FONTS.card_headers }} className='text-[#7D7D7D]'>Total Revenue</p>
+          </div>
+          <h1 style={{ ...FONTS.headers }} className="px-6">
+            6000000 
+          </h1>
         </section>
 
         <section
-          className="w-[350px] flex items-center shadow-[0px_0px_40px_0px_#9739E91A] rounded-xl px-6 py-5"
+          className="w-[350px] shadow-[0px_0px_40px_0px_#9739E91A] rounded-xl  py-1"
           style={{
             backgroundImage: `url(${Frame_2})`,
             backgroundPosition: 'center',
@@ -187,11 +194,15 @@ function Reports() {
             backgroundRepeat: 'no-repeat',
           }}
         >
+          <div className='flex items-center'>
           <img src={Purple_Building} alt="Purp_build" className='w-[90px] h-[90px]' />
           <p style={{ ...FONTS.card_headers }} className='text-[#7D7D7D]'>Total Expenses</p>
+          </div>
+          <h1 style={{ ...FONTS.headers }} className="px-6">
+            6000000 
+          </h1>
         </section>
-      </div>
-
+      </div> }
 
 
 

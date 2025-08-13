@@ -3,8 +3,14 @@
 import { Area, AreaChart, XAxis, YAxis, ResponsiveContainer } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { BarChart3, ChevronDown } from "lucide-react"
+import { ChevronDown } from "lucide-react"
 import { FONTS } from '../../constants/ui constants';
+import ExpenseBreakdown from "./ExpenseChart"
+import graphBuilding from '../../assets/Reports/graphBuilding.png'
+import { useState } from "react"
+import Purple_Building from '../../assets/Reports/purple_building.png'
+import Frame_1 from '../../assets/Reports/Frame_1.png'
+import Frame_2 from '../../assets/Reports/Frame_2.png'
 
 const revenueData = [
     { month: "Jan", series1: 52, series2: 15 },
@@ -21,8 +27,35 @@ const revenueData = [
     { month: "Dec", series1: 42, series2: 38 },
 ]
 
+const revenueYearData = [
+    { month: "Jan", series1: 15, series2: 25 },
+    { month: "Feb", series1: 25, series2: 35 },
+    { month: "Mar", series1: 20, series2: 30 },
+    { month: "Apr", series1: 30, series2: 20 },
+    { month: "May", series1: 40, series2: 25 },
+    { month: "Jun", series1: 35, series2: 30 },
+    { month: "Jul", series1: 45, series2: 40 },
+    { month: "Aug", series1: 50, series2: 45 },
+    { month: "Sep", series1: 55, series2: 50 },
+    { month: "Oct", series1: 60, series2: 55 },
+    { month: "Nov", series1: 65, series2: 60 },
+    { month: "Dec", series1: 70, series2: 65 },
+]
+
 const FinancialReport = () => {
     const tableHeaders = Array.from({ length: 5 });
+
+    const [isOpen, setIsOpen] = useState(false);
+    const [selectedOption, setSelectedOption] = useState("Monthly");
+
+    const options = ["Monthly", "Yearly"];
+
+    const toggleDropdown = () => setIsOpen(!isOpen);
+
+    const handleOptionClick = (option: any) => {
+        setSelectedOption(option);
+        setIsOpen(false);
+    };
 
     return (
         <div>
@@ -30,24 +63,73 @@ const FinancialReport = () => {
             {/* Graph Data  */}
 
 
-            <div className=" my-6">
-                <div className="max-w-1/2 ">
-                    <Card className="w-full ">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-8">
-                            <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                                    <BarChart3 className="w-6 h-6 text-blue-600" />
-                                </div>
-                                <CardTitle style={{...FONTS.headers}}>Monthly Revenue Trend</CardTitle>
+            {/* <div className='my-8 flex gap-4'> */}
+                
+
+                
+            {/* </div> */}
+            <div className=" my-6 flex gap-6">
+
+                <div className="w-full ">
+                   <section
+                    className="w-full flex flex-col justify-center shadow-[0px_0px_40px_0px_#9739E91A] rounded-xl  py-3 my-10"
+                    style={{
+                        backgroundImage: `url(${Frame_1})`,
+                        backgroundPosition: 'center',
+                        backgroundSize: 'cover',
+                        backgroundRepeat: 'no-repeat',
+                    }}
+                >
+                    <div className="flex items-center">
+                    <img src={Purple_Building} alt="Purp_build" className='w-[90px] h-[90px]' />
+                    <p style={{ ...FONTS.card_headers }} className='text-[#7D7D7D]'>Total Revenue</p>
+                    </div>
+                    <h1 style={{...FONTS.headers}} className="px-6">6000000</h1>
+                </section>
+                    <Card className=" shadow-[0px_0px_15px_0px_#0000001A] border-0 pt-0 rounded-lg">
+                        <CardHeader className="flex items-center justify-between pl-0">
+                            <div className="flex items-center">
+                                <img src={graphBuilding} alt="pyBuilding" className="h-[90px] w-[90px]" />
+                                <CardTitle style={{ ...FONTS.headers }}>{selectedOption === "Monthly" ? "Monthly Revenue Trend" : "Yearly Revenue Trend"}</CardTitle>
                             </div>
-                            <ChevronDown className="w-6 h-6 text-gray-400" />
+
+                            {/* Dropdown */}
+                            <div className="relative">
+                                <button
+                                    className="bg-[#B200FF1A] px-4 py-2 rounded-md flex items-center justify-between text-[#B200FF]"
+                                    style={{ ...FONTS.button_Text }}
+                                    onClick={toggleDropdown}
+                                >
+                                    {selectedOption}
+                                    <ChevronDown
+                                        className={`ml-2 w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""
+                                            }`}
+                                    />
+                                </button>
+
+                                {isOpen && (
+                                    <div className="absolute z-10 mt-1 w-[140px] p-2 bg-white rounded-md shadow-[0px_0px_15px_0px_#0000001A] grid gap-2 top-[42px] right-0">
+                                        {options.map((option) => (
+                                            <div
+                                                key={option}
+                                                style={{ ...FONTS.headers_description }}
+                                                className={`px-4 py-2 hover:bg-[#B200FF1A] border rounded-md cursor-pointer ${selectedOption === option ? "bg-[#B200FF1A]" : ""
+                                                    }`}
+                                                onClick={() => handleOptionClick(option)}
+                                            >
+                                                {option}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
                         </CardHeader>
                         <CardContent>
                             <ChartContainer
                                 config={{
                                     series1: {
                                         label: "Revenue Stream 1",
-                                        color: "rgb(236, 72, 153)#EF5DA8", // Pink color matching the image
+                                        color: "#EF5DA8", // Pink color matching the image
                                     },
                                     series2: {
                                         label: "Revenue Stream 2",
@@ -57,7 +139,10 @@ const FinancialReport = () => {
                                 className="h-[300px] w-full"
                             >
                                 <ResponsiveContainer width="100%" height="100%">
-                                    <AreaChart data={revenueData} margin={{ top: 20, right: 20, left: 0, bottom: 20 }}>
+                                    <AreaChart
+                                        data={selectedOption.toLowerCase() === "monthly" ? revenueData : revenueYearData}
+                                        margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
+                                    >
                                         <XAxis
                                             dataKey="month"
                                             axisLine={false}
@@ -74,8 +159,8 @@ const FinancialReport = () => {
                                         />
                                         <ChartTooltip
                                             content={<ChartTooltipContent />}
-                                            cursor={{ stroke: "rgba(0,0,0,0.1)", strokeWidth: 10}}
-                                            strokeLinecap="rounded"
+                                            cursor={{ stroke: "rgba(0,0,0,0.1)", strokeWidth: 10 }}
+                                            strokeLinecap="round"
                                         />
                                         <Area
                                             type="monotone"
@@ -97,6 +182,7 @@ const FinancialReport = () => {
                                         />
                                     </AreaChart>
                                 </ResponsiveContainer>
+
                             </ChartContainer>
                         </CardContent>
                     </Card>
@@ -105,8 +191,9 @@ const FinancialReport = () => {
 
 
 
-                <div>
-                    
+                <div className='w-full'>
+                    <ExpenseBreakdown />
+
                 </div>
             </div>
 
@@ -116,7 +203,7 @@ const FinancialReport = () => {
             <div className='shadow-[0px_0px_15px_0px_#0000001A] rounded-lg p-3 grid gap-6'>
                 <h1 style={{ ...FONTS.chart_Header }}>Property Performance</h1>
 
-                <div style={{ ...FONTS.Table_Header }} className='shadow-[0px_0px_15px_0px_#0000001A] rounded-lg p-3 grid grid-cols-4'>
+                <div style={{ ...FONTS.Table_Header }} className='shadow-[0px_0px_15px_0px_#0000001A] rounded-lg p-4 grid grid-cols-4'>
                     <p>Property</p>
                     <p>Units</p>
                     <p>Revenue</p>
@@ -124,7 +211,7 @@ const FinancialReport = () => {
                 </div>
 
                 {tableHeaders.map((_, index) => (
-                    <div className='shadow-[0px_0px_15px_0px_#0000001A] rounded-lg p-3 grid grid-cols-4'>
+                    <div className='shadow-[0px_0px_15px_0px_#0000001A] rounded-lg p-4 grid grid-cols-4'>
                         <p style={{ ...FONTS.Table_Header }}>Property</p>
                         <p style={{ ...FONTS.Table_Body_2 }} className='text-[#7D7D7D]'>24</p>
                         <p style={{ ...FONTS.Table_Body_2 }} className='text-[#7D7D7D]'>240k</p>
