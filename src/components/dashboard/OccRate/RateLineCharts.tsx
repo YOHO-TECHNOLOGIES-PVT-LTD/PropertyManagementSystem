@@ -1,73 +1,120 @@
 import { Building2 } from "lucide-react";
-import { useState } from "react"
+import { useState } from "react";
 
 interface OccupancyRateTrendProps {
-  data: Array<{ month: string; rate: number }>
-  highlightedPoint?: { month: string; rate: number }
+  data: Array<{ month: string; rate: number }>;
+  highlightedPoint?: { month: string; rate: number };
 }
 
-export default function OccupancyRateTrend({ data, highlightedPoint }: OccupancyRateTrendProps) {
-  const [hoveredPoint, setHoveredPoint] = useState<{ month: string; rate: number; x: number; y: number } | null>(null)
+export default function OccupancyRateTrend({
+  data,
+  highlightedPoint,
+}: OccupancyRateTrendProps) {
+  const [hoveredPoint, setHoveredPoint] = useState<{
+    month: string;
+    rate: number;
+    x: number;
+    y: number;
+  } | null>(null);
 
-  const maxRate = 100
-  const chartWidth = 580
-  const chartHeight = 200
-  const padding = 40
+  const maxRate = 100;
+  const chartWidth = 620; 
+  const chartHeight = 230;
+  const padding = 30;
+
+  const allMonths = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  ];
+
+  const completeData = allMonths.map((month) => {
+    const existingData = data.find((d) => d.month === month);
+    return {
+      month,
+      rate: existingData ? existingData.rate : null,
+    };
+  });
+
+  const dataWithValues = completeData.filter((d) => d.rate !== null);
+
+  const stepX = (chartWidth - padding * 2) / (allMonths.length - 1);
 
   const generatePath = () => {
-    if (data.length === 0) return ""
-
-    const stepX = (chartWidth - padding * 2) / (data.length - 1)
-
-    return data
+    if (dataWithValues.length <= 1) return "";
+    return dataWithValues
       .map((point, index) => {
-        const x = padding + index * stepX
-        const y = chartHeight - padding - (point.rate / maxRate) * (chartHeight - padding * 2)
-        return `${index === 0 ? "M" : "L"} ${x} ${y}`
+        const monthIndex = allMonths.indexOf(point.month);
+        const x = padding + monthIndex * stepX;
+        const y =
+          chartHeight -
+          padding -
+          (point.rate! / maxRate) * (chartHeight - padding * 2);
+        return `${index === 0 ? "M" : "L"} ${x} ${y}`;
       })
-      .join(" ")
-  }
+      .join(" ");
+  };
 
   const getPointPosition = (month: string, rate: number) => {
-    const index = data.findIndex((d) => d.month === month)
-    if (index === -1) return null
+    const monthIndex = allMonths.indexOf(month);
+    if (monthIndex === -1) return null;
+    const x = padding + monthIndex * stepX;
+    const y =
+      chartHeight - padding - (rate / maxRate) * (chartHeight - padding * 2);
+    return { x, y };
+  };
 
-    const stepX = (chartWidth - padding * 2) / (data.length - 1)
-    const x = padding + index * stepX
-    const y = chartHeight - padding - (rate / maxRate) * (chartHeight - padding * 2)
-    return { x, y }
-  }
+  const highlightPosition = highlightedPoint
+    ? getPointPosition(highlightedPoint.month, highlightedPoint.rate)
+    : null;
 
-  const highlightPosition = highlightedPoint ? getPointPosition(highlightedPoint.month, highlightedPoint.rate) : null
-
-  const handleMouseEnter = (point: { month: string; rate: number }, x: number, y: number) => {
-    setHoveredPoint({ ...point, x, y })
-  }
+  const handleMouseEnter = (
+    point: { month: string; rate: number | null },
+    x: number,
+    y: number
+  ) => {
+    if (point.rate !== null) {
+      setHoveredPoint({ month: point.month, rate: point.rate, x, y });
+    }
+  };
 
   const handleMouseLeave = () => {
-    setHoveredPoint(null)
-  }
+    setHoveredPoint(null);
+  };
 
   return (
-    <div className=" p-2 rounded-2xl shadow-[2px_2px_5px_rgba(0,0,0,0.25)] w-full border">
+    <div className="p-2 rounded-2xl shadow-[2px_2px_5px_rgba(0,0,0,0.25)] w-full border">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <div className="h-10 w-10 flex items-center justify-center rounded-full bg-[#3A32D326]/15 shadow-lg">
-          <div className="text-[#3A32D3]"><Building2 /></div>
+          <div className="text-[#3A32D3]">
+            <Building2 />
+          </div>
         </div>
-        <h3 className="text-lg font-semibold text-gray-900">Occupancy Rate Trend</h3>
+        <h3 className="text-lg font-semibold text-gray-900">
+          Occupancy Rate Trend
+        </h3>
       </div>
 
       {/* Chart */}
       <div className="relative">
-        <svg width={chartWidth} height={chartHeight} className="overflow-visible">
-          {/* Grid lines */}
+        <svg
+          viewBox={`0 0 ${chartWidth} ${chartHeight}`}
+          width="100%" // responsive width
+          height={chartHeight}
+          preserveAspectRatio="xMidYMid meet"
+          className="overflow-visible"
+        >
+          {/* Y-axis labels */}
           {[0, 25, 50, 75, 100].map((value) => (
             <g key={value}>
-             
               <text
                 x={padding - 10}
-                y={chartHeight - padding - (value / maxRate) * (chartHeight - padding * 2) + 4}
+                y={
+                  chartHeight -
+                  padding -
+                  (value / maxRate) * (chartHeight - padding * 2) +
+                  4
+                }
                 textAnchor="end"
                 className="text-xs fill-gray-400"
               >
@@ -76,14 +123,25 @@ export default function OccupancyRateTrend({ data, highlightedPoint }: Occupancy
             </g>
           ))}
 
-          {/* Main line */}
-          <path d={generatePath()} fill="none" stroke="#f97316" strokeWidth="2" strokeDasharray="4,4" />
+          {/* Main dashed line */}
+          {dataWithValues.length > 1 && (
+            <path
+              d={generatePath()}
+              fill="none"
+              stroke="#f97316"
+              strokeWidth="2"
+              strokeDasharray="4,4"
+            />
+          )}
 
-          {/* Data points with hover functionality */}
-          {data.map((point, index) => {
-            const stepX = (chartWidth - padding * 2) / (data.length - 1)
-            const x = padding + index * stepX
-            const y = chartHeight - padding - (point.rate / maxRate) * (chartHeight - padding * 2)
+          {/* Data points */}
+          {completeData.map((point, index) => {
+            if (point.rate === null) return null;
+            const x = padding + index * stepX;
+            const y =
+              chartHeight -
+              padding -
+              (point.rate / maxRate) * (chartHeight - padding * 2);
 
             return (
               <g key={index}>
@@ -93,24 +151,29 @@ export default function OccupancyRateTrend({ data, highlightedPoint }: Occupancy
                   r="12"
                   fill="transparent"
                   className="cursor-pointer"
-                  onMouseEnter={() => handleMouseEnter(point, x, y)}
+                  onMouseEnter={() =>
+                    handleMouseEnter(
+                      { month: point.month, rate: point.rate },
+                      x,
+                      y
+                    )
+                  }
                   onMouseLeave={handleMouseLeave}
                 />
-                {/* Visible data point */}
                 <circle
                   cx={x}
                   cy={y}
-                  r="3"
+                  r="4"
                   fill="#f97316"
                   stroke="white"
                   strokeWidth="2"
                   className="pointer-events-none"
                 />
               </g>
-            )
+            );
           })}
 
-          {/* Highlighted point (static) */}
+          {/* Highlighted point */}
           {highlightPosition && (
             <>
               <circle
@@ -121,7 +184,6 @@ export default function OccupancyRateTrend({ data, highlightedPoint }: Occupancy
                 stroke="white"
                 strokeWidth="3"
               />
-              {/* Tooltip */}
               <g>
                 <rect
                   x={highlightPosition.x - 25}
@@ -143,12 +205,26 @@ export default function OccupancyRateTrend({ data, highlightedPoint }: Occupancy
             </>
           )}
 
+          {/* Hovered point */}
           {hoveredPoint && (
             <>
-              <circle cx={hoveredPoint.x} cy={hoveredPoint.y} r="6" fill="#f97316" stroke="white" strokeWidth="3" />
-              {/* Hover tooltip */}
+              <circle
+                cx={hoveredPoint.x}
+                cy={hoveredPoint.y}
+                r="6"
+                fill="#f97316"
+                stroke="white"
+                strokeWidth="3"
+              />
               <g>
-                <rect x={hoveredPoint.x - 25} y={hoveredPoint.y - 35} width="50" height="25" rx="12" fill="#f97316" />
+                <rect
+                  x={hoveredPoint.x - 25}
+                  y={hoveredPoint.y - 35}
+                  width="50"
+                  height="25"
+                  rx="12"
+                  fill="#f97316"
+                />
                 <text
                   x={hoveredPoint.x}
                   y={hoveredPoint.y - 18}
@@ -162,18 +238,37 @@ export default function OccupancyRateTrend({ data, highlightedPoint }: Occupancy
           )}
 
           {/* X-axis labels */}
-          {data.map((point, index) => {
-            const stepX = (chartWidth - padding * 2) / (data.length - 1)
-            const x = padding + index * stepX
-
+          {allMonths.map((month, index) => {
+            const x = padding + index * stepX;
+            const hasData = completeData[index].rate !== null;
             return (
-              <text key={index} x={x} y={chartHeight - 10} textAnchor="middle" className="text-xs fill-gray-400">
-                {point.month}
+              <text
+                key={index}
+                x={x}
+                y={chartHeight - 10}
+                textAnchor="middle"
+                className={`text-xs ${
+                  hasData ? "fill-gray-600 font-medium" : "fill-gray-400"
+                }`}
+              >
+                {month}
               </text>
-            )
+            );
           })}
+
+          {/* No data message */}
+          {dataWithValues.length === 0 && (
+            <text
+              x={chartWidth / 2}
+              y={chartHeight / 2}
+              textAnchor="middle"
+              className="text-lg fill-gray-400"
+            >
+              No occupancy data available
+            </text>
+          )}
         </svg>
       </div>
     </div>
-  )
+  );
 }

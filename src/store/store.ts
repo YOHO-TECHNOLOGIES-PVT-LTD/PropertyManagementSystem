@@ -1,8 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
+import DashboardSlice from "../features/Dashboard/Reducer/DashboardSlice"
 
 const store = configureStore({
     reducer: {
-
+        DashboardSlice:DashboardSlice
     }
 })
 
