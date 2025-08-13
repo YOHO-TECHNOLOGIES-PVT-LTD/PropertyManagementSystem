@@ -44,10 +44,11 @@ class Client {
 		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.unit.get, params),
     };
     rent = {
-        getAll: (params: string) =>
+        getAll: (params: any) =>
 			HttpClient.get(HTTP_END_POINTS.rent.getAll, params),
 		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.rent.get, params),
-		update: (params: string) => HttpClient.get(HTTP_END_POINTS.rent.update, params)
+		update: (params: string) => HttpClient.update(HTTP_END_POINTS.rent.update+ params.uuid, params),
+		download: (uuid: string) => HttpClient.fileGet(HTTP_END_POINTS.rent.download+ uuid)
     };
     lease = {
         getAll: (params: string) =>

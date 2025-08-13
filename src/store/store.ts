@@ -1,8 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit';
+import rentReducer from '../features/Rent/slice'
 
 const store = configureStore({
     reducer: {
-
+        rentReducer: rentReducer,
     }
 })
 

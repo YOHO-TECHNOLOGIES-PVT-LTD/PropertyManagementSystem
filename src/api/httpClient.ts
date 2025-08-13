@@ -36,6 +36,17 @@ class HttpClient {
 		});
 		return response.data;
 	}
+
+	async fileGet(url: string, params: any, userType?: undefined) {
+        const response = Axios.get(url, {
+            params,
+            responseType: 'blob',
+            headers: {
+                'User-Type': userType,
+            },
+        });
+        return response;
+    }
 }
 
 export default new HttpClient();
