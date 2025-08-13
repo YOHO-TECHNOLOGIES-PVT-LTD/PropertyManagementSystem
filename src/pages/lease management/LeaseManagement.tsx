@@ -11,10 +11,41 @@ import cardimg2 from "../../assets/cardimg2.png"
 import cardimg3 from "../../assets/cardimg3.png"
 import cardimg4 from "../../assets/cardimg4.png"
 import man from "../../assets/Ellipse 276.png"
+import { Leaseviewform } from "../../components/LeaseManagement/Leaseviewform"
+
+interface LeaseData {
+  id: number
+  name: string
+  unit: string
+  avatar: string
+  period: string
+  duration: string
+  rent: string
+  deposit: string
+  status: string
+  expiry: string
+  expiryNote: string
+}
+
+
 
 function LeaseManagement() {
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
+  const [showLeaseForm, setShowLeaseForm] = useState(false)
+  const [selectedLease, setSelectedLease] = useState<LeaseData | null>(null)
+
+  const handleViewLease = (lease: LeaseData) => {
+    setSelectedLease(lease)
+    setShowLeaseForm(true)
+  }
+
+  const handleCloseForm = () => {
+    setShowLeaseForm(false)
+    setSelectedLease(null)
+  }
+
+  
 
   const cardData = [
     {
@@ -141,14 +172,14 @@ function LeaseManagement() {
                 <div className="absolute inset-0 bg-white opacity-30"></div>
 
                 {/* Card content with perfect vertical alignment */}
-                <CardContent className="relative h-full flex flex-col justify-between p-6">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 ${card.iconBgColor} rounded-lg`}>
+                <CardContent className="relative h-full flex flex-col justify-between pb-5">
+                  <div className="flex items-center gap-3 ">
+                    <div className={`p-2  ${card.iconBgColor} rounded-lg`}>
                       <IconComponent className="w-5 h-5 text-white" />
                     </div>
-                    <span className="text-sm font-medium text-gray-700 ">{card.title}</span>
+                    <span className="text-[20px] font-medium text-gray-700">{card.title}</span>
                   </div>
-                  <div className="text-3xl font-bold text-gray-900">{card.value}</div>
+                  <div className="text-3xl font-bold text-gray-900 pt-4">{card.value}</div>
                 </CardContent>
               </Card>
             )
@@ -196,10 +227,11 @@ function LeaseManagement() {
           </Select>
         </div>
 
-        <Card className="shadow-md border rounded-2xl overflow-hidden ">
+        <Card className="shadow-lg border rounded-2xl overflow-hidden ">
           <CardContent className="pl-3 pr-3 ">
             {/* Header Section with separate shadow */}
-            <div className="border shadow-md rounded-xl mb-4 overflow-hidden ">
+           <div className="border shadow-md rounded-xl mb-[30px] overflow-hidden ">
+
               <div className="overflow-x-auto ">
                 <table className="w-full table-fixed">
                   <colgroup>
@@ -225,15 +257,15 @@ function LeaseManagement() {
             </div>
 
             {/* Body Section with separate shadow */}
-            <div className="space-y-3">
+            <div className="space-y-6 ">
               {filteredLeaseData.length > 0 ? (
                 filteredLeaseData.map((lease) => (
                   <div
                     key={lease.id}
                     className="border shadow-md rounded-xl overflow-hidden hover:shadow-lg transition-shadow "
                   >
-                    <div className="overflow-x-auto">
-                      <table className="w-full table-fixed">
+                    <div className="overflow-x-auto ">
+                      <table className="w-full table-fixed ">
                         <colgroup>
                           <col className="w-[25%]" />
                           <col className="w-[20%]" />
@@ -243,8 +275,8 @@ function LeaseManagement() {
                           <col className="w-[10%]" />
                         </colgroup>
                         <tbody>
-                          <tr className="hover:bg-gray-50 transition-colors">
-                            <td className="px-6 py-4">
+                          <tr className="hover:bg-gray-50 transition-colors ">
+                            <td className="px-6 py-4  ">
                               <div className="flex items-center gap-3">
                                 <Avatar className="w-10 h-10">
                                   <AvatarImage src={lease.avatar || "/placeholder.svg"} alt={lease.name} />
@@ -286,10 +318,11 @@ function LeaseManagement() {
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-2">
-                                <Button
+                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 p-2 h-8 w-8"
+                                  onClick={() => handleViewLease(lease)}
                                 >
                                   <Eye className="w-4 h-4" />
                                 </Button>
@@ -317,6 +350,16 @@ function LeaseManagement() {
           </CardContent>
         </Card>
       </div>
+     {showLeaseForm && selectedLease && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 backdrop-blur-md" onClick={handleCloseForm} />
+
+          {/* Modal content */}
+          <div className="relative z-10 w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4">
+            <Leaseviewform leaseData={selectedLease} onClose={handleCloseForm} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
