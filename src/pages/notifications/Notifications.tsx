@@ -238,6 +238,12 @@ function Notifications() {
     )
   }
 
+  const handleNotificationClick = (notification: NotificationItem) => {
+    if (!notification.isRead) {
+      markAsRead(notification.id)
+    }
+  }
+
   const updatedCardData = cardData.map(card => {
     if (card.title === "Total") {
       return { ...card, value: notificationList.length.toString() }
@@ -364,24 +370,50 @@ function Notifications() {
 
       {/* Notifications List */}
       <div className="divide-y divide-gray-200">
-        {paginatedNotifications.map((notification) => (
-          <div key={notification.id} className={`p-6 rounded-lg mb-4 ${!notification.isRead ? "border border-blue-500" : "border border-transparent"}`}>
+       {paginatedNotifications.map((notification) => (
+          <div
+            key={notification.id}
+            className={`p-6 rounded-lg mb-4 transition-all duration-200 ${
+              !notification.isRead
+                ? "border-2  bg-blue-50 cursor-pointer hover:bg-blue-100 shadow-md"
+                : "border border-gray-200 bg-white hover:bg-blue-100 opacity-70"
+            }`}
+            onClick={() => handleNotificationClick(notification)}
+          >
             <div className="flex items-start gap-4">
-              <div className="p-2 bg-white rounded-lg border border-gray-200 shadow-sm">
+              <div
+                className={`p-2 rounded-lg border shadow-sm ${
+                  !notification.isRead ? "bg-blue-100 border-blue-300" : "bg-gray-50 border-gray-200"
+                }`}
+              >
                 {getNotificationIcon(notification.type)}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
-                    <h3 className={`font-semibold mb-1 ${!notification.isRead ? "text-gray-900" : "text-gray-600"}`}>
-                      {notification.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 mb-2" >{notification.description}</p>
-                    <p className="text-xs text-gray-500">{notification.timestamp}</p>
+                    <div className="flex items-center gap-2 mb-1">
+                      <h3 className={`font-semibold ${!notification.isRead ? "text-gray-900" : "text-gray-500"}`}>
+                        {notification.title}
+                      </h3>
+                      {!notification.isRead && <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>}
+                    </div>
+                    <p className={`text-sm mb-2 ${!notification.isRead ? "text-gray-700" : "text-gray-500"}`}>
+                      {notification.description}
+                    </p>
+                    <p className={`text-xs ${!notification.isRead ? "text-gray-600" : "text-gray-400"}`}>
+                      {notification.timestamp}
+                    </p>
                   </div>
                   <div className="flex gap-3 items-start">
-                    <Button size="sm" variant="ghost" className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={() => deleteNotification(notification.id)}>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={(e) => {
+                        e.stopPropagation() 
+                        deleteNotification(notification.id)
+                      }}
+                    >
                       <img src={cancelicon} className="h-6 w-6" />
                     </Button>
                   </div>

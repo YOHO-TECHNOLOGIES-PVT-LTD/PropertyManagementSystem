@@ -64,6 +64,14 @@ class Client {
 		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.maintenance.get, params),
     };
 
+	notification ={
+		getAll:(params:string)=>
+			HttpClient.get(HTTP_END_POINTS.Notification.getAll,params),
+		delete:(params:string)=>
+			HttpClient.delete(HTTP_END_POINTS.Notification.delete,params),
+		update:(data:any,params:string)=>HttpClient.update(HTTP_END_POINTS.Notification.update,data,params)
+	}
+
 }
 
 export default new Client();
