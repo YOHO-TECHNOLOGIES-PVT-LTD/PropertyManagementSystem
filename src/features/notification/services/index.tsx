@@ -13,3 +13,14 @@ export const getAllNotification = async (params?:any)=>{
     }
 }
 
+export const deleteNotification = async (params:any)=>{
+    try{
+        const response = await Client.notification.delete(params)
+        if (response){
+            return response
+        }
+    }
+    catch(err){
+        console.log(err,'error ')
+    }
+}

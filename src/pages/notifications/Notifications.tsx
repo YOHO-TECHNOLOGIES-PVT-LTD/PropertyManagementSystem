@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
 import {
   Bell,
   ChevronDown,
@@ -20,7 +21,10 @@ import cardimg1 from "../../assets/cardimg1.png"
 import cardimg2 from "../../assets/cardimg2.png"
 import cardimg3 from "../../assets/cardimg3.png"
 import cardimg4 from "../../assets/cardimg4.png"
-import  {FONTS } from '../../constants/ui constants'
+import { FONTS } from '../../constants/ui constants'
+import { selectNotification } from "../../features/notification/redecures/selectors"
+import { getNotificationAll } from "../../features/notification/redecures/thunks"
+
 
 interface NotificationItem {
   id: string
@@ -30,113 +34,6 @@ interface NotificationItem {
   timestamp: string
   isRead: boolean
 }
-
-const notifications: NotificationItem[] = [
- {
-    id: "1",
-    type: "rent",
-    title: "Rent Payment Overdue",
-    description: "Mike Johnson (Unit 304) has an overdue rent payment of $3,500. Payment was due 5 days ago.",
-    timestamp: "5/9/2024",
-    isRead: false,
-  },
-  {
-    id: "2",
-    type: "rent",
-    title: "Payment Received",
-    description: "John Doe (Unit 101) has successfully paid rent of $2,500 via UPI.",
-    timestamp: "5/9/2024",
-    isRead: false,
-  },
-  {
-    id: "3",
-    type: "lease",
-    title: "Lease Expiring Soon",
-    description: "Sarah Wilson (Unit 205) will expire in 30 days. Consider sending renewal notice.",
-    timestamp: "5/9/2024",
-    isRead: false,
-  },
-  {
-    id: "4",
-    type: "rent",
-    title: "New Maintenance Request",
-    description: "Urgent electrical issue reported in Unit 506. Power outlet not working in living room.",
-    timestamp: "5/9/2024",
-    isRead: false,
-  },
-  {
-    id: "5",
-    type: "report",
-    title: "Monthly Report Generated",
-    description: "Your January 2024 financial report is ready for download.",
-    timestamp: "5/8/2024",
-    isRead: true,
-  },
-  {
-    id: "6",
-    type: "reminder",
-    title: "Rent Due Reminder",
-    description: "Sarah Wilson (Unit 205) has rent due tomorrow ($4,000). Send reminder notification.",
-    timestamp: "5/8/2024",
-    isRead: true,
-  },
-    {
-    id: "7",
-    type: "rent",
-    title: "New Maintenance Request",
-    description: "Urgent electrical issue reported in Unit 506. Power outlet not working in living room.",
-    timestamp: "5/9/2024",
-    isRead: false,
-  },
-    {
-    id: "8",
-    type: "rent",
-    title: "New Maintenance Request",
-    description: "Urgent electrical issue reported in Unit 506. Power outlet not working in living room.",
-    timestamp: "5/9/2024",
-    isRead: true,
-  },
-    {
-    id: "9",
-    type: "rent",
-    title: "New Maintenance Request",
-    description: "Urgent electrical issue reported in Unit 506. Power outlet not working in living room.",
-    timestamp: "5/9/2024",
-    isRead: false,
-  },
-   {
-    id: "10",
-    type: "reminder",
-    title: "Rent Due Reminder",
-    description: "Sarah Wilson (Unit 205) has rent due tomorrow ($4,000). Send reminder notification.",
-    timestamp: "5/8/2024",
-    isRead: true,
-  },
-   {
-    id: "11",
-    type: "reminder",
-    title: "Rent Due Reminder",
-    description: "Sarah Wilson (Unit 205) has rent due tomorrow ($4,000). Send reminder notification.",
-    timestamp: "5/8/2024",
-    isRead: true,
-  },
-   {
-    id: "12",
-    type: "rent",
-    title: "Rent Payment Overdue",
-    description: "Mike Johnson (Unit 304) has an overdue rent payment of $3,500. Payment was due 5 days ago.",
-    timestamp: "5/9/2024",
-    isRead: false,
-  },
-   {
-    id: "13",
-    type: "rent",
-    title: "Rent Payment Overdue",
-    description: "Mike Johnson (Unit 304) has an overdue rent payment of $3,500. Payment was due 5 days ago.",
-    timestamp: "5/9/2024",
-    isRead: false,
-  },
-]
 
 const cardData = [
   {
@@ -189,15 +86,60 @@ const getNotificationIcon = (type: string) => {
 }
 
 function Notifications() {
+  const dispatch = useDispatch()
+  
+ 
+  const notifications = useSelector(selectNotification) || []
+  
   const [readFilter, setReadFilter] = useState<"all" | "read" | "unread">("all")
   const [typeFilter, setTypeFilter] = useState<"all" | "rent" | "lease">("all")
-  const [notificationList, setNotificationList] = useState<NotificationItem[]>(notifications)
+  const [notificationList, setNotificationList] = useState<NotificationItem[]>([])
+  const [error, setError] = useState<string | null>(null)
 
-  // Pagination state
+  
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
-  // Filter logic
+  
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        setError(null)
+        
+       
+        const params = 
+        {
+          page: 1,
+          limit: 100, 
+        }
+        
+        await dispatch(getNotificationAll(params))
+        
+      } catch (err) {
+        setError('Failed to fetch notifications')
+        console.error('Error fetching notifications:', err)
+      }
+    }
+
+    fetchNotifications()
+  }, [dispatch])
+
+   useEffect(() => {
+    if (notifications && Array.isArray(notifications)) {
+    
+      const transformedNotifications = notifications.map((notification: any) => ({
+        id: notification.id || notification._id,
+        type: notification.type || "reminder",
+        title: notification.title || "Notification",
+        description: notification.description || notification.message || "",
+        timestamp: notification.timestamp || notification.createdAt || new Date().toLocaleDateString(),
+        isRead: notification.isRead || false,
+      }))
+      
+      setNotificationList(transformedNotifications)
+    }
+  }, [notifications])
+
   const filteredNotifications = notificationList.filter(notification => {
     const readMatch =
       readFilter === "all" ||
@@ -211,31 +153,60 @@ function Notifications() {
     return readMatch && typeMatch
   })
 
-  // Pagination logic
+
   const totalPages = Math.ceil(filteredNotifications.length / itemsPerPage)
   const paginatedNotifications = filteredNotifications.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   )
 
-  const markAsRead = (id: string) => {
-    setNotificationList(prev =>
-      prev.map(notification =>
-        notification.id === id ? { ...notification, isRead: true } : notification
+  const markAsRead = async (id: string) => {
+    try {
+      
+      setNotificationList(prev =>
+        prev.map(notification =>
+          notification.id === id ? { ...notification, isRead: true } : notification
+        )
       )
-    )
+      
+   
+      
+    } catch (err) {
+      console.error('Error marking notification as read:', err)
+     
+      setNotificationList(prev =>
+        prev.map(notification =>
+          notification.id === id ? { ...notification, isRead: false } : notification
+        )
+      )
+    }
   }
 
-  const markAllAsRead = () => {
-    setNotificationList(prev =>
-      prev.map(notification => ({ ...notification, isRead: true }))
-    )
+  const markAllAsRead = async () => {
+    try {
+      const unreadIds = notificationList.filter(n => !n.isRead).map(n => n.id)
+      
+     
+      setNotificationList(prev =>
+        prev.map(notification => ({ ...notification, isRead: true }))
+      )
+      } catch (err) {
+      console.error('Error marking all notifications as read:', err)
+      
+    }
   }
 
-  const deleteNotification = (id: string) => {
-    setNotificationList(prev =>
-      prev.filter(notification => notification.id !== id)
-    )
+  const deleteNotification = async (id: string) => {
+    try {
+      
+      setNotificationList(prev =>
+        prev.filter(notification => notification.id !== id)
+      )
+      
+    } catch (err) {
+      console.error('Error deleting notification:', err)
+  
+    }
   }
 
   const handleNotificationClick = (notification: NotificationItem) => {
@@ -254,8 +225,37 @@ function Notifications() {
     if (card.title === "Rent Reminders") {
       return { ...card, value: notificationList.filter(n => n.type === "rent").length.toString() }
     }
+    if (card.title === "Today") {
+      const today = new Date().toLocaleDateString()
+      return { 
+        ...card, 
+        value: notificationList.filter(n => {
+          const notificationDate = new Date(n.timestamp).toLocaleDateString()
+          return notificationDate === today
+        }).length.toString()
+      }
+    }
     return card
   })
+
+  // Error state
+  if (error) {
+    return (
+      <div className="w-6xl mx-auto">
+        <div className="flex items-center justify-center h-64">
+          <div className="flex flex-col items-center gap-4">
+            <div className="text-red-600 text-lg">{error}</div>
+            <Button 
+              onClick={() => window.location.reload()}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              Retry
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="w-6xl mx-auto">
@@ -270,6 +270,7 @@ function Notifications() {
         <Button
           className="bg-purple-600 hover:bg-purple-700 -mr-9 text-white"
           onClick={markAllAsRead}
+          disabled={notificationList.filter(n => !n.isRead).length === 0}
         >
           Mark All Read
         </Button>
@@ -280,7 +281,7 @@ function Notifications() {
         {updatedCardData.map((card) => {
           const IconComponent = card.icon
           return (
-            <Card key={card.id} className="relative overflow-hidden shadow-md border w-[285px] h-[127px]">
+            <Card key={card.id} className="relative overflow-hidden shadow-md border w-[285px] h-[130px]">
               <div
                 className="absolute inset-0 bg-no-repeat bg-[length:150%] opacity-35"
                 style={{
@@ -306,11 +307,11 @@ function Notifications() {
               <CardContent className="relative h-full flex flex-col justify-between p-6">
                 <div className="flex items-center gap-4">
                   <div className={`p-2 ${card.iconBgColor} rounded-lg`}>
-                    <IconComponent className="w-5 h-5 text-white" />
+                    <IconComponent className="w-5 h-5  text-white" />
                   </div>
-                  <span className="text-sm font-medium text-gray-700" style={{...FONTS.card_headers}}>{card.title}</span>
+                  <span className="text-sm font-medium text-gray-700 " style={{...FONTS.card_headers}}>{card.title}</span>
                 </div>
-                <div className="text-3xl font-bold text-gray-900">{card.value}</div>
+                <div className="text-3xl font-bold  text-gray-900 ">{card.value}</div>
               </CardContent>
             </Card>
           )
@@ -370,78 +371,88 @@ function Notifications() {
 
       {/* Notifications List */}
       <div className="divide-y divide-gray-200">
-       {paginatedNotifications.map((notification) => (
-          <div
-            key={notification.id}
-            className={`p-6 rounded-lg mb-4 transition-all duration-200 ${
-              !notification.isRead
-                ? "border-2  bg-blue-50 cursor-pointer hover:bg-blue-100 shadow-md"
-                : "border border-gray-200 bg-white hover:bg-blue-100 opacity-70"
-            }`}
-            onClick={() => handleNotificationClick(notification)}
-          >
-            <div className="flex items-start gap-4">
-              <div
-                className={`p-2 rounded-lg border shadow-sm ${
-                  !notification.isRead ? "bg-blue-100 border-blue-300" : "bg-gray-50 border-gray-200"
-                }`}
-              >
-                {getNotificationIcon(notification.type)}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className={`font-semibold ${!notification.isRead ? "text-gray-900" : "text-gray-500"}`}>
-                        {notification.title}
-                      </h3>
-                      {!notification.isRead && <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>}
+        {paginatedNotifications.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            {notificationList.length === 0 
+              ? "No notifications available." 
+              : "No notifications found matching your filters."}
+          </div>
+        ) : (
+          paginatedNotifications.map((notification) => (
+            <div
+              key={notification.id}
+              className={`p-6 rounded-lg mb-4 transition-all duration-200 ${
+                !notification.isRead
+                  ? "border-2  bg-blue-50 cursor-pointer hover:bg-blue-100 shadow-md"
+                  : "border border-gray-200 bg-white hover:bg-blue-100 opacity-70"
+              }`}
+              onClick={() => handleNotificationClick(notification)}
+            >
+              <div className="flex items-start gap-4">
+                <div
+                  className={`p-2 rounded-lg border shadow-sm ${
+                    !notification.isRead ? "bg-blue-100 border-blue-300" : "bg-gray-50 border-gray-200"
+                  }`}
+                >
+                  {getNotificationIcon(notification.type)}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className={`font-semibold ${!notification.isRead ? "text-gray-900" : "text-gray-500"}`}>
+                          {notification.title}
+                        </h3>
+                        {!notification.isRead && <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>}
+                      </div>
+                      <p className={`text-sm mb-2 ${!notification.isRead ? "text-gray-700" : "text-gray-500"}`}>
+                        {notification.description}
+                      </p>
+                      <p className={`text-xs ${!notification.isRead ? "text-gray-600" : "text-gray-400"}`}>
+                        {notification.timestamp}
+                      </p>
                     </div>
-                    <p className={`text-sm mb-2 ${!notification.isRead ? "text-gray-700" : "text-gray-500"}`}>
-                      {notification.description}
-                    </p>
-                    <p className={`text-xs ${!notification.isRead ? "text-gray-600" : "text-gray-400"}`}>
-                      {notification.timestamp}
-                    </p>
-                  </div>
-                  <div className="flex gap-3 items-start">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                      onClick={(e) => {
-                        e.stopPropagation() 
-                        deleteNotification(notification.id)
-                      }}
-                    >
-                      <img src={cancelicon} className="h-6 w-6" />
-                    </Button>
+                    <div className="flex gap-3 items-start">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                        onClick={(e) => {
+                          e.stopPropagation() 
+                          deleteNotification(notification.id)
+                        }}
+                      >
+                        <img src={cancelicon} className="h-6 w-6" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Pagination Controls */}
-      <div className="flex justify-center gap-2 mt-4">
-        <Button
-          variant="outline"
-          disabled={currentPage === 1}
-          onClick={() => setCurrentPage(prev => prev - 1)}
-        >
-          Previous
-        </Button>
-        <span className="px-3 py-2">Page {currentPage} of {totalPages}</span>
-        <Button
-          variant="outline"
-          disabled={currentPage === totalPages}
-          onClick={() => setCurrentPage(prev => prev + 1)}
-        >
-          Next
-        </Button>
-      </div>
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-2 mt-4">
+          <Button
+            variant="outline"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage(prev => prev - 1)}
+          >
+            Previous
+          </Button>
+          <span className="px-3 py-2">Page {currentPage} of {totalPages}</span>
+          <Button
+            variant="outline"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage(prev => prev + 1)}
+          >
+            Next
+          </Button>
+        </div>
+      )}
     </div>
   )
 }
