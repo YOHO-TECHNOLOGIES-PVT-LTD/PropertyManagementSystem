@@ -1,3 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Afacad:wght@400;500;600;700&display=swap');
+
+body {
+  font-family: 'Afacad', sans-serif;
+}
+
+
 .clip-hex {
   clip-path: polygon(
     50% 0%,   /* Top */
@@ -19,3 +26,6 @@
   scrollbar-width: none; /* Firefox */
 }
 
+.input {
+  @apply w-full px-4 py-2 border border-gray-300 rounded-md text-sm outline-none focus:border-purple-500 placeholder-gray-400;
+}
