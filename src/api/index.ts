@@ -16,7 +16,8 @@ class Client {
 			HttpClient.post(HTTP_END_POINTS.property.create, params),
 		edit: (data: any, params: string) => HttpClient.update(HTTP_END_POINTS.property.update, params, data),
 		delete: (params: string) => HttpClient.delete(HTTP_END_POINTS.property.delete, params),
-		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.property.get, params),
+		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.property.get.replace(":uuid", params.uuid), params),
+		getProperty: (data: any) => HttpClient.get(HTTP_END_POINTS.property.getProperty, data),
     };
     land = {
         getAll: (params: string) =>
@@ -28,13 +29,13 @@ class Client {
 		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.land.get, params),
     };
     tenant = {
-        getAll: (params: string) =>
-			HttpClient.get(HTTP_END_POINTS.tenant.getAll, params),
+        getAll: (data: string) =>
+			HttpClient.get(HTTP_END_POINTS.tenant.getAll, data),
 		create: (params: string) =>
 			HttpClient.post(HTTP_END_POINTS.tenant.create, params),
 		edit: (data: any, params: string) => HttpClient.update(HTTP_END_POINTS.tenant.update, params, data),
 		delete: (params: string) => HttpClient.delete(HTTP_END_POINTS.tenant.delete, params),
-		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.tenant.get, params),
+		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.tenant.get.replace(":uuid", params.uuid), params),
     };
     unit = {
         getAll: (params: string) =>

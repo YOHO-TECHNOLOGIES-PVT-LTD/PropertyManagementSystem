@@ -1,11 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Input } from "../../../src/components/ui/input"
 import { Label } from "../../../src/components/ui/label"
 import { Button } from "../../../src/components/ui/button"
+import { Checkbox } from "../../../src/components/ui/checkbox"
 import { Card, CardContent, CardHeader, CardTitle } from "../../../src/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../../src/components/ui/select"
+import { createTenants, getPropertyByIdData, getPropertyData } from "../../features/tenants/services"
 
 export interface TenantFormData {
   fullName: string
@@ -19,6 +21,12 @@ export interface TenantFormData {
   propertyInformation: string
   rent: string
   securityDeposit: string
+  hasGst: boolean 
+  cgst: string   
+  sgst: string
+  tds: string
+  maintanance: string
+  totalmonthlyrent: string
   teamSpecialized: string
   leaseStartDate: string
   leaseEndDate: string
@@ -27,14 +35,47 @@ export interface TenantFormData {
   relationship: string
   bankName: string
   accountNumber: string
-  bankBranch: string
+  accountHolder: string
   ifscNumber: string
 }
 
 interface AddTenantFormProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (formData: TenantFormData) => void
+  onSubmit: (formData: {
+    personal_information: {
+      full_name: string
+      email: string
+      phone: string
+      address: string
+    }
+    lease_duration: {
+      start_date: Date | null
+      end_date: Date | null
+    }
+    emergency_contact: {
+      name: string
+      phone: string
+      relation: string
+    }
+    tenant_type: string
+    unit: string
+    rent: string
+    deposit: string
+    financial_information: {
+      rent: string
+      cgst: string
+      sgst: string
+      tds: string
+      maintenance: string
+    }
+    bank_details: {
+      bank_name: string
+      account_number: string
+      bank_branch: string
+      bank_IFSC: string
+    }
+  }) => void
 }
 
 export default function AddTenantForm({ isOpen, onClose, onSubmit }: AddTenantFormProps) {
@@ -50,6 +91,12 @@ export default function AddTenantForm({ isOpen, onClose, onSubmit }: AddTenantFo
     propertyInformation: "",
     rent: "",
     securityDeposit: "",
+    hasGst: false,  
+    cgst: "",       
+    sgst: "",       
+    tds: '',
+    maintanance: '',
+    totalmonthlyrent: '',
     teamSpecialized: "",
     leaseStartDate: "",
     leaseEndDate: "",
@@ -58,7 +105,7 @@ export default function AddTenantForm({ isOpen, onClose, onSubmit }: AddTenantFo
     relationship: "",
     bankName: "",
     accountNumber: "",
-    bankBranch: "",
+    accountHolder: "",
     ifscNumber: "",
   })
 
@@ -69,13 +116,87 @@ export default function AddTenantForm({ isOpen, onClose, onSubmit }: AddTenantFo
     }))
   }
 
-  const handleSubmit = () => {
-    if (!formData.fullName || !formData.emailAddress || !formData.phoneNumber) {
-      alert("Please fill in required fields")
-      return
-    }
+const [commercial , setCommercial] = useState<any>();
+const [unitData, setUnitData] = useState<any>();
 
-    onSubmit(formData)
+// console.log("commer",commercial[0]?.property_name)
+
+const getUnit = async() => {
+  const data = {uuid : "e465c027-3ad0-4e94-a755-178a4aa53115"}
+  const response = await getPropertyByIdData(data)
+  setUnitData(response?.data);
+  console.log(response?.data, 'single unit response');
+}
+
+const getProperty = async() => {
+      const data = {property_type: "commercial"}
+      const response = await getPropertyData(data)
+      setCommercial(response?.data);
+      console.log(response?.data, 'single tenant response');
+              
+  }
+
+  useEffect(() => {
+    getProperty(),getUnit()
+  },[])
+
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault(); // Prevent default form submission behavior
+  
+  if (!formData.fullName || !formData.emailAddress || !formData.phoneNumber) {
+    alert("Please fill in required fields");
+    return;
+  }
+
+  try {
+    // Transform the form data to match the backend schema
+    const payload = {
+      personal_information: {
+        full_name: formData.fullName,
+        email: formData.emailAddress,
+        phone: formData.phoneNumber,
+        address: formData.address
+      },
+      lease_duration: {
+        start_date: formData.leaseStartDate ? new Date(formData.leaseStartDate) : null,
+        end_date: formData.leaseEndDate ? new Date(formData.leaseEndDate) : null
+      },
+      emergency_contact: {
+        name: formData.contactName,
+        phone: formData.contactPhone,
+        relation: formData.relationship || "other"
+      },
+      tenant_type: formData.tenantType || "rent",
+      unit: formData.unit,
+      rent: formData.rent,
+      deposit: formData.securityDeposit,
+      uuid: `tenant-${Math.random().toString(36).substr(2, 9)}`,
+      is_active: true,
+      is_deleted: false,
+      financial_information: {
+        rent: formData.rent,
+        cgst: formData.cgst,
+        sgst: formData.sgst,
+        tds: formData.tds,
+        maintenance: formData.maintanance
+      },
+      bank_details: {
+        bank_name: formData.bankName,
+        account_number: formData.accountNumber,
+        bank_branch: formData.accountHolder,
+        bank_IFSC: formData.ifscNumber
+      }
+    };
+
+    console.log("Submitting tenant data:", payload);
+    
+    // Call the API service
+    const response = await createTenants(payload);
+    console.log("API Response:", response);
+    
+    // Call the parent onSubmit callback
+    onSubmit(payload);
 
     // Reset form
     setFormData({
@@ -90,6 +211,12 @@ export default function AddTenantForm({ isOpen, onClose, onSubmit }: AddTenantFo
       propertyInformation: "",
       rent: "",
       securityDeposit: "",
+      hasGst: false,  
+      cgst: "",       
+      sgst: "", 
+      tds: '',
+      maintanance: '',
+      totalmonthlyrent: '',
       teamSpecialized: "",
       leaseStartDate: "",
       leaseEndDate: "",
@@ -98,10 +225,18 @@ export default function AddTenantForm({ isOpen, onClose, onSubmit }: AddTenantFo
       relationship: "",
       bankName: "",
       accountNumber: "",
-      bankBranch: "",
+      accountHolder: "",
       ifscNumber: "",
-    })
+    });
+
+    // Close the form
+    onClose();
+    
+  } catch (error) {
+    console.error("Failed to create tenant:", error);
+    alert("Failed to create tenant. Please try again.");
   }
+};
 
   const handleCancel = () => {
     // Reset form
@@ -117,6 +252,12 @@ export default function AddTenantForm({ isOpen, onClose, onSubmit }: AddTenantFo
       propertyInformation: "",
       rent: "",
       securityDeposit: "",
+      hasGst: false,  
+      cgst: "",       
+      sgst: "", 
+      tds: '',
+    maintanance: '',
+    totalmonthlyrent: '',
       teamSpecialized: "",
       leaseStartDate: "",
       leaseEndDate: "",
@@ -125,7 +266,7 @@ export default function AddTenantForm({ isOpen, onClose, onSubmit }: AddTenantFo
       relationship: "",
       bankName: "",
       accountNumber: "",
-      bankBranch: "",
+      accountHolder: "",
       ifscNumber: "",
     })
     onClose()
@@ -199,77 +340,173 @@ export default function AddTenantForm({ isOpen, onClose, onSubmit }: AddTenantFo
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="propertytype">Property Type</Label>
-                    <Input
-                      id="propertytype"
-                      value={formData.propertytype}
-                      onChange={(e) => handleInputChange("propertytype", e.target.value)}
-                      placeholder="Enter property type"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                  <Label htmlFor="relationship">Property Name</Label>
+                  <Label htmlFor="propertytype">Property Type</Label>
                   <Select
                   
-                    value={formData.relationship}
-                    onValueChange={(value) => handleInputChange("relationship", value)}
+                    value={formData.propertytype}
+                    onValueChange={(value) => handleInputChange("propertytype", value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Property type" />
+                    </SelectTrigger>
+                    <SelectContent   >
+                      <SelectItem value="all">All Type</SelectItem>
+                      <SelectItem value="commercial">Commercial</SelectItem>
+                      
+                    </SelectContent>
+                  </Select>
+                </div>
+                  
+                  <div className="space-y-2">
+                  <Label htmlFor="propertyName">Property Name</Label>
+                  <Select
+                  
+                    value={formData.propertyName}
+                    onValueChange={(value) => handleInputChange("propertyName", value)}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Select Property" />
                     </SelectTrigger>
                     <SelectContent   >
-                      <SelectItem value="sunrise">Surise Property</SelectItem>
-                      <SelectItem value="bru">Bru Property</SelectItem>
-                      <SelectItem value="wahtaj">Wah Taj Property</SelectItem>
-                      
+                      <SelectItem value="sunrise">{commercial[0]?.property_name}</SelectItem>                                            
                     </SelectContent>
                   </Select>
                 </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="tenantType">Tenant Type</Label>
-                    <Input
-                      id="tenantType"
-                      value={formData.tenantType}
-                      onChange={(e) => handleInputChange("tenantType", e.target.value)}
-                      placeholder="Enter tenant type"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tenantType">Tenant Type</Label>
+                  <Select
+                  
+                    value={formData.tenantType}
+                    onValueChange={(value) => handleInputChange("tenantType", value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Property" />
+                    </SelectTrigger>
+                    <SelectContent   >
+                      <SelectItem value="lease">Lease</SelectItem>
+                      <SelectItem value="rent">Rent</SelectItem>                      
+                    </SelectContent>
+                  </Select>
+                </div>
+                 <div className="space-y-2">
+                  <Label htmlFor="unit">Unit</Label>
+                  <Select
+                  
+                    value={formData.unit}
+                    onValueChange={(value) => handleInputChange("unit", value)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Unit" />
+                    </SelectTrigger>
+                    <SelectContent   >
+                    {unitData?.map((item) => (
+                      <SelectItem key={item._id} value={item.uuid}>{item.unit_name}</SelectItem>
+                      ))}                     
+                    </SelectContent>
+                  </Select>
+                </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader className="bg-blue-50 rounded-t-lg">
-                <CardTitle className="flex items-center gap-2 text-blue-700">
-                  <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold">
-                    3
-                  </div>
-                  Financial Information
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="rent">Monthly Rent</Label>
-                    <Input
-                      id="rent"
-                      value={formData.rent}
-                      onChange={(e) => handleInputChange("rent", e.target.value)}
-                      placeholder="Enter monthly rent"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="securityDeposit">Security Deposit</Label>
-                    <Input
-                      id="securityDeposit"
-                      value={formData.securityDeposit}
-                      onChange={(e) => handleInputChange("securityDeposit", e.target.value)}
-                      placeholder="Enter security deposit"
-                    />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+<Card>
+  <CardHeader className="bg-blue-50 rounded-t-lg">
+    <CardTitle className="flex items-center gap-2 text-blue-700">
+      <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold">
+        3
+      </div>
+      Financial Information
+    </CardTitle>
+  </CardHeader>
+  <CardContent className="p-6 space-y-4">
+    <div className="grid grid-cols-3 gap-4">
+      <div className="space-y-2">
+        <Label htmlFor="rent">Monthly Rent</Label>
+        <Input
+          id="rent"
+          value={formData.rent}
+          onChange={(e) => handleInputChange("rent", e.target.value)}
+          placeholder="Enter monthly rent"
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="securityDeposit">Security Deposit</Label>
+        <Input
+          id="securityDeposit"
+          value={formData.securityDeposit}
+          onChange={(e) => handleInputChange("securityDeposit", e.target.value)}
+          placeholder="Enter security deposit"
+        />
+      </div>
+      <div className="space-y-2">
+    <Label htmlFor="maintanance">Maintenance Charge</Label>
+    <Input
+      id="maintanance"
+      value={formData.maintanance}
+      onChange={(e) => handleInputChange("maintanance", e.target.value)}
+      placeholder="-10 %"
+    />
+  </div>
+    </div>
+    
+    {/* GST Section */}
+    <div className="space-y-4 pt-2">
+      <div className="flex items-center space-x-2">
+        <Checkbox 
+          id="gstCheckbox" 
+          checked={formData.hasGst}
+          onCheckedChange={(checked) => handleInputChange("hasGst", checked)}
+        />
+        <Label htmlFor="gstCheckbox">Include GST</Label>
+      </div>
+      
+      {formData.hasGst && (
+        <div className="grid grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="cgst">CGST (%)</Label>
+            <Input
+              id="cgst"
+              value={formData.cgst}
+              onChange={(e) => handleInputChange("cgst", e.target.value)}
+              placeholder="Enter CGST percentage"
+              type="number"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="sgst">SGST (%)</Label>
+            <Input
+              id="sgst"
+              value={formData.sgst}
+              onChange={(e) => handleInputChange("sgst", e.target.value)}
+              placeholder="Enter SGST percentage"
+              type="number"
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="tds">TDS</Label>
+            <Input
+              id="tds"
+              value={formData.tds}
+              onChange={(e) => handleInputChange("tds", e.target.value)}
+              placeholder="-10 %"
+            />
+          </div>
+        </div>
+      )}
+    </div>
+    
+  <div className="space-y-2 col-span-2"> 
+    <Label htmlFor="totalmonthlyrent">Total Monthly Rent</Label>
+    <Input
+      id="totalmonthlyrent"
+      value={formData.totalmonthlyrent}
+      onChange={(e) => handleInputChange("totalmonthlyrent", e.target.value)}
+      placeholder="Calculated amount"
+    />
+  </div>
+
+  </CardContent>
+</Card>
 
             <Card>
               <CardHeader className="bg-blue-50 rounded-t-lg">
@@ -387,12 +624,12 @@ export default function AddTenantForm({ isOpen, onClose, onSubmit }: AddTenantFo
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="bankBranch">Bank Branch</Label>
+                    <Label htmlFor="accountHolder">Account Holder Name</Label>
                     <Input
-                      id="bankBranch"
-                      value={formData.bankBranch}
-                      onChange={(e) => handleInputChange("bankBranch", e.target.value)}
-                      placeholder="Enter Bank Branch"
+                      id="accountHolder"
+                      value={formData.accountHolder}
+                      onChange={(e) => handleInputChange("accountHolder", e.target.value)}
+                      placeholder="Enter Account Holder"
                     />
                   </div>
                   <div className="space-y-2">
