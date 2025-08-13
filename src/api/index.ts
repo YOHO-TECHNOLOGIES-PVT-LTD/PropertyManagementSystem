@@ -9,6 +9,9 @@ class Client {
 		login: (data: any) => HttpClient.post(HTTP_END_POINTS.auth.login, data),
 		me: () => HttpClient.get(HTTP_END_POINTS.auth.login),
     };
+	dashboard={
+		get:(data:any)=>HttpClient.get(HTTP_END_POINTS.DashBoard.get,data),
+	}
     property = {
         getAll: (params: string) =>
 			HttpClient.get(HTTP_END_POINTS.property.getAll, params),
