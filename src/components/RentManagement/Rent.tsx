@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
-import {Building2,X,User,Calendar,IndianRupee,CreditCard,Users} from "lucide-react";
+import { Building2, X } from "lucide-react";
 import Card2 from "./Card";
 import frame1 from "../../assets/Bg_Frames/Frame_1.png";
 import frame2 from "../../assets/Bg_Frames/Frame_2.png";
@@ -63,8 +63,10 @@ const Rent: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [monthFilter, setMonthFilter] = useState("All Months");
   const [modalData, setModalData] = useState<RentItem | null>(null);
-  const [isMonthDropdownOpen,setIsMonthDropdownOpen] = useState<boolean>(false)
-  const [isStatusDropdownOpen,setIsStatusDropdownOpen] = useState<boolean>(false)
+  const [isMonthDropdownOpen, setIsMonthDropdownOpen] =
+    useState<boolean>(false);
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] =
+    useState<boolean>(false);
   const [isAddFormOpen, setIsAddFormOpen] = useState(false);
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
   const badgeRef = useRef<HTMLDivElement | null>(null);
@@ -360,8 +362,9 @@ const Rent: React.FC = () => {
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="flex justify-between items-center mb-6">
-        <div className="font-bold" >
-         <span className="text-3xl"> Rent Management </span><br />
+        <div className="font-bold">
+          <span className="text-3xl"> Rent Management </span>
+          <br />
           <span className="text-md font-normal text-gray-600">
             Track and Manage Rent Payments
           </span>
@@ -411,11 +414,12 @@ const Rent: React.FC = () => {
         <div className="relative w-28 ml-auto ">
           <div
             className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center  justify-between bg-[#B200FF1A]"
-            onClick={() =>{
-               setIsStatusDropdownOpen((prev) => !prev);
-              setStatusFilter((prev) => prev === "All Status" ? "All Status" : prev
-              );}
-            }
+            onClick={() => {
+              setIsStatusDropdownOpen((prev) => !prev);
+              setStatusFilter((prev) =>
+                prev === "All Status" ? "All Status" : prev
+              );
+            }}
           >
             <span className="text-[#B200FF]">{statusFilter}</span>
             <svg
@@ -455,14 +459,12 @@ const Rent: React.FC = () => {
         <div className="relative w-28 ">
           <div
             className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center justify-between bg-[#B200FF1A]"
-            onClick={() =>
-             {
+            onClick={() => {
               setIsMonthDropdownOpen((prev) => !prev);
-               setMonthFilter((prev) =>
+              setMonthFilter((prev) =>
                 prev === "All Months" ? "All Months" : prev
-              )
-             }
-            }
+              );
+            }}
           >
             <span className="text-[#B200FF]">{monthFilter}</span>
             <svg
@@ -479,8 +481,7 @@ const Rent: React.FC = () => {
               />
             </svg>
           </div>
-
- {isMonthDropdownOpen && (
+          {isMonthDropdownOpen && (
             <div className="absolute w-full text-[#7D7D7D] bg-white shadow-xl rounded-lg mt-1 border border-gray-300 z-10 overflow-y-auto p-2 space-y-2">
               {months.map((month) => (
                 <div
@@ -497,13 +498,14 @@ const Rent: React.FC = () => {
                 </div>
               ))}
             </div>
-          )}        </div>
+          )}{" "}
+        </div>
       </div>
 
       {/* Table */}
       <div className="bg-white rounded-xl p-3 shadow overflow-x-auto">
         <table className="w-full text-left border-separate border-spacing-y-6">
-          <thead className="bg-gray-100" style={{...FONTS.Table_Header}}>
+          <thead className="bg-gray-100" style={{ ...FONTS.Table_Header }}>
             <tr>
               <th className="px-6 py-4 rounded-l-lg">Company Name</th>
               <th className="px-6 py-4">Amount</th>
@@ -512,7 +514,7 @@ const Rent: React.FC = () => {
               <th className="px-6 py-4 rounded-r-lg">Actions</th>
             </tr>
           </thead>
-          <tbody style={{...FONTS.Table_Body}}>
+          <tbody style={{ ...FONTS.Table_Body }}>
             {filteredData.length > 0 ? (
               filteredData.map((item) => (
                 <tr
@@ -528,7 +530,9 @@ const Rent: React.FC = () => {
                       <BiSolidBuildings className="text-2xl" />
                     </span>
                     <div className="grid ml-3">
-                      <span className="font-bold text-black">{item.companyName}</span>
+                      <span className="font-bold text-black">
+                        {item.companyName}
+                      </span>
                       <span className="text-sm">Unit {item.unit}</span>
                     </div>
                   </td>
@@ -542,39 +546,41 @@ const Rent: React.FC = () => {
                   </td>
 
                   <td className="px-6 py-4 border-t border-b border-gray-200 relative">
-                   <div
-  ref={(el) => {
-    if (openDropdownId === item.id && el) badgeRef.current = el;
-  }}
-  onClick={(e) => {
-    badgeRef.current = e.currentTarget as HTMLDivElement;
-    setOpenDropdownId((prev) => (prev === item.id ? null : item.id));
-  }}
-  className={`inline-flex items-center justify-between cursor-pointer h-10 px-3 py-1 rounded-md border text-sm font-medium ${getStatusStyle(
-    item.status
-  )} min-w-[100px]`} 
->
-  <span className="flex items-center gap-2 truncate">
-    <span>{item.status}</span>
-  </span>
+                    <div
+                      ref={(el) => {
+                        if (openDropdownId === item.id && el)
+                          badgeRef.current = el;
+                      }}
+                      onClick={(e) => {
+                        badgeRef.current = e.currentTarget as HTMLDivElement;
+                        setOpenDropdownId((prev) =>
+                          prev === item.id ? null : item.id
+                        );
+                      }}
+                      className={`inline-flex items-center justify-between cursor-pointer h-10 px-3 py-1 rounded-md border text-sm font-medium ${getStatusStyle(
+                        item.status
+                      )} min-w-[100px]`}
+                    >
+                      <span className="flex items-center gap-2 truncate">
+                        <span>{item.status}</span>
+                      </span>
 
-  <svg
-    className={`w-4 h-4 ml-2 transition-transform ${
-      openDropdownId === item.id ? "rotate-180" : ""
-    }`}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M19 9l-7 7-7-7"
-    />
-  </svg>
-</div>
-
+                      <svg
+                        className={`w-4 h-4 ml-2 transition-transform ${
+                          openDropdownId === item.id ? "rotate-180" : ""
+                        }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </div>
 
                     {/* dropdown */}
                     {openDropdownId === item.id && (
@@ -636,8 +642,8 @@ const Rent: React.FC = () => {
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-gray-200">
               <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Add New Tenant
+                <h2 className="text-2xl font-bold text-gray-900 flex">
+                 <span className="bg-[#3065A426] rounded-full h-8 w-8 mr-3"> <Building2 size={20} className="mt-1.5 ml-1.5 text-[]"/></span> Add New Tenant
                 </h2>
                 <button
                   onClick={() => setIsAddFormOpen(false)}
@@ -650,7 +656,7 @@ const Rent: React.FC = () => {
 
             <form onSubmit={handleSubmit} className="p-6">
               <h3 className="col-span-2 text-lg font-semibold text-gray-900 flex items-center gap-2 border-b pb-2">
-                <Building2 size={20} />
+               <span className="bg-[#3065A426] rounded-full h-8 w-8"> <Building2 size={20} className="mt-1.5 ml-1.5 text-[]"/></span>
                 Personal Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
@@ -743,7 +749,7 @@ const Rent: React.FC = () => {
 
               {/* Financial Information */}
               <h3 className="col-span-2 text-lg font-semibold text-gray-900 flex items-center gap-2 border-b pb-2 mt-8">
-                 <Building2 size={20} />
+                <span className="bg-[#3065A426] rounded-full h-8 w-8"> <Building2 size={20} className="mt-1.5 ml-1.5 text-[]"/></span>
                 Financial Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
@@ -794,7 +800,7 @@ const Rent: React.FC = () => {
 
               {/* Lease Information */}
               <h3 className="col-span-2 text-lg font-semibold text-gray-900 flex items-center gap-2 border-b pb-2 mt-8">
-                 <Building2 size={20} />
+                <span className="bg-[#3065A426] rounded-full h-8 w-8"> <Building2 size={20} className="mt-1.5 ml-1.5 text-[]"/></span>
                 Lease Information
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
@@ -828,7 +834,7 @@ const Rent: React.FC = () => {
 
               {/* Emergency Contact */}
               <h3 className="col-span-2 text-lg font-semibold text-gray-900 flex items-center gap-2 border-b pb-2 mt-8">
-                <Building2 size={20} />
+                <span className="bg-[#3065A426] rounded-full h-8 w-8"> <Building2 size={20} className="mt-1.5 ml-1.5 text-[]"/></span>
                 Emergency Contact
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
@@ -881,7 +887,7 @@ const Rent: React.FC = () => {
 
               {/* Bank Details */}
               <h3 className="col-span-2 text-lg font-semibold text-gray-900 flex items-center gap-2 border-b pb-2 mt-8">
-                <Building2 size={20} />
+                <span className="bg-[#3065A426] rounded-full h-8 w-8"> <Building2 size={20} className="mt-1.5 ml-1.5 text-[]"/></span>
                 Bank Details
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
