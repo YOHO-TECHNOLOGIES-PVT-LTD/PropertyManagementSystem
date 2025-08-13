@@ -76,6 +76,11 @@ export const FONTS = {
         fontWeight: '500',
         fontSize: '16px',
     },
+    Table_Body_2: {
+        fontFamily: 'Afacad, sans-serif',
+        fontWeight: '700',
+        fontSize: '18px',
+    },
     large_card_header: {
         fontFamily: 'Afacad, sans-serif',
         fontWeight: '600',
@@ -96,7 +101,11 @@ export const FONTS = {
         fontFamily: 'Afacad, sans-serif',
         fontWeight: '500',
         fontSize: '16px',
-
+    },
+    large_card_description3: {
+        fontFamily: 'Afacad, sans-serif',
+        fontWeight: '400',
+        fontSize: '18px',
     },
     Large_card_Numbers: {
         fontFamily: 'Afacad, sans-serif',
@@ -106,6 +115,11 @@ export const FONTS = {
     Large_card_Button_text: {
         fontFamily: 'Afacad, sans-serif',
         fontWeight: '700',
+        fontSize: '20px',
+    },
+    report_btn: {
+        fontFamily: 'Afacad, sans-serif',
+        fontWeight: '500',
         fontSize: '20px',
     },
 
