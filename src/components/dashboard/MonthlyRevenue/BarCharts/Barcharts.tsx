@@ -1,6 +1,6 @@
 import React from "react";
 import { Building2 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from "recharts";
 
 interface DataPoint {
   year: string;
@@ -27,13 +27,16 @@ const MonthlyRevenueTrendBar: React.FC<{ data: DataPoint[] }> = ({ data }) => {
           </defs>
 
           {/* Hide ticks, keep baseline */}
-          <XAxis dataKey="year"tick={true} axisLine={false} tickLine={false} />
-          <YAxis tick={true} axisLine={false} tickLine={false} tickFormatter={(value) => `${value / 1000}K`}/>
+          <XAxis dataKey="year" tick={true} axisLine={false} tickLine={false} />
+          <YAxis tick={true} axisLine={false} tickLine={false} tickFormatter={(value) => `${value / 1000}K`} />
 
           <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
 
-          <Bar dataKey="revenue" fill="url(#diagonalStripes)" radius={[10, 10, 0, 0]} />
-          <Bar dataKey="netIncome" fill="#B200FF" radius={[10, 10, 0, 0]} />
+          <Bar dataKey="revenue" fill="url(#diagonalStripes)" radius={[10, 10, 0, 0]} name="Revenue" />
+          <Bar dataKey="netIncome" fill="#B200FF" radius={[10, 10, 0, 0]} name="Net Income" />
+
+          {/* Legend added here */}
+          <Legend verticalAlign="bottom" height={36} />
         </BarChart>
       </ResponsiveContainer>
     </div>

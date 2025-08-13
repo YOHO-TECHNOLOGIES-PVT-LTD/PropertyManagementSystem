@@ -27,7 +27,10 @@ interface ActivityTabsProps {
   taskData: TaskItem[];
 }
 
-export default function ActivityTabs({ activityData, taskData }: ActivityTabsProps) {
+export default function ActivityTabs({
+  activityData,
+  taskData,
+}: ActivityTabsProps) {
   const [activeTab, setActiveTab] = useState<"activity" | "tasks">("activity");
 
   const getStatusBadgeStyles = (status: string) => {
@@ -97,23 +100,27 @@ export default function ActivityTabs({ activityData, taskData }: ActivityTabsPro
             Upcoming Tasks
           </button>
         </div>
-        <button className="text-blue-600 font-medium hover:text-blue-700">View All</button>
+        <button className="text-blue-600 font-medium hover:text-blue-700">
+          View All
+        </button>
       </div>
 
       {/* Conditional Render */}
-      {activeTab === "activity" ? (
-        <ActivityList
-          data={activityData}
-          getIconStyles={getIconStyles}
-          getStatusBadgeStyles={getStatusBadgeStyles}
-        />
-      ) : (
-        <TaskList
-          data={taskData}
-          getIconStyles={getIconStyles}
-          getPriorityBadgeStyles={getPriorityBadgeStyles}
-        />
-      )}
+      <div className="h-[400px] overflow-y-auto no-scrollbar">
+        {activeTab === "activity" ? (
+          <ActivityList
+            data={activityData}
+            getIconStyles={getIconStyles}
+            getStatusBadgeStyles={getStatusBadgeStyles}
+          />
+        ) : (
+          <TaskList
+            data={taskData}
+            getIconStyles={getIconStyles}
+            getPriorityBadgeStyles={getPriorityBadgeStyles}
+          />
+        )}
+      </div>
     </div>
   );
 }

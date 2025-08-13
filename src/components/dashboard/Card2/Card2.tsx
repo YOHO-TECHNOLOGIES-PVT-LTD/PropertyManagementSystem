@@ -21,7 +21,7 @@ const Card2: React.FC<Card2Props> = ({
 }) => {
   return (
     <div
-      className="bg-right bg-contain bg-no-repeat p-4 rounded-lg w-[417px] shadow-[2px_2px_5px_rgba(0,0,0,0.25)] h-[127px] flex flex-col justify-between"
+      className="bg-right bg-contain bg-no-repeat p-4 rounded-lg  h-[127px] shadow-[2px_2px_5px_rgba(0,0,0,0.25)]  flex flex-col justify-between"
       style={{ backgroundImage: `url(${bgImage})` }}
     >
       <div className="flex justify-between items-center">

@@ -17,9 +17,13 @@ const RadialChart: React.FC<RadialChartProps> = ({ data }) => {
   return (
     <div className="w-full flex flex-col rounded-lg shadow-[2px_2px_5px_rgba(0,0,0,0.25)] p-4 justify-center bg-transparent">
       {/* Title Row */}
-      <div className="flex items-center gap-3 mb-6 justify-start">
-        <Building2 className="text-cyan-500" size={24} />
-        <h2 className="text-lg font-semibold">Payment Status Distribution</h2>
+      <div className="flex items-center gap-3 mb-4">
+        <div className="h-10 w-10 flex items-center justify-center rounded-full bg-[#289A9A26]/15 shadow-lg">
+          <div className="text-[#289A9A]">
+            <Building2 />
+          </div>
+        </div>
+        <h2 className="font-semibold text-lg">Payment Status Distribution</h2>
       </div>
 
       {/* Chart */}

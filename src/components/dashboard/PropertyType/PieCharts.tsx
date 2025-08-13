@@ -101,7 +101,7 @@ const PropertyTypesDistribution: React.FC<PropertyTypesDistributionProps> = ({ d
   return (
     <div className="bg-white rounded-2xl shadow-[2px_2px_5px_rgba(0,0,0,0.25)]   p-4 w-full h-80 flex flex-col">
       <div className="flex items-center gap-3 mb-6">
-        <div className="h-10 w-10 flex items-center justify-center rounded-full bg-[#3A32D326]/15 shadow-lg">
+        <div className="h-10 w-10 flex items-center justify-center rounded-full bg-[#FF7B0026]/15 shadow-lg">
           <div className="text-[#FF7B00]"><Building2 /></div>
         </div>
         <h3 className="text-lg font-semibold text-gray-900">Property Types Distribution</h3>

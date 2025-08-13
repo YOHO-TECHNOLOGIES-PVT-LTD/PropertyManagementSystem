@@ -57,18 +57,17 @@ const occupancyData = [
   { month: "Dec", rate: 65 },
 ];
 const samplePieData = [
-
   { name: "Commercial", value: 25, color: "#06B6D4" },
   { name: "Land", value: 25, color: "#EC4899" },
   { name: "Villas", value: 10, color: "#EF4444" },
   { name: "Houses", value: 5, color: "#8B5CF6" },
-    { name: "Apartment", value: 60, color: "#FACC15" },
+  { name: "Apartment", value: 60, color: "#FACC15" },
 ];
 
 const chartData = [
-  { name: "Paid", value: 80, fill: "#E800DC" ,count: 64},
-  { name: "Pending", value: 55, fill: "#006AFF",count: 17 },
-  { name: "Overdue", value: 30, fill: "#FF008C",count: 4 },
+  { name: "Paid", value: 80, fill: "#E800DC", count: 64 },
+  { name: "Pending", value: 55, fill: "#006AFF", count: 17 },
+  { name: "Overdue", value: 30, fill: "#FF008C", count: 4 },
 ];
 
 const rentCollectionData = [
@@ -78,7 +77,14 @@ const rentCollectionData = [
   { month: "Apr", paid: 45, pending: 25 },
   { month: "May", paid: 70, pending: 30 },
   { month: "Jun", paid: 60, pending: 25 },
+  { month: "Jul", paid: 72, pending: 18 },
+  { month: "Aug", paid: 55, pending: 35 },
+  { month: "Sept", paid: 68, pending: 22 },
+  { month: "Oct", paid: 75, pending: 20 },
+  { month: "Nov", paid: 63, pending: 27 },
+  { month: "Dec", paid: 80, pending: 15 },
 ];
+
 
 const sampleActivityData = [
   {
@@ -244,7 +250,7 @@ const DashBoard = () => {
       </div>
 
       {/* Charts Section-1 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ">
         <div className="">
           <MonthlyRevenueTrendLine data={lineData} />
         </div>
@@ -254,7 +260,7 @@ const DashBoard = () => {
       </div>
 
       {/* Chaers Section-2 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <OccupancyRateTrend data={occupancyData} />
         <PropertyTypesDistribution data={samplePieData} />
       </div>

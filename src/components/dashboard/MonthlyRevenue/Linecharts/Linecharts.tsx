@@ -20,7 +20,7 @@ const MonthlyRevenueTrendLine: React.FC<{ data: DataPoint[] }> = ({ data }) => {
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-black text-white px-3 py-1.5 rounded-lg shadow-[2px_2px_5px_rgba(0,0,0,0.25)] text-sm font-medium">
+        <div className="bg-black text-white px-3 py-1.5 rounded-lg  text-sm font-medium">
           <p>${(payload[0].value / 1000).toFixed(1)}k</p>
         </div>
       );
@@ -29,7 +29,7 @@ const MonthlyRevenueTrendLine: React.FC<{ data: DataPoint[] }> = ({ data }) => {
   };
 
   return (
-    <div className="p-3 rounded-2xl shadow-lg w-full">
+    <div className="p-3 rounded-2xl shadow-[2px_2px_5px_rgba(0,0,0,0.25)] w-full">
       {/* Header */}
       <div className="flex items-center gap-3 ">
         <div className="h-10 w-10 flex items-center justify-center rounded-full bg-blue-100 shadow-sm">

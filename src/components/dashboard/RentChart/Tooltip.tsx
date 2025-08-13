@@ -18,9 +18,13 @@ const RentCollectionRate: React.FC<RentCollectionRateProps> = ({ data }) => {
   return (
     <div className="bg-white rounded-2xl shadow-[2px_2px_5px_rgba(0,0,0,0.25)] p-6">
       <div className="flex items-center gap-3 mb-4">
-        <Building2 className="text-cyan-500" size={24} />
-        <h2 className="text-lg font-semibold">Rent Collection Rate</h2>
-      </div>
+              <div className="h-10 w-10 flex items-center justify-center rounded-full bg-[#289A9A26]/15 shadow-lg">
+                <div className="text-[#289A9A]">
+                  <Building2 />
+                </div>
+              </div>
+              <h2 className="font-semibold text-lg">Rent Collection Rate</h2>
+            </div>
       <ResponsiveContainer width="100%" height={300}>
         <BarChart data={data} barSize={30}>
           <XAxis dataKey="month" axisLine={false} tickLine={false} />
