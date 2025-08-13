@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FiSearch } from "react-icons/fi";
 import { FONTS } from "../../constants/ui constants";
 import { FaUser, FaPlus } from "react-icons/fa";
@@ -7,122 +7,79 @@ import Background_Image_1 from "../../assets/Bg_Frames/Frame_1.png";
 import Background_Image_2 from "../../assets/Bg_Frames/Frame_3.png";
 import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
-
-
-
-
+import { useDispatch } from "react-redux";
+import { CreatMaintenanceThunks, GetallMaintenanceThunks } from "../../features/maintenance/reducers/thunks.ts"
+import { cn } from '../../lib/utils';
 
 const Maintenance = () => {
     const [categoryFilter, setCategoryFilter] = useState<string>("All");
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [Openrequest, setOpenrequest] = useState(Boolean)
-    
+    const dispatch = useDispatch<any>();
+    const [maintenanceList, setMaintenanceList] = useState<any[]>([]);
+    const [creatmaintenances, setcreatmaintenances] = useState<any[]>([]);
 
-    const data = () => [
-        {
-            id: 1,
-            title: "Kitchen Sink Leakage",
-            name: "Arun",
-            unit: "Unit 101",
-            description:
-                "The Kitchen Sink Is Leaking From The Bottom. Water Is Dripping Continuously And Needs Immediate Attention.",
-            category: "A/C",
-            assigned: "Mike Wilson A/C",
-            created: "Feb 8, 2024",
-            scheduled: "Feb 10, 2024",
-            cost: "2,500",
-            note: '"Plumber Scheduled To Visit On Feb 10th"',
-        },
-        {
-            id: 2,
-            title: "Air Conditioner Fault",
-            name: "Prakash",
-            unit: "Unit 205",
-            description:
-                "The air conditioner is not cooling properly and needs urgent service.",
-            category: "HVAC",
-            assigned: "Robert King HVAC",
-            created: "Feb 5, 2024",
-            scheduled: "Feb 9, 2024",
-            cost: "3,200",
-            note: '"Technician Scheduled To Visit On Feb 9th"',
-        },
-        {
-            id: 3,
-            title: "Air Conditioner Fault",
-            name: "Hema",
-            unit: "Unit 305",
-            description:
-                "The air conditioner is not cooling properly and needs urgent service.",
-            category: "HVAC",
-            assigned: "Robert King HVAC",
-            created: "Feb 5, 2024",
-            scheduled: "Feb 9, 2024",
-            cost: "3,200",
-            note: '"Technician Scheduled To Visit On Feb 9th"',
-        },
-        {
-            id: 4,
-            title: "Air Conditioner Fault",
-            name: "Ram",
-            unit: "Unit 405",
-            description:
-                "The air conditioner is not cooling properly and needs urgent service.",
-            category: "Plumbing",
-            assigned: "Robert King HVAC",
-            created: "Feb 5, 2024",
-            scheduled: "Feb 9, 2024",
-            cost: "3,200",
-            note: '"Technician Scheduled To Visit On Feb 9th"',
-        },
-        {
-            id: 5,
-            title: "Air Conditioner Fault",
-            name: "Abishek",
-            unit: "Unit 505",
-            description:
-                "The air conditioner is not cooling properly and needs urgent service.",
-            category: "Plumbing",
-            assigned: "Robert King HVAC",
-            created: "Feb 5, 2024",
-            scheduled: "Feb 9, 2024",
-            cost: "3,200",
-            note: '"Technician Scheduled To Visit On Feb 9th"',
-        },
-        {
-            id: 6,
-            title: "Air Conditioner Fault",
-            name: "Abishek",
-            unit: "Unit 505",
-            description:
-                "The air conditioner is not cooling properly and needs urgent service.",
-            category: "Plumbing",
-            assigned: "Robert King HVAC",
-            created: "Feb 5, 2024",
-            scheduled: "Feb 9, 2024",
-            cost: "700",
-            note: '"Technician Scheduled To Visit On Feb 9th"',
-        },
-        {
-            id: 7,
-            title: "Air Conditioner Fault",
-            name: "Abishek",
-            unit: "Unit 505",
-            description:
-                "The air conditioner is not cooling properly and needs urgent service.",
-            category: "Plumbing",
-            assigned: "Robert King HVAC",
-            created: "Feb 5, 2024",
-            scheduled: "Feb 9, 2024",
-            cost: "700",
-            note: '"Technician Scheduled To Visit On Feb 9th"',
-        },
-    ];
 
-    // Calculate totals
-    const totalCount = data().length;
-    const totalCost = data().reduce((sum, item) => {
-        const numericCost = parseInt(item.cost.replace(/[^0-9]/g, ""), 10);
+    useEffect(() => {
+        (async () => {
+            const maintenancedata = await dispatch(GetallMaintenanceThunks({}));
+            console.log("Maintenance Data directly from thunk:", maintenancedata);
+            setMaintenanceList(maintenancedata);
+        })();
+    }, [dispatch]);
+
+    const [formData, setFormData] = useState({
+        title: "",
+        description: "",
+        full_name: "",
+        unitId: "",
+        category: "",
+        createdAt: "",
+        scheduled: "",
+        estmate_cost: ""
+    });
+
+    useEffect(() => {
+
+        dispatch(GetallMaintenanceThunks({}));
+        dispatch(CreatMaintenanceThunks(formData)).then((res: any) => {
+            console.log("Created maintenance:", res);
+            setcreatmaintenances(res);
+        });
+    }, [dispatch]);
+
+    const handleInputChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value,
+        });
+    };
+
+
+    const handleCreate = (e: React.FormEvent) => {
+        e.preventDefault();
+        dispatch(CreatMaintenanceThunks(formData)).then((res: any) => {
+            console.log("Created maintenance:", res);
+            setOpenrequest(false);
+            dispatch(GetallMaintenanceThunks({}));
+            setFormData({
+                title: "",
+                description: "",
+                full_name: "",
+                unitId: "",
+                category: "",
+                createdAt: "",
+                scheduled: "",
+                estmate_cost: ""
+            });
+        });
+    };
+
+    const totalCount = maintenanceList.length;
+    const totalCost = maintenanceList.reduce((sum, item) => {
+        const numericCost = parseInt(String(item.estmate_cost).replace(/[^0-9]/g, ""), 10);
         return sum + (isNaN(numericCost) ? 0 : numericCost);
     }, 0);
 
@@ -131,18 +88,18 @@ const Maintenance = () => {
         { id: 2, icon: <FaUser />, title: "Total Estimated Cost", number: `₹.${totalCost.toLocaleString()}`, bg: Background_Image_2 },
     ];
 
-    const filteredData = data()
-        .filter(item => categoryFilter === "All" || item.category === categoryFilter)
-        .filter(item =>
-            item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            item.unit.toLowerCase().includes(searchTerm.toLowerCase
-                ())
-        );
+    const
+        filteredData = maintenanceList
+            .filter(item => categoryFilter === "All" || item.category === categoryFilter)
+            .filter(item =>
+                item.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+
+    console.log(filteredData, "filtered data")
+
 
     return (
         <div>
-       
 
             <div className="flex justify-between items-center gap-4 mt-4">
                 <div className="relative w-full max-w-sm">
@@ -201,10 +158,10 @@ const Maintenance = () => {
 
             {/* Maintenance Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
-                {filteredData.length > 0 ? (
+                {filteredData?.length > 0 ? (
                     filteredData.map((item) => (
                         <div
-                            key={item.id}
+                            key={item._id}
                             className="bg-white text-white  rounded-xl shadow-xl overflow-hidden border"
                         >
                             {/* Header */}
@@ -220,39 +177,48 @@ const Maintenance = () => {
                                     <div>
                                         <h2
                                             style={FONTS.card_headers}
-                                            className="text-lg font-bold">{item.title}</h2>
+                                            className="text-lg font-bold">{item.title || "no data available"}</h2>
                                         <p
                                             style={FONTS.chart_legend}
-                                            className="text-sm">
-                                            {item.name} • {item.unit}
+                                            className="text-sm"
+                                        >
+                                            {item.full_name || "no data available"} •
+                                            {typeof item.unitId === "string"
+                                                ? item.unitId
+                                                : item.unitId?.unit_name || "no unit"}
                                         </p>
+
                                     </div>
                                 </div>
                             </div>
                             <p className="px-4 text-gray-600 text-sm py-3"
-                                style={FONTS.card_subDescripription}>{item.description}</p>
+                                style={FONTS.card_subDescripription}>{item.description || "no data available"}</p>
 
                             {/* Details */}
                             <div className="p-4 space-y-2">
                                 <p className="text-sm flex justify-between">
                                     <span className="text-gray-500">Category:</span>
-                                    <span className="text-black">{item.category}</span>
+                                    <span className="text-black">{item.category ? item.category : "no data"}</span>
                                 </p>
                                 <p className="text-sm flex justify-between">
                                     <span className="text-gray-500" style={FONTS.headers_description}>Created:</span>
-                                    <span className="text-black">{item.created}</span>
+                                    <span className="text-black">{item.createdAt ? new Date(item.createdAt).toLocaleDateString() : "no data"}
+                                    </span>
                                 </p>
                                 <p className="text-sm flex justify-between">
                                     <span className="text-gray-500" style={FONTS.headers_description}>Scheduled:</span>
                                     <span className="text-black">
-                                        {item.scheduled}
+                                        {item.scheduled ? new Date(item.scheduled).toLocaleDateString() : "no data"}
+
 
                                     </span>
                                 </p>
                                 <div className="bg-gray-50 rounded-lg flex justify-between items-center">
                                     <span className="text-gray-500 font-medium">Estimated Cost:</span>
                                     <span className="text-black font-bold" style={FONTS.headers_description}>
-                                        {item.cost}
+                                        {item.
+                                            estmate_cost ? item.
+                                            estmate_cost : "no data"}
                                     </span>
                                 </div>
                             </div>
@@ -263,7 +229,8 @@ const Maintenance = () => {
                                 </div>
                             </div>
                             <p className="text-xs text-gray-400 italic px-4 py-2"
-                                style={FONTS.card_subDescripription}>Note: {item.note}</p>
+                                style={FONTS.card_subDescripription}>Note: {item.description || "no data available"}
+                            </p>
                         </div>
                     ))
                 ) : (
@@ -283,7 +250,10 @@ const Maintenance = () => {
 
             {Openrequest && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
-                    <form className="bg-white shadow rounded-lg p-4 w-full max-w-lg">
+                    <form
+                        onSubmit={handleCreate}
+                        className="bg-white shadow rounded-lg p-4 w-full max-w-lg"
+                    >
 
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-lg font-semibold text-gray-800" style={FONTS.headers}>
@@ -298,69 +268,148 @@ const Maintenance = () => {
                             </button>
                         </div>
 
-
                         <h3 className="text-lg font-bold text-gray-800 mb-2" style={FONTS.Table_Header}>
                             Personal Information
                         </h3>
+                        <div className="w-full">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                            <Input
+                                name="title"
+                                type="text"
+                                value={formData.title}
+                                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Enter your need"
+                                onChange={handleInputChange}
+                            />
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                            <Input
+                                name="description"
+                                type="text"
+                                value={formData.description}
+                                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                placeholder="Enter your need"
+                                onChange={handleInputChange}
+                            />
+                        </div>
 
                         <div className="grid grid-cols-2 gap-4 py-2">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                                 <Input
+                                    name="full_name"
                                     type="text"
+                                    value={formData.full_name}
                                     className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="Enter your name"
+                                    onChange={handleInputChange}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
-                                <Input
-                                    type="text"
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Property Tpye</label>
+                                <select className={cn(
+                                    'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
+                                    'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[1px]',
+                                    'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
+
+                                )}>
+                                    <option value="" >Select property type</option>
+                                    <option value="villa">Villa</option>
+                                    <option value="apartment">Apartment</option>
+                                    <option value="commercial">Commercial</option>
+                                    <option value="business">Business</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Property</label>
+                                <select
+                                    name="propertyId"
+                                    value={formData.propertyId}
+                                    onChange={handleInputChange}
                                     className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Enter your unit"
-                                />
+                                >
+                                    <option value="" >Select property</option>
+                                    <option value="villa">Villa</option>
+                                    <option value="apartment">Apartment</option>
+                                    <option value="commercial">Commercial</option>
+                                    <option value="business">Business</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
+                                <select
+                                    name="unitId"
+                                    value={formData.unitId}
+                                    onChange={handleInputChange}
+                                    className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="">Select Unit</option>
+                                    {maintenanceList.map((item: any) => (
+                                        <option key={item.id} value={item.unitId}>
+                                            {item.unitId.unit_name}
+                                        </option>
+                                    ))}
+                                </select>
+
+
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                                 <Input
+                                    name="category"
                                     type="text"
+                                    value={formData.category}
                                     className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="Category"
+                                    onChange={handleInputChange}
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Created</label>
                                 <Input
+                                    name="createdAt"
                                     type="text"
+                                    // value={formData.createdAt}
                                     className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="Created Date"
+                                    onChange={handleInputChange}
                                 />
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Schedule</label>
                                 <Input
+                                    name="scheduled"
                                     type="text"
+                                    value={formData.scheduled}
                                     className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="Scheduled date"
+                                    onChange={handleInputChange}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Estimated Cost</label>
                                 <Input
+                                    name="estmate_cost"
                                     type="text"
+                                    value={formData.estmate_cost}
                                     className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    placeholder="Status..."
+                                    placeholder="Estimated Cost"
+                                    onChange={handleInputChange}
                                 />
                             </div>
                         </div>
 
                         <div className="mt-4 flex justify-end">
-                            <Button type="submit" className="bg-[#B200FF] text-white px-4 py-2 rounded-lg">
+                            <Button
+                                type="submit"
+                                className="bg-[#B200FF] text-white px-4 py-2 rounded-lg"
+                            >
                                 Submit
                             </Button>
                         </div>
                     </form>
                 </div>
+
             )}
         </div>
     );
