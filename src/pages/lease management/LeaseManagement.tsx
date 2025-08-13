@@ -10,6 +10,7 @@ import cardimg1 from "../../assets/cardimg1.png"
 import cardimg2 from "../../assets/cardimg2.png"
 import cardimg3 from "../../assets/cardimg3.png"
 import cardimg4 from "../../assets/cardimg4.png"
+import man from "../../assets/Ellipse 276.png"
 
 function LeaseManagement() {
   const [searchTerm, setSearchTerm] = useState("")
@@ -59,7 +60,7 @@ function LeaseManagement() {
       id: 1,
       name: "John Doe",
       unit: "Unit 101 • 2BHK",
-      avatar: "/placeholder.svg?height=40&width=40",
+      avatar: man,
       period: "Jun1, 2025 - May 31, 2025",
       duration: "1Yr",
       rent: "₹25,000",
@@ -72,7 +73,7 @@ function LeaseManagement() {
       id: 2,
       name: "Sarah Wilson",
       unit: "Unit 205 • 1BHK",
-      avatar: "/placeholder.svg?height=40&width=40",
+      avatar: man,
       period: "Aug 15, 2025- Aug 14, 2025",
       duration: "1Yr",
       rent: "₹18,000",
@@ -85,7 +86,7 @@ function LeaseManagement() {
       id: 3,
       name: "Mike Johnson",
       unit: "Unit 304 • 3BHK",
-      avatar: "/placeholder.svg?height=40&width=40",
+      avatar: man,
       period: "Jun1, 2025 - May 31, 2025",
       duration: "1Yr",
       rent: "₹35,000",
@@ -145,7 +146,7 @@ function LeaseManagement() {
                     <div className={`p-2 ${card.iconBgColor} rounded-lg`}>
                       <IconComponent className="w-5 h-5 text-white" />
                     </div>
-                    <span className="text-sm font-medium text-gray-700">{card.title}</span>
+                    <span className="text-sm font-medium text-gray-700 ">{card.title}</span>
                   </div>
                   <div className="text-3xl font-bold text-gray-900">{card.value}</div>
                 </CardContent>
@@ -163,12 +164,12 @@ function LeaseManagement() {
               placeholder="Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-[400px] h-[48px]  bg-white border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400 text-[18px]"
+              className="pl-10 w-[400px] h-[48px]  bg-[#B200FF0D]/5 border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400 text-[18px]"
             />
           </div>
 
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-[140px] bg-purple-50 border-gray-300   rounded-lg h-10 text-purple-600 font-medium hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400 ">
+            <SelectTrigger className="w-full sm:w-[140px] bg-[#B200FF1A]/5 border-gray-300   rounded-lg h-10 text-purple-600 font-medium hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400 ">
               <SelectValue>
                 <span className="text-purple-600">
                   {statusFilter === "all" ? "All Status" : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
@@ -176,30 +177,30 @@ function LeaseManagement() {
               </SelectValue>
             </SelectTrigger>
             <SelectContent className="bg-white border-gray-200 rounded-lg shadow-lg">
-              <SelectItem value="all" className="text-gray-700 hover:bg-purple-50">
+              <SelectItem value="all" className="text-gray-700 hover:bg-[#B200FF1A]/5">
                 All Status
               </SelectItem>
-              <SelectItem value="active" className="text-gray-700 hover:bg-purple-50">
+              <SelectItem value="active" className="text-gray-700 hover:bg-[#B200FF1A]/5">
                 Active
               </SelectItem>
-              <SelectItem value="expired" className="text-gray-700 hover:bg-purple-50">
+              <SelectItem value="expired" className="text-gray-700 hover:bg-[#B200FF1A]/5">
                 Expired
               </SelectItem>
-              <SelectItem value="terminated" className="text-gray-700 hover:bg-purple-50">
+              <SelectItem value="terminated" className="text-gray-700 hover:bg-[#B200FF1A]/5">
                 Terminated
               </SelectItem>
-              <SelectItem value="renewed" className="text-gray-700 hover:bg-purple-50">
+              <SelectItem value="renewed" className="text-gray-700 hover:bg-[#B200FF1A]/5">
                 Renewed
               </SelectItem>
             </SelectContent>
           </Select>
         </div>
 
-        <Card className="shadow-lg border rounded-2xl overflow-hidden ">
-          <CardContent className="p-6">
+        <Card className="shadow-md border rounded-2xl overflow-hidden ">
+          <CardContent className="pl-3 pr-3 ">
             {/* Header Section with separate shadow */}
-            <div className="border shadow-md rounded-xl mb-4 overflow-hidden">
-              <div className="overflow-x-auto">
+            <div className="border shadow-md rounded-xl mb-4 overflow-hidden ">
+              <div className="overflow-x-auto ">
                 <table className="w-full table-fixed">
                   <colgroup>
                     <col className="w-[25%]" />
@@ -229,7 +230,7 @@ function LeaseManagement() {
                 filteredLeaseData.map((lease) => (
                   <div
                     key={lease.id}
-                    className="border shadow-md rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
+                    className="border shadow-md rounded-xl overflow-hidden hover:shadow-lg transition-shadow "
                   >
                     <div className="overflow-x-auto">
                       <table className="w-full table-fixed">
@@ -272,8 +273,8 @@ function LeaseManagement() {
                               <Badge
                                 className={
                                   lease.status === "Active"
-                                    ? "bg-blue-100 text-blue-700 border border-blue-200 font-medium px-3 py-1 rounded-lg"
-                                    : "bg-red-100 text-red-700 border border-red-200 font-medium px-3 py-1 rounded-lg"
+                                    ? "bg-[#0D35D41A]/10 text-blue-700 border border-blue-200 font-medium px-3 py-1 rounded-lg "
+                                    : "bg-[#EE2F2F1A]/10 text-red-700 border border-red-200 font-medium px-3 py-1 rounded-lg"
                                 }
                               >
                                 {lease.status}
