@@ -7,27 +7,30 @@ import Properties from '../pages/properties/Properties';
 import Tenants from '../pages/tenants/Tenants';
 import RentManagement from '../pages/rent management/RentManagement';
 import LeaseManagement from '../pages/lease management/LeaseManagement';
-import FinancialReports from '../pages/financial reports/FinancialReports';
+import FinancialReports from '../pages/financial reports/Reports';
 import Settings from '../pages/settings/Settings';
+import Maintenance from '../pages/maintenance/Maintenance';
 
 function Approutes() {
-	return (
-		<>
-			<Routes>
-				<Route path='/' element={<MainLayout />}>
-					<Route index element={<DashBoard />} />
-					<Route path='/notifications' element={<Notifications />} />
-					<Route path='/profile' element={<Profile />} />
-					<Route path='/properties' element={<Properties />} />
-					<Route path='/tenants' element={<Tenants />} />
-					<Route path='/rent' element={<RentManagement />} />
-					<Route path='/lease' element={<LeaseManagement />} />
-					<Route path='/finance' element={<FinancialReports />} />
-					<Route path='/settings' element={<Settings />} />
-				</Route>
-			</Routes>
-		</>
-	);
+  return (
+    <>
+      <Routes>
+        <Route path='/' element={<MainLayout />}>
+          <Route index element={<DashBoard />} />
+          <Route path='/notifications' element={<Notifications />} />
+          <Route path='/profile' element={<Profile />} />
+          <Route path='/properties' element={<Properties />} />
+          <Route path='/tenants' element={<Tenants />} />
+          <Route path='/rent' element={<RentManagement />} />
+          <Route path='/lease' element={<LeaseManagement />} />
+          <Route path='/finance' element={<FinancialReports />} />
+          <Route path='/settings' element={<Settings />} />
+          <Route path='/maintenance' element={<Maintenance />} />
+
+        </Route>
+      </Routes>
+    </>
+  );
 }
 
 export default Approutes;
