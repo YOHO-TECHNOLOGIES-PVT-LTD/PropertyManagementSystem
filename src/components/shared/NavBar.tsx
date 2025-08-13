@@ -58,7 +58,7 @@ export default function Navbar({ isSidebarOpen, toggleSidebar }) {
       isSidebarOpen ? "opacity-100" : "opacity-0"
     }`}
   >
-    PMS Name
+    MGM Properties
   </span>
 </div>
 
