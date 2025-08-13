@@ -26,6 +26,7 @@ const generateEndPoints = () => {
             get: "/api/tenant/:uuid",
             update: "/api/tenant/:uuid",
             delete: "/api/tenant/:uuid",
+
         },
         rent: {
             getAll: "/api/property/",
