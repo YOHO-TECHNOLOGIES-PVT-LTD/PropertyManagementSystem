@@ -7,6 +7,7 @@ import propertyReducer from "../features/Properties/Reducers/PropertiesSlice"
 import Maintenance from "../features/maintenance/reducers/moduleSlice"
 import Property from "../features/maintenance/reducers/moduleSlice"
 import SettingsProfileSlice from "../features/settings/reducers/slice"
+import LeaseManagementSlice from '../features/Leasemanagement/reducer/LeaseSlice';
 
 const store = configureStore({
   reducer: {
@@ -17,7 +18,8 @@ const store = configureStore({
     rentReducer: rentReducer,
     Maintenance: Maintenance,
     Property: Property,
-    SettingsProfileSlice:SettingsProfileSlice
+    SettingsProfileSlice:SettingsProfileSlice,
+    LeasemanagementSlice:LeaseManagementSlice
   }
 })
 
