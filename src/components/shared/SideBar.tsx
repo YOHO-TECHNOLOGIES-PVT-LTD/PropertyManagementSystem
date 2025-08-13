@@ -12,17 +12,16 @@ import {
   LogOut,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import { NavLink, } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { FONTS } from "../../constants/ui constants";
 
-const Sidebar = ({ isOpen, setIsOpen }:any) => {
+const Sidebar = ({ isOpen, setIsOpen }) => {
   const menuItems = [
     { icon: LayoutDashboard, path: "/", label: "DashBoard" },
     { icon: LandPlot, path: "/properties", label: "Properties" },
     { icon: FileText, path: "/tenants", label: "Tenants" },
     { icon: BadgeIndianRupee, path: "/rent", label: "Rent Management" },
     { icon: Handshake, path: "/lease", label: "Lease Management" },
-    { icon: Handshake, path: "/maintenance", label: "Maintenance" },
     { icon: TrendingUp, path: "/finance", label: "Financial Reports" },
     { icon: Bell, path: "/notifications", label: "Notifications" },
     { icon: Settings, path: "/settings", label: "Settings" },
@@ -80,15 +79,16 @@ const Sidebar = ({ isOpen, setIsOpen }:any) => {
                     )}
                     <div
                       className={`w-12 h-12 flex items-center justify-center transition-all duration-300 clip-hex
-                        ${isActive
-                          ? "bg-[#B200FF] text-white"
-                          : "bg-[#F6F6F6] text-gray-500 hover:bg-[#B200FF] hover:text-white"
+                        ${
+                          isActive
+                            ? "bg-[#B200FF] text-white"
+                            : "bg-[#F6F6F6] text-gray-500 hover:bg-[#B200FF] hover:text-white"
                         }`}
                     >
                       <Icon size={20} />
                     </div>
                     {isOpen && (
-                      <span style={{ ...FONTS.headers }} className="text-sm font-medium text-gray-700 whitespace-nowrap  ">
+                      <span style={{...FONTS.sidebar}} className="text-sm font-medium text-gray-700 whitespace-nowrap font-bold ">
                         {item.label}
                       </span>
                     )}
