@@ -100,9 +100,7 @@ export default function ActivityTabs({
             Upcoming Tasks
           </button>
         </div>
-        <button className="text-blue-600 font-medium hover:text-blue-700">
-          View All
-        </button>
+       
       </div>
 
       {/* Conditional Render */}

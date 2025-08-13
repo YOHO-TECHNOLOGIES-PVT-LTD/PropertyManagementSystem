@@ -144,6 +144,29 @@ const DashBoard = () => {
   const currentOccupancyRate =
     dashboardData?.occupancyGraph?.[0]?.occupancyRate || 0;
 
+  const radialData =
+    dashboardData?.paymentStatusBreakdownGraph?.map((item, index) => ({
+      name: item._id.charAt(0).toUpperCase() + item._id.slice(1),
+      value: item.count,
+      fill: ["#E800DC", "#006AFF", "#FF008C"][index % 3],
+    })) || [];
+
+  const rentCollectionData = dashboardData?.rentCollectionGraph?.map((item) => {
+      const monthName = new Date(
+        item._id.year,
+        item._id.month - 1
+      ).toLocaleString("default", { month: "short" });
+      const paid =
+        item.collected && item.collected > 0 ? item.collected : 50000;
+      const totalExpected =
+        item.totalExpected && item.totalExpected > 0
+          ? item.totalExpected
+          : 75000;
+
+      const pending = totalExpected - paid;
+      return { month: monthName, paid, pending: pending < 0 ? 0 : pending };
+    }) || [];
+
   const formatIndianCurrency = (value: number): string => {
     if (value === 0) return "₹0";
     if (value >= 10000000) return `₹${(value / 10000000).toFixed(1)}Cr`;
@@ -238,7 +261,7 @@ const DashBoard = () => {
           bgImage={frame3}
           icon={<Building2 />}
           title="Occupancy Rate"
-          subText="Current"
+          subText="This Month"
           value={`${currentOccupancyRate}%`}
           iconBg="bg-[#3091EB26]/15"
           iconTextColor="text-[#3091EB]"
@@ -281,8 +304,8 @@ const DashBoard = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <RadialChart data={dashboardData?.paymentStatusBreakdownGraph || []} />
-        <RentCollectionRate data={dashboardData?.rentCollectionGraph || []} />
+        <RadialChart data={radialData} />
+        <RentCollectionRate data={rentCollectionData} />
       </div>
 
       {/* Last section stays dummy */}
