@@ -1,11 +1,13 @@
 import { BrowserRouter } from 'react-router-dom';
 import Approutes from './routes/Approutes';
 import { Toaster } from 'react-hot-toast';
+import { AuthProvider } from './components/auth/AuthContext';
 
 function App() {
 	return (
 		<>
 			<BrowserRouter>
+			<AuthProvider>
 				<Toaster
 					position='top-right'
 					toastOptions={{
@@ -31,6 +33,7 @@ function App() {
 					}}
 				/>
 				<Approutes />
+				</AuthProvider>
 			</BrowserRouter>
 		</>
 	);
