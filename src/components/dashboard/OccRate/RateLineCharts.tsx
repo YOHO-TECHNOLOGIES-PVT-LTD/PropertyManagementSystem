@@ -18,13 +18,23 @@ export default function OccupancyRateTrend({
   } | null>(null);
 
   const maxRate = 100;
-  const chartWidth = 620; 
+  const chartWidth = 620;
   const chartHeight = 230;
   const padding = 30;
 
   const allMonths = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
   ];
 
   const completeData = allMonths.map((month) => {

@@ -17,7 +17,11 @@ interface ActivityListProps {
   getStatusBadgeStyles: (status: string) => string;
 }
 
-export default function ActivityList({ data, getIconStyles, getStatusBadgeStyles }: ActivityListProps) {
+export default function ActivityList({
+  data,
+  getIconStyles,
+  getStatusBadgeStyles,
+}: ActivityListProps) {
   return (
     <div>
       {/* Headers */}
@@ -39,19 +43,31 @@ export default function ActivityList({ data, getIconStyles, getStatusBadgeStyles
           >
             {/* Company + icon */}
             <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${getIconStyles(item.icon)}`}>
+              <div
+                className={`w-10 h-10 rounded-lg flex items-center justify-center ${getIconStyles(
+                  item.icon
+                )}`}
+              >
                 <Building2 />
               </div>
-              <span className="font-medium text-gray-900">{item.companyName}</span>
+              <span className="font-medium text-gray-900">
+                {item.companyName}
+              </span>
             </div>
 
             <div className="text-gray-700">{item.name}</div>
             <div className="text-gray-700">{item.unit}</div>
             <div className="text-gray-700">{item.time}</div>
-            <div className="text-gray-900 font-medium">{item.amount || "-"}</div>
+            <div className="text-gray-900 font-medium">
+              {item.amount || "-"}
+            </div>
 
             <div>
-              <span className={`px-3 py-1 rounded-lg text-sm font-medium ${getStatusBadgeStyles(item.status)}`}>
+              <span
+                className={`px-3 py-1 rounded-lg text-sm font-medium ${getStatusBadgeStyles(
+                  item.status
+                )}`}
+              >
                 {item.status}
               </span>
             </div>

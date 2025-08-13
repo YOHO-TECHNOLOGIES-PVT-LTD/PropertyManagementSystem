@@ -18,7 +18,6 @@ const Card1: React.FC<CardProps> = ({
   iconBg = "bg-gray-400",
   iconTextColor = "text-white",
 }) => {
-  
   const formatValue =
     typeof value === "number"
       ? value.toLocaleString("en-IN", {

@@ -82,20 +82,16 @@ const MonthlyRevenueTrendLine: React.FC<{ data: DataPoint[] }> = ({ data }) => {
             tick={{ fontSize: 12, fill: "#6B7280" }}
             tickFormatter={(value) => `${value / 1000}k`}
             domain={[0, 800000]}
-            
           />
 
           {/* Custom Tooltip */}
           <Tooltip content={<CustomTooltip />} />
 
           {/* Legend */}
-          <Legend
-            wrapperStyle={{ paddingTop: "20px" }}
-            iconType="line"
-          />
+          <Legend wrapperStyle={{ paddingTop: "20px" }} iconType="line" />
 
           <Line
-            type="monotone" 
+            type="monotone"
             dataKey="revenue"
             stroke="#36ACD3"
             strokeWidth={5}
@@ -104,12 +100,12 @@ const MonthlyRevenueTrendLine: React.FC<{ data: DataPoint[] }> = ({ data }) => {
             filter="url(#blueGlow)"
             style={{
               filter: "drop-shadow(0px 2px 8px rgba(0, 191, 255, 0.5))",
-              transform: "translateX(10px)" 
+              transform: "translateX(10px)",
             }}
           />
 
           <Line
-            type="monotone" 
+            type="monotone"
             dataKey="expenses"
             stroke="#B200FF"
             strokeWidth={5}
@@ -118,7 +114,7 @@ const MonthlyRevenueTrendLine: React.FC<{ data: DataPoint[] }> = ({ data }) => {
             filter="url(#pinkGlow)"
             style={{
               filter: "drop-shadow(0px 2px 8px rgba(255, 20, 147, 0.5))",
-              transform: "translateX(10px)" 
+              transform: "translateX(10px)",
             }}
           />
         </LineChart>

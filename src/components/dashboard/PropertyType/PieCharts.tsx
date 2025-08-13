@@ -1,24 +1,18 @@
 import { Building2 } from "lucide-react";
 import React from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 interface PropertyTypesDistributionProps {
   data: { name: string; value: number; color: string }[];
 }
 
-const PropertyTypesDistribution: React.FC<PropertyTypesDistributionProps> = ({ data }) => {
+const PropertyTypesDistribution: React.FC<PropertyTypesDistributionProps> = ({
+  data,
+}) => {
   const total = data.reduce((sum, entry) => sum + entry.value, 0);
   let cumulativeAngle = 90;
   const minThickness = 20;
   const maxThickness = 45;
-
-  // Custom outside label with connector lines
   const renderCustomLabel = (props: any) => {
     const { cx, cy, midAngle, outerRadius, value, name, fill } = props;
     const RADIAN = Math.PI / 180;
@@ -33,7 +27,6 @@ const PropertyTypesDistribution: React.FC<PropertyTypesDistributionProps> = ({ d
 
     return (
       <g>
-        {/* Connector line */}
         <line
           x1={lineX}
           y1={lineY}
@@ -42,7 +35,6 @@ const PropertyTypesDistribution: React.FC<PropertyTypesDistributionProps> = ({ d
           stroke={fill}
           strokeWidth={1}
         />
-        {/* Label text */}
         <text
           x={x}
           y={y}
@@ -56,8 +48,6 @@ const PropertyTypesDistribution: React.FC<PropertyTypesDistributionProps> = ({ d
       </g>
     );
   };
-
-  // Bottom legend with colors + names + percentages
   const renderLegend = () => {
     return (
       <div
@@ -102,15 +92,19 @@ const PropertyTypesDistribution: React.FC<PropertyTypesDistributionProps> = ({ d
     <div className="bg-white rounded-2xl shadow-[2px_2px_5px_rgba(0,0,0,0.25)]   p-4 w-full h-80 flex flex-col">
       <div className="flex items-center gap-3 mb-6">
         <div className="h-10 w-10 flex items-center justify-center rounded-full bg-[#FF7B0026]/15 shadow-lg">
-          <div className="text-[#FF7B00]"><Building2 /></div>
+          <div className="text-[#FF7B00]">
+            <Building2 />
+          </div>
         </div>
-        <h3 className="text-lg font-semibold text-gray-900">Property Types Distribution</h3>
+        <h3 className="text-lg font-semibold text-gray-900">
+          Property Types Distribution
+        </h3>
       </div>
       <ResponsiveContainer width="100%" height="80%">
         <PieChart>
           {data.map((entry, index) => {
             const thickness =
-              ((entry.value / total) * (maxThickness - minThickness)) +
+              (entry.value / total) * (maxThickness - minThickness) +
               minThickness;
 
             const angle = (entry.value / total) * 360;
@@ -144,7 +138,6 @@ const PropertyTypesDistribution: React.FC<PropertyTypesDistributionProps> = ({ d
           <Tooltip formatter={(value) => `${value} units`} />
         </PieChart>
       </ResponsiveContainer>
-      {/* Legend at the bottom */}
       {renderLegend()}
     </div>
   );

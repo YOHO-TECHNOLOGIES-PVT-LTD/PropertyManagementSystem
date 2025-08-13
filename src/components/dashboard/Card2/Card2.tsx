@@ -6,8 +6,8 @@ interface Card2Props {
   title: string;
   subText: string;
   value: number | string;
-  iconBg?: string; 
-  iconTextColor?: string; 
+  iconBg?: string;
+  iconTextColor?: string;
 }
 
 const Card2: React.FC<Card2Props> = ({

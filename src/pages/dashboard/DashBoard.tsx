@@ -1,12 +1,9 @@
 import { Building2 } from "lucide-react";
-
 import Card1 from "../../components/dashboard/Card1/Card1";
 import Card2 from "../../components/dashboard/Card2/Card2";
-
 import frame1 from "../../assets/Bg_Frames/Frame_1.png";
 import frame2 from "../../assets/Bg_Frames/Frame_2.png";
 import frame3 from "../../assets/Bg_Frames/Frame_3.png";
-
 import MonthlyRevenueTrendBar from "../../components/dashboard/MonthlyRevenue/BarCharts/Barcharts";
 import MonthlyRevenueTrendLine from "../../components/dashboard/MonthlyRevenue/Linecharts/Linecharts";
 import OccupancyRateTrend from "../../components/dashboard/OccRate/RateLineCharts";

@@ -15,7 +15,11 @@ interface TaskListProps {
   getPriorityBadgeStyles: (priority: string) => string;
 }
 
-export default function TaskList({ data, getIconStyles, getPriorityBadgeStyles }: TaskListProps) {
+export default function TaskList({
+  data,
+  getIconStyles,
+  getPriorityBadgeStyles,
+}: TaskListProps) {
   return (
     <div>
       {/* Headers */}
@@ -35,17 +39,27 @@ export default function TaskList({ data, getIconStyles, getPriorityBadgeStyles }
           >
             {/* Company + icon */}
             <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${getIconStyles(item.icon)}`}>
+              <div
+                className={`w-10 h-10 rounded-lg flex items-center justify-center ${getIconStyles(
+                  item.icon
+                )}`}
+              >
                 <Building2 />
               </div>
-              <span className="font-medium text-gray-900">{item.companyName}</span>
+              <span className="font-medium text-gray-900">
+                {item.companyName}
+              </span>
             </div>
 
             <div className="text-gray-700">{item.name}</div>
             <div className="text-gray-700">{item.dueDate}</div>
 
             <div>
-              <span className={`px-3 py-1 rounded-lg text-sm font-medium ${getPriorityBadgeStyles(item.priority)}`}>
+              <span
+                className={`px-3 py-1 rounded-lg text-sm font-medium ${getPriorityBadgeStyles(
+                  item.priority
+                )}`}
+              >
                 {item.priority}
               </span>
             </div>
