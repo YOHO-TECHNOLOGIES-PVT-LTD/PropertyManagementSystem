@@ -7,7 +7,9 @@ class Client {
         update_password: (data: any) =>
 			HttpClient.update(HTTP_END_POINTS.auth.updatePassword, data),
 		login: (data: any) => HttpClient.post(HTTP_END_POINTS.auth.login, data),
-		me: () => HttpClient.get(HTTP_END_POINTS.auth.login),
+		me: () => HttpClient.get(HTTP_END_POINTS.auth.getProfile),
+		update_profile: (data: any) =>
+			HttpClient.update(HTTP_END_POINTS.auth.updateProfile, data)
     };
 	dashboard={
 		get:(data:any)=>HttpClient.get(HTTP_END_POINTS.DashBoard.get,data),

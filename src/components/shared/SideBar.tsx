@@ -14,6 +14,8 @@ import {
 import toast from "react-hot-toast";
 import { NavLink, useNavigate } from "react-router-dom";
 import { FONTS } from "../../constants/ui constants";
+import { useDispatch } from "react-redux";
+import { useState } from "react";
 
 const Sidebar = ({ isOpen, setIsOpen } : any) => {
   const menuItems = [
@@ -28,10 +30,24 @@ const Sidebar = ({ isOpen, setIsOpen } : any) => {
     { icon: Settings, path: "/settings", label: "Settings" },
   ];
 
-  const handleLogout = () => {
-    toast.success("Logout successfully");
-  };
+  
+  const navigate = useNavigate();
+  // const dispatch = useDispatch()
+  // const[authenticated, setAuthenticated] = useState("")
 
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to log out?")) {
+      // Remove token from storage
+      localStorage.removeItem("@secure.s.token");
+      sessionStorage.removeItem("@secure.s.token");
+
+      // If you also store user/auth state in Redux or Context
+      // dispatch(setAuthenticated(false));
+
+      
+      navigate("/login");
+    }
+  };
   return (
     <div className="h-full flex">
       <div
@@ -101,26 +117,27 @@ const Sidebar = ({ isOpen, setIsOpen } : any) => {
 
           {/* Logout */}
           <div className="mt-10 px-2">
-            <div
-              className="flex items-center gap-3 cursor-pointer"
-              onClick={handleLogout}
-            >
-              <div
-                className="w-12 h-12 flex items-center justify-center clip-hex 
-                           bg-red-600 text-white 
-                           hover:bg-red-700 
-                           transition-all duration-300"
-              >
-                <LogOut size={20} />
-              </div>
+      <div
+        className="flex items-center gap-3 cursor-pointer"
+        onClick={handleLogout}
+      >
+        <div
+          className="w-12 h-12 flex items-center justify-center clip-hex 
+                     bg-red-600 text-white 
+                     hover:bg-red-700 
+                     transition-all duration-300"
+        >
+          <LogOut size={20} />
+        </div>
 
-              {isOpen && (
-                <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                  Logout
-                </span>
-              )}
-            </div>
-          </div>
+        {isOpen && (
+          <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+            Logout
+          </span>
+        )}
+      </div>
+    </div>
+         
         </div>
       </div>
     </div>
