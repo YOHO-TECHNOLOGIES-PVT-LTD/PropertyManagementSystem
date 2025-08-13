@@ -23,7 +23,7 @@ function Approutes() {
           <Route path='/tenants' element={<Tenants />} />
           <Route path='/rent' element={<RentManagement />} />
           <Route path='/lease' element={<LeaseManagement />} />
-          <Route path='/finance' element={<FinancialReports />} />
+          <Route path='/reports' element={<FinancialReports />} />
           <Route path='/settings' element={<Settings />} />
           <Route path='/maintenance' element={<Maintenance />} />
 

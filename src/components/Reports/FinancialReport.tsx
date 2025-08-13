@@ -11,6 +11,8 @@ import { useState } from "react"
 import Purple_Building from '../../assets/Reports/purple_building.png'
 import Frame_1 from '../../assets/Reports/Frame_1.png'
 import Frame_2 from '../../assets/Reports/Frame_2.png'
+import { useSelector } from "react-redux"
+import { selectDashboardData } from "../../features/Dashboard/Reducer/Selector"
 
 const revenueData = [
     { month: "Jan", series1: 52, series2: 15 },
@@ -44,6 +46,8 @@ const revenueYearData = [
 
 const FinancialReport = () => {
     const tableHeaders = Array.from({ length: 5 });
+      const ReportsData = useSelector(selectDashboardData);
+
 
     const [isOpen, setIsOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState("Monthly");
@@ -57,35 +61,39 @@ const FinancialReport = () => {
         setIsOpen(false);
     };
 
+
+    const formatIndianNumber = (num: any) => {
+        if (num >= 10000000) {
+            return `${(num / 10000000).toFixed(2)} Cr`;
+        } else if (num >= 100000) {
+            return `${(num / 100000).toFixed(2)} Lakh`;
+        }
+        return num?.toString();
+    };
+
+    console.log("ReportsDataaaaaaaaaaaaaaaa", ReportsData);
     return (
         <div>
 
-            {/* Graph Data  */}
-
-
-            {/* <div className='my-8 flex gap-4'> */}
-                
-
-                
-            {/* </div> */}
             <div className=" my-6 flex gap-6">
+                {/* Graph Data  */}
 
                 <div className="w-full ">
-                   <section
-                    className="w-full flex flex-col justify-center shadow-[0px_0px_40px_0px_#9739E91A] rounded-xl  py-3 my-10"
-                    style={{
-                        backgroundImage: `url(${Frame_1})`,
-                        backgroundPosition: 'center',
-                        backgroundSize: 'cover',
-                        backgroundRepeat: 'no-repeat',
-                    }}
-                >
-                    <div className="flex items-center">
-                    <img src={Purple_Building} alt="Purp_build" className='w-[90px] h-[90px]' />
-                    <p style={{ ...FONTS.card_headers }} className='text-[#7D7D7D]'>Total Revenue</p>
-                    </div>
-                    <h1 style={{...FONTS.headers}} className="px-6">6000000</h1>
-                </section>
+                    <section
+                        className="w-full flex flex-col justify-center shadow-[0px_0px_40px_0px_#9739E91A] rounded-xl  py-3 my-10"
+                        style={{
+                            backgroundImage: `url(${Frame_1})`,
+                            backgroundPosition: 'center',
+                            backgroundSize: 'cover',
+                            backgroundRepeat: 'no-repeat',
+                        }}
+                    >
+                        <div className="flex items-center">
+                            <img src={Purple_Building} alt="Purp_build" className='w-[90px] h-[90px]' />
+                            <p style={{ ...FONTS.card_headers }} className='text-[#7D7D7D]'>Total Revenue</p>
+                        </div>
+                        <h1 style={{ ...FONTS.headers }} className="px-6">{formatIndianNumber(ReportsData?.totalMonthlyRevenue)}</h1>
+                    </section>
                     <Card className=" shadow-[0px_0px_15px_0px_#0000001A] border-0 pt-0 rounded-lg">
                         <CardHeader className="flex items-center justify-between pl-0">
                             <div className="flex items-center">
@@ -189,11 +197,8 @@ const FinancialReport = () => {
                 </div>
 
 
-
-
                 <div className='w-full'>
                     <ExpenseBreakdown />
-
                 </div>
             </div>
 

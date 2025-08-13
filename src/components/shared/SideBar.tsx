@@ -23,7 +23,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { icon: BadgeIndianRupee, path: "/rent", label: "Rent Management" },
     { icon: Handshake, path: "/lease", label: "Lease Management" },
     { icon: Handshake, path: "/maintenance", label: "Maintenance" },
-    { icon: TrendingUp, path: "/finance", label: "Financial Reports" },
+    { icon: TrendingUp, path: "/reports", label: "Reports" },
     { icon: Bell, path: "/notifications", label: "Notifications" },
     { icon: Settings, path: "/settings", label: "Settings" },
   ];
@@ -71,12 +71,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               <NavLink
                 key={index}
                 to={item.path}
-                className="relative flex py-2 items-center gap-3 transition-all duration-300 px-2"
+                className={`relative flex py-2 items-center gap-3 transition-all duration-300 px-2 border-r-[4px] border-r-white`}
               >
                 {({ isActive }) => (
                   <>
                     {isActive && (
-                      <div className="absolute -right-1 top-0 h-full w-1 bg-[#B200FF] rounded-r" />
+                      <div className="absolute -right-1 top-0 h-full w-full  border-r-[4px] border-[#B200FF] rounded-r-lg" />
                     )}
                     <div
                       className={`w-12 h-12 flex items-center justify-center transition-all duration-300 clip-hex
