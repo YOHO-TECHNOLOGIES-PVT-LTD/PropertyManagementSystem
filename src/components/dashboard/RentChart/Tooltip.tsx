@@ -9,7 +9,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Building2 } from "lucide-react";
-import Empty_Report from "../../../assets/Reports/Empty_Report.png"; // empty state image
+import Empty_Report from "../../../assets/Reports/Empty_Report.png";
 import { FONTS } from "../../../constants/ui constants";
 
 interface RentCollectionRateProps {
@@ -17,8 +17,19 @@ interface RentCollectionRateProps {
 }
 
 const RentCollectionRate: React.FC<RentCollectionRateProps> = ({ data }) => {
-  const total =
-    data?.reduce((sum, entry) => sum + entry.paid + entry.pending, 0) || 0;
+  // Default months
+  const months = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+  ];
+
+  // Merge API data into default months so missing months show as zero
+  const mergedData = months.map((m) => {
+    const found = data?.find((d) => d.month === m);
+    return found || { month: m, paid: 0, pending: 0 };
+  });
+
+  const total = mergedData.reduce((sum, entry) => sum + entry.paid + entry.pending, 0);
 
   return (
     <div className="bg-white rounded-2xl shadow-[2px_2px_5px_rgba(0,0,0,0.25)] p-6 flex flex-col">
@@ -33,7 +44,7 @@ const RentCollectionRate: React.FC<RentCollectionRateProps> = ({ data }) => {
       </div>
 
       {/* Chart or No Data */}
-      {!data || data.length === 0 || total === 0 ? (
+      {total === 0 ? (
         <div className="flex flex-col justify-center items-center flex-1 py-10">
           <img src={Empty_Report} alt="EmptyImg" className="w-[80px] mb-4" />
           <h1 style={{ ...FONTS.large_card_subHeader }}>Rent Collection</h1>
@@ -43,7 +54,7 @@ const RentCollectionRate: React.FC<RentCollectionRateProps> = ({ data }) => {
         </div>
       ) : (
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data} barSize={30}>
+          <BarChart data={mergedData} barSize={30}>
             <XAxis dataKey="month" axisLine={false} tickLine={false} />
             <YAxis axisLine={false} tickLine={false} />
             <Tooltip />

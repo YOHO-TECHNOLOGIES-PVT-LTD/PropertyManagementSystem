@@ -3,12 +3,14 @@ import DashboardSlice from "../features/Dashboard/Reducer/DashboardSlice";
 import NotificationReducer from '../../src/features/notification/redecures/slice'
 import TenantSlice from '../features/tenants/reducers/TenantSlice';
 
+import propertyReducer from "../features/Properties/Reducers/PropertiesSlice"
 
 const store = configureStore({
   reducer: {
     DashboardSlice: DashboardSlice,
     NotificationReducer: NotificationReducer,
-    TenantSlice: TenantSlice
+    TenantSlice: TenantSlice,
+    property: propertyReducer,
   }
 })
 

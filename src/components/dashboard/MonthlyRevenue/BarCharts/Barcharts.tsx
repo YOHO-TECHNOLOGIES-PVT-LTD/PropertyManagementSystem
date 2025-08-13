@@ -31,14 +31,14 @@ const MonthlyRevenueTrendBar: React.FC<{ data: DataPoint[] }> = ({ data }) => {
             <Building2 />
           </div>
         </div>
-        <h2 className="font-semibold text-lg">Yearly Revenue Trend</h2>
+        <h2 className="font-semibold text-lg">Yearly Revenue Growth</h2>
       </div>
 
       {/* Chart or No Data */}
       {!data || data.length === 0 || total === 0 ? (
         <div className="flex flex-col justify-center items-center flex-1 py-10">
           <img src={Empty_Report} alt="EmptyImg" className="w-[80px] mb-4" />
-          <h1 style={{ ...FONTS.large_card_subHeader }}> Yearly Revenue Trend</h1>
+          <h1 style={{ ...FONTS.large_card_subHeader }}> Yearly Revenue Growth</h1>
           <p style={{ ...FONTS.large_card_description3, textAlign: "center" }}>
             Monthly revenue details will appear once available.
           </p>

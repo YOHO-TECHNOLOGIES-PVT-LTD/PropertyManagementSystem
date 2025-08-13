@@ -7,6 +7,7 @@ import {
   Tooltip,
   PolarAngleAxis,
   ResponsiveContainer,
+  Cell,
 } from "recharts";
 import Empty_Report from "../../../assets/Reports/Empty_Report.png";
 import { FONTS } from "../../../constants/ui constants";
@@ -58,7 +59,7 @@ const RadialChart: React.FC<RadialChartProps> = ({ data }) => {
               barSize={15}
               data={data}
               startAngle={90}
-              endAngle={-270}
+              endAngle={-1070}
             >
               <PolarAngleAxis
                 type="number"
@@ -66,7 +67,12 @@ const RadialChart: React.FC<RadialChartProps> = ({ data }) => {
                 angleAxisId={0}
                 tick={false}
               />
-              <RadialBar dataKey="value" cornerRadius={10} />
+              <RadialBar dataKey="value" cornerRadius={10}>
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.fill} />
+                ))}
+              </RadialBar>
+
               <Tooltip />
               <Legend
                 iconSize={10}
