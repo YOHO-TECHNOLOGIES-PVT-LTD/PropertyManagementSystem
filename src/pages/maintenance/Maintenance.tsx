@@ -244,7 +244,10 @@ const Maintenance = () => {
                                 </p>
                                 <p className="text-sm flex justify-between">
                                     <span className="text-gray-500" style={FONTS.headers_description}>Scheduled:</span>
-                                    <span>{item.scheduled}</span>
+                                    <span>
+                                        {item.scheduled}
+
+                                    </span>
                                 </p>
                                 <div className="bg-gray-50 rounded-lg flex justify-between items-center">
                                     <span className="text-gray-500 font-medium">Estimated Cost:</span>
