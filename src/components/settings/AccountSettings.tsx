@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import  { useRef, useState } from "react";
 import { CgProfile } from "react-icons/cg";
 import { BsCloudUpload } from "react-icons/bs";
 import profile from "../../assets/profileicon.png";
