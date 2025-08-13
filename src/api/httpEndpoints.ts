@@ -53,6 +53,11 @@ const generateEndPoints = () => {
         },
         DashBoard: {
             get: "/api/dashboard/report"
+        },
+        Notification:{
+            getAll:"/api/notification/",
+            delete:"/api/notification/:uuid",
+            update:"/api/notification/:uuid",
         }
     }
 }
