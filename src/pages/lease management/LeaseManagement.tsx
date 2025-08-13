@@ -157,13 +157,13 @@ function LeaseManagement() {
         {/* Search and Filter */}
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center sm:justify-between">
           <div className="relative flex-1 max-w-md  items-center">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-400 w-4 h-4 mt-2" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-400 w-[19px] h-[19px] mt-2" />
             <Input
               type="text"
               placeholder="Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-[50%] bg-white border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400 text-[18px]"
+              className="pl-10 w-[400px] h-[48px]  bg-white border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400 text-[18px]"
             />
           </div>
 
