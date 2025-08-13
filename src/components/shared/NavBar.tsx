@@ -7,25 +7,57 @@ import pmsicon from "../../assets/pmsicon (2).png";
 
 export default function Navbar({ isSidebarOpen, toggleSidebar }) {
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearchResults, setShowSearchResults] = useState(false);
   const profileRef = useRef(null);
   const notificationRef = useRef(null);
+  const searchRef = useRef(null);
   const navigate = useNavigate();
+  
+  const searchSuggestions = [
+    { title: "Properties", path: "/properties" },
+    { title: "Tenants", path: "/tenants" },
+    { title: "Lease Management", path: "/lease" },
+    { title: "Rent Management", path: "/rent" },
+    { title: "Financial Reports", path: "/finance" },
+    { title: "Maintenance", path: "/maintenance" },
+    { title: "Settings", path: "/settings" },
+  ];
+  
+  const filteredSuggestions = searchQuery
+    ? searchSuggestions.filter(item =>
+        item.title.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : [];
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
         profileRef.current &&
         !profileRef.current.contains(event.target) &&
         notificationRef.current &&
-        !notificationRef.current.contains(event.target)
+        !notificationRef.current.contains(event.target) &&
+        searchRef.current &&
+        !searchRef.current.contains(event.target)
       ) {
         setShowNotificationDropdown(false);
+        setShowSearchResults(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value);
+    setShowSearchResults(e.target.value.length > 0);
+  };
+
+  const handleSearchItemClick = (path) => {
+    setSearchQuery("");
+    setShowSearchResults(false);
+    navigate(path);
+  };
 
   const handleViewNotification = () => {
     setShowNotificationDropdown(false);
@@ -66,15 +98,33 @@ export default function Navbar({ isSidebarOpen, toggleSidebar }) {
       {/* Right: Search + Notification + Profile */}
       <div className="flex items-center justify-between h-[80px] flex-1 bg-white shadow-xl px-6 rounded-br-xl rounded-bl-xl">
         {/* Search */}
-        <div className="relative w-[400px]">
-          <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+        <div className="relative w-[400px]" ref={searchRef}>
+          <FiSearch className="absolute left-3 top-7 -translate-y-1/2 h-4 w-4 text-gray-500" />
           <input
             type="text"
+            value={searchQuery}
+            onChange={handleSearch}
             placeholder="Search or type"
             className="w-full pl-9 pr-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
           />
+          
+          {/* Search Results Dropdown */}
+          {showSearchResults && filteredSuggestions.length > 0 && (
+            <div className="absolute left-0 right-0 mt-1 bg-white rounded-md shadow-lg z-20 border border-gray-200 overflow-hidden">
+              {filteredSuggestions.map((item, index) => (
+                <div 
+                  key={index} 
+                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center"
+                  onClick={() => handleSearchItemClick(item.path)}
+                >
+                  <FiSearch className="mr-3 h-4 w-4 text-gray-500" />
+                  <span>{item.title}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-
+        
         {/* Notification + Profile */}
         <div className="flex items-center gap-6">
           {/* Notification */}
