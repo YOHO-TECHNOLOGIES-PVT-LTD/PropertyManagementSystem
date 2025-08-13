@@ -236,15 +236,15 @@ const Maintenance = () => {
                             <div className="p-4 space-y-2">
                                 <p className="text-sm flex justify-between">
                                     <span className="text-gray-500">Category:</span>
-                                    <span>{item.category}</span>
+                                    <span className="text-black">{item.category}</span>
                                 </p>
                                 <p className="text-sm flex justify-between">
                                     <span className="text-gray-500" style={FONTS.headers_description}>Created:</span>
-                                    <span>{item.created}</span>
+                                    <span className="text-black">{item.created}</span>
                                 </p>
                                 <p className="text-sm flex justify-between">
                                     <span className="text-gray-500" style={FONTS.headers_description}>Scheduled:</span>
-                                    <span>
+                                    <span className="text-black">
                                         {item.scheduled}
 
                                     </span>
