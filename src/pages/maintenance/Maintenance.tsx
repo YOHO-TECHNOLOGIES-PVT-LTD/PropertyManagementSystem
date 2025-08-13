@@ -1,4 +1,5 @@
 
+
 import { useEffect, useState } from "react";
 import { FiSearch } from "react-icons/fi";
 import { FONTS } from "../../constants/ui constants";
@@ -8,8 +9,7 @@ import Background_Image_2 from "../../assets/Bg_Frames/Frame_3.png";
 import { Input } from "../../components/ui/input";
 import { Button } from "../../components/ui/button";
 import { useDispatch } from "react-redux";
-import { CreatMaintenanceThunks, GetallMaintenanceThunks } from "../../features/maintenance/reducers/thunks.ts"
-import { cn } from '../../lib/utils';
+import { CreatMaintenanceThunks, GetallMaintenanceThunks, GetallPropertyThunks, GetallUnitThunks } from "../../features/maintenance/reducers/thunks.ts"
 
 const Maintenance = () => {
     const [categoryFilter, setCategoryFilter] = useState<string>("All");
@@ -18,15 +18,27 @@ const Maintenance = () => {
     const dispatch = useDispatch<any>();
     const [maintenanceList, setMaintenanceList] = useState<any[]>([]);
     const [creatmaintenances, setcreatmaintenances] = useState<any[]>([]);
-
+    const [propertyTypes, setPropertyTypes] = useState<string[]>([]);
+    const [units, setUnits] = useState<any[]>([]);
 
     useEffect(() => {
         (async () => {
             const maintenancedata = await dispatch(GetallMaintenanceThunks({}));
-            console.log("Maintenance Data directly from thunk:", maintenancedata);
+            console.log("all maintenance", maintenancedata);
             setMaintenanceList(maintenancedata);
         })();
     }, [dispatch]);
+
+    useEffect(() => {
+        (async () => {
+            const maintenancedata = await dispatch(GetallPropertyThunks({ property_type: "commercial" }));
+            console.log("commercial:", maintenancedata);
+            setPropertyTypes(maintenancedata);
+        })();
+    }, [dispatch]);
+
+  
+
 
     const [formData, setFormData] = useState({
         title: "",
@@ -36,17 +48,9 @@ const Maintenance = () => {
         category: "",
         createdAt: "",
         scheduled: "",
-        estmate_cost: ""
+        estmate_cost: "",
+        property_type: "",
     });
-
-    useEffect(() => {
-
-        dispatch(GetallMaintenanceThunks({}));
-        dispatch(CreatMaintenanceThunks(formData)).then((res: any) => {
-            console.log("Created maintenance:", res);
-            setcreatmaintenances(res);
-        });
-    }, [dispatch]);
 
     const handleInputChange = (
         e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -56,7 +60,6 @@ const Maintenance = () => {
             [e.target.name]: e.target.value,
         });
     };
-
 
     const handleCreate = (e: React.FormEvent) => {
         e.preventDefault();
@@ -72,7 +75,8 @@ const Maintenance = () => {
                 category: "",
                 createdAt: "",
                 scheduled: "",
-                estmate_cost: ""
+                estmate_cost: "",
+                property_type: "",
             });
         });
     };
@@ -88,14 +92,24 @@ const Maintenance = () => {
         { id: 2, icon: <FaUser />, title: "Total Estimated Cost", number: `₹.${totalCost.toLocaleString()}`, bg: Background_Image_2 },
     ];
 
-    const
-        filteredData = maintenanceList
-            .filter(item => categoryFilter === "All" || item.category === categoryFilter)
-            .filter(item =>
-                item.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
-            );
+    const filteredData = maintenanceList
+        .filter(item => categoryFilter === "All" || item.category === categoryFilter)
+        .filter(item =>
+            item.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
 
-    console.log(filteredData, "filtered data")
+       useEffect(() => {
+    
+    if (formData.property_type) {
+        (async () => {
+            const unitsData = await dispatch(GetallUnitThunks({ uuid: "e465c027-3ad0-4e94-a755-178a4aa53115"}));
+            console.log("Units for selected property type:", unitsData);
+            setUnits(unitsData);
+        })();
+    } else {
+        setUnits([]); 
+    }
+}, [dispatch, formData.property_type]);
 
 
     return (
@@ -133,7 +147,6 @@ const Maintenance = () => {
                         key={item.id}
                         className="shadow-lg rounded-lg border-2 p-4 flex flex-col items-start relative overflow-hidden"
                     >
-                        {/* Background image layer with opacity */}
                         <div
                             style={{
                                 backgroundImage: `url(${item.bg})`,
@@ -144,7 +157,6 @@ const Maintenance = () => {
                             className="absolute inset-0"
                         ></div>
 
-                        {/* Foreground content */}
                         <div className=" z-10">
                             <div className="flex items-center gap-2 text-lg font-semibold">
                                 <span>{item.icon}</span>
@@ -156,7 +168,6 @@ const Maintenance = () => {
                 ))}
             </div>
 
-            {/* Maintenance Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                 {filteredData?.length > 0 ? (
                     filteredData.map((item) => (
@@ -164,7 +175,6 @@ const Maintenance = () => {
                             key={item._id}
                             className="bg-white text-white  rounded-xl shadow-xl overflow-hidden border"
                         >
-                            {/* Header */}
                             <div className="p-4 flex items-start justify-between bg-[#B200FF]">
                                 <div className="flex gap-4">
                                     <div className="py-2">
@@ -187,14 +197,12 @@ const Maintenance = () => {
                                                 ? item.unitId
                                                 : item.unitId?.unit_name || "no unit"}
                                         </p>
-
                                     </div>
                                 </div>
                             </div>
                             <p className="px-4 text-gray-600 text-sm py-3"
                                 style={FONTS.card_subDescripription}>{item.description || "no data available"}</p>
 
-                            {/* Details */}
                             <div className="p-4 space-y-2">
                                 <p className="text-sm flex justify-between">
                                     <span className="text-gray-500">Category:</span>
@@ -209,16 +217,12 @@ const Maintenance = () => {
                                     <span className="text-gray-500" style={FONTS.headers_description}>Scheduled:</span>
                                     <span className="text-black">
                                         {item.scheduled ? new Date(item.scheduled).toLocaleDateString() : "no data"}
-
-
                                     </span>
                                 </p>
                                 <div className="bg-gray-50 rounded-lg flex justify-between items-center">
                                     <span className="text-gray-500 font-medium">Estimated Cost:</span>
                                     <span className="text-black font-bold" style={FONTS.headers_description}>
-                                        {item.
-                                            estmate_cost ? item.
-                                            estmate_cost : "no data"}
+                                        {item.estmate_cost ? item.estmate_cost : "no data"}
                                     </span>
                                 </div>
                             </div>
@@ -245,8 +249,6 @@ const Maintenance = () => {
                     </div>
                 )}
             </div>
-
-
 
             {Openrequest && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
@@ -304,30 +306,49 @@ const Maintenance = () => {
                                     onChange={handleInputChange}
                                 />
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Property Tpye</label>
-                                <select className={cn(
-                                    'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
-                                    'focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[1px]',
-                                    'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
+                            {/* Property Type Dropdown */}
+                            <select
+                                name="property_type"
+                                value={formData.property_type}
+                                onChange={handleInputChange}
+                                className="w-full text-black border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">Select Property Type</option>
+                                {propertyTypes.map((item: any) => (
+                                    <option key={item._id} value={item.uuid}>
+                                        {item?.property_type}
+                                    </option>
+                                ))}
+                            </select>
 
-                                )}>
-                                    <option value="" >Select property type</option>
-                                    <option value="villa">Villa</option>
-                                    <option value="apartment">Apartment</option>
-                                    <option value="commercial">Commercial</option>
-                                    <option value="business">Business</option>
-                                </select>
-                            </div>
+                            {/* Unit Dropdown */}
+                            <select
+                                name="unitId"
+                                value={formData.unitId}
+                                onChange={handleInputChange}
+                                className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="">Select Unit</option>
+                                {units.length > 0 ? (
+                                    units.map((unit: any) => (
+                                        <option key={unit._id} value={unit.uuid}>
+                                            {unit.unit_name}
+                                        </option>
+                                    ))
+                                ) : (
+                                    <option disabled>No units available</option>
+                                )}
+                            </select>
+
+
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Property</label>
                                 <select
                                     name="propertyId"
-                                    value={formData.propertyId}
                                     onChange={handleInputChange}
                                     className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
-                                    <option value="" >Select property</option>
+                                    <option value="">Select property</option>
                                     <option value="villa">Villa</option>
                                     <option value="apartment">Apartment</option>
                                     <option value="commercial">Commercial</option>
@@ -335,24 +356,6 @@ const Maintenance = () => {
                                 </select>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Unit</label>
-                                <select
-                                    name="unitId"
-                                    value={formData.unitId}
-                                    onChange={handleInputChange}
-                                    className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                >
-                                    <option value="">Select Unit</option>
-                                    {maintenanceList.map((item: any) => (
-                                        <option key={item.id} value={item.unitId}>
-                                            {item.unitId.unit_name}
-                                        </option>
-                                    ))}
-                                </select>
-
-
-                            </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
                                 <Input
@@ -369,7 +372,6 @@ const Maintenance = () => {
                                 <Input
                                     name="createdAt"
                                     type="text"
-                                    // value={formData.createdAt}
                                     className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="Created Date"
                                     onChange={handleInputChange}

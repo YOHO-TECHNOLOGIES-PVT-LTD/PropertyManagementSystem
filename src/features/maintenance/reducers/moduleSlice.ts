@@ -4,6 +4,7 @@ const ModuleSlice = createSlice({
   name: "Maintenance",
   initialState: {
     maintenancedata: [],
+    property:[]
     
   },
   reducers: {
@@ -14,10 +15,18 @@ const ModuleSlice = createSlice({
       state.maintenancedata = action.payload;
     },
 
+    getproperty: (state, action) => {
+      state.property = action.payload;
+    },
+
+    getunit: (state, action) => {
+      state.property = action.payload;
+    },
+
   },
 });
 export const {
-  getAllMaintenance,creatMaintenance
+  getAllMaintenance,creatMaintenance,getproperty,getunit
 
 } = ModuleSlice.actions;
 export default ModuleSlice.reducer;
