@@ -1,146 +1,157 @@
-import { useState } from "react"
-import { Search, Download, Eye, Building2, Clock, FileX, Shield } from "lucide-react"
-import { Button } from "../../components/ui/button"
-import { Input } from "../../components/ui/input"
-import { Card, CardContent } from "../../components/ui/card"
-import { Badge } from "../../components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select"
-import cardimg1 from "../../assets/cardimg1.png"
-import cardimg2 from "../../assets/cardimg2.png"
-import cardimg3 from "../../assets/cardimg3.png"
-import cardimg4 from "../../assets/cardimg4.png"
-import man from "../../assets/Ellipse 276.png"
-import { Leaseviewform } from "../../components/LeaseManagement/Leaseviewform"
+import { useEffect, useState } from "react";
+import { Search, Download, Eye, Building2, Clock, FileX, Shield } from "lucide-react";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Card, CardContent } from "../../components/ui/card";
+import { Badge } from "../../components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "../../components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+import cardimg1 from "../../assets/cardimg1.png";
+import cardimg2 from "../../assets/cardimg2.png";
+import cardimg3 from "../../assets/cardimg3.png";
+import cardimg4 from "../../assets/cardimg4.png";
+import man from "../../assets/Ellipse 276.png";
+import { Leaseviewform } from "../../components/LeaseManagement/Leaseviewform";
+import { useDispatch, useSelector } from "react-redux";
+import { selectLeasemanagement } from "../../features/Leasemanagement/reducer/selector";
+import { getAllLeasemanagementThunk } from "../../features/Leasemanagement/reducer/thunks";
 
 interface LeaseData {
-  id: number
-  name: string
-  unit: string
-  avatar: string
-  period: string
-  duration: string
-  rent: string
-  deposit: string
-  status: string
-  expiry: string
-  expiryNote: string
+  id: string;
+  name: string;
+  unit: string;
+  avatar: string;
+  period: string;
+  duration: string;
+  rent: string;
+  deposit: string;
+  status: string;
+  expiry: string;
+  expiryNote: string;
 }
 
-
-
 function LeaseManagement() {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [statusFilter, setStatusFilter] = useState("all")
-  const [showLeaseForm, setShowLeaseForm] = useState(false)
-  const [selectedLease, setSelectedLease] = useState<LeaseData | null>(null)
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [showLeaseForm, setShowLeaseForm] = useState(false);
+  const [selectedLease, setSelectedLease] = useState<LeaseData | null>(null);
+  
+  const dispatch = useDispatch<any>();
+  const Leasemanagement = useSelector(selectLeasemanagement);
+  
+  useEffect(() => {
+    dispatch(getAllLeasemanagementThunk({}));
+  }, [dispatch]);
 
   const handleViewLease = (lease: LeaseData) => {
-    setSelectedLease(lease)
-    setShowLeaseForm(true)
-  }
+    setSelectedLease(lease);
+    setShowLeaseForm(true);
+  };
 
   const handleCloseForm = () => {
-    setShowLeaseForm(false)
-    setSelectedLease(null)
-  }
+    setShowLeaseForm(false);
+    setSelectedLease(null);
+  };
 
-  
+  // Process backend data to match frontend structure
+  const processBackendData = (): LeaseData[] => {
+    if (!Leasemanagement.data?.Leases) {
+      console.log("No leases data available");
+      return [];
+    }
+
+    return Leasemanagement.data.Leases
+      .filter(lease => lease.tenantId) // Only show leases with tenant info
+      .map(lease => {
+        const tenant = lease.tenantId || {};
+        const unit = tenant?.unit || {};
+        const personalInfo = tenant?.personal_information || {};
+        const leaseDuration = tenant?.lease_duration || {};
+        
+        // Safe date handling with fallbacks
+        const now = new Date();
+        const startDate = leaseDuration?.start_date 
+          ? new Date(leaseDuration.start_date)
+          : new Date(now.setMonth(now.getMonth() - 1)); // Default to 1 month ago
+        
+        const endDate = leaseDuration?.end_date
+          ? new Date(leaseDuration.end_date)
+          : new Date(now.setMonth(now.getMonth() + 12)); // Default to 1 year from now
+
+        // Calculate expiry status
+        const daysLeft = Math.floor((endDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+        const expiryNote = daysLeft < 0 
+          ? `Expired ${Math.abs(daysLeft)} days ago`
+          : daysLeft === 0
+            ? 'Expires today'
+            : `${daysLeft} days left`;
+
+        return {
+          id: lease._id || 'no-id',
+          name: personalInfo.full_name || 'Unknown Tenant',
+          unit: unit.unit_name ? `${unit.unit_name} • ${unit.unit_sqft || '0'} sqft` : 'No Unit',
+          avatar: man,
+          period: `${startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} - ${endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
+          duration: "1Yr",
+          rent: unit.unit_rent ? `₹${unit.unit_rent}` : '₹0',
+          deposit: unit.unit_deposit ? `₹${unit.unit_deposit}` : '₹0',
+          status: lease.status ? lease.status.charAt(0).toUpperCase() + lease.status.slice(1) : 'Unknown',
+          expiry: endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+          expiryNote
+        };
+      });
+  };
+
+  const leaseData = processBackendData();
 
   const cardData = [
     {
       id: 1,
       title: "Active Leases",
-      value: "2",
+      value: Leasemanagement.data?.activeLeases?.toString() || "0",
       icon: Building2,
       iconBgColor: "bg-purple-500",
-      gradient: "from-yellow-100 via-orange-50 to-yellow-50",
       backgroundImage: cardimg1,
     },
     {
       id: 2,
       title: "Expiring Soon",
-      value: "1",
+      value: Leasemanagement.data?.expiringSoonThisMonth?.toString() || "0",
       icon: Clock,
       iconBgColor: "bg-orange-500",
-      gradient: "from-pink-100 via-purple-50 to-pink-50",
       backgroundImage: cardimg2,
     },
     {
       id: 3,
       title: "Expired",
-      value: "1",
+      value: Leasemanagement.data?.expiredLeases?.toString() || "0",
       icon: FileX,
       iconBgColor: "bg-blue-500",
-      gradient: "from-green-100 via-teal-50 to-green-50",
       backgroundImage: cardimg3,
     },
     {
       id: 4,
       title: "Security Deposits",
-      value: "₹1,56,000",
+      value: `₹${Leasemanagement.data?.totalDepositAmount?.toLocaleString('en-IN') || "0"}`,
       icon: Shield,
       iconBgColor: "bg-purple-600",
-      gradient: "from-purple-100 via-pink-50 to-purple-50",
       backgroundImage: cardimg4,
     },
-  ]
-
-  const leaseData = [
-    {
-      id: 1,
-      name: "John Doe",
-      unit: "Unit 101 • 2BHK",
-      avatar: man,
-      period: "Jun1, 2025 - May 31, 2025",
-      duration: "1Yr",
-      rent: "₹25,000",
-      deposit: "₹50,000",
-      status: "Active",
-      expiry: "May 31, 2025",
-      expiryNote: "Expired 69 Days Ago",
-    },
-    {
-      id: 2,
-      name: "Sarah Wilson",
-      unit: "Unit 205 • 1BHK",
-      avatar: man,
-      period: "Aug 15, 2025- Aug 14, 2025",
-      duration: "1Yr",
-      rent: "₹18,000",
-      deposit: "₹36,000",
-      status: "Active",
-      expiry: "May 31, 2025",
-      expiryNote: "6 Days Left",
-    },
-    {
-      id: 3,
-      name: "Mike Johnson",
-      unit: "Unit 304 • 3BHK",
-      avatar: man,
-      period: "Jun1, 2025 - May 31, 2025",
-      duration: "1Yr",
-      rent: "₹35,000",
-      deposit: "₹70,000",
-      status: "Expired",
-      expiry: "May 31, 2025",
-      expiryNote: "Expired 130 Days Ago",
-    },
-  ]
+  ];
 
   const filteredLeaseData = leaseData.filter((lease) => {
     const matchesSearch =
       lease.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       lease.unit.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lease.rent.toLowerCase().includes(searchTerm.toLowerCase())
+      lease.rent.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesStatus = statusFilter === "all" || lease.status.toLowerCase() === statusFilter.toLowerCase()
+    const matchesStatus = statusFilter === "all" || lease.status.toLowerCase() === statusFilter.toLowerCase();
 
-    return matchesSearch && matchesStatus
-  })
+    return matchesSearch && matchesStatus;
+  });
 
   return (
-    <div className="min-h-screen  p-6">
+    <div className="min-h-screen p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -153,28 +164,29 @@ function LeaseManagement() {
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {cardData.map((card) => {
-            const IconComponent = card.icon
+            const IconComponent = card.icon;
             return (
               <Card key={card.id} className="relative overflow-hidden shadow-md border w-[298px] h-[127px]">
-                {/* Background image with precise positioning */}
                 <div
                   className="absolute inset-0 bg-no-repeat bg-[length:150%] opacity-35"
                   style={{
                     backgroundImage: `url('${card.backgroundImage}')`,
-                    backgroundPosition: card.backgroundImage === cardimg1 ? "100px 10px" : card.backgroundImage === cardimg2 ? "-162px -130px" : card.backgroundImage === cardimg3 ? "-340px -110px" : card.backgroundImage === cardimg4 ? "-192px -150px" : "10px 10px",
-                    transform: card.backgroundImage === cardimg2 ? "rotate(180deg)" : card.backgroundImage === cardimg3 ? "rotate(180deg)" : card.backgroundImage === cardimg4 ? "rotate(180deg)" : "none",
-                    backgroundSize: card.backgroundImage === cardimg2 ? "110%" : card.backgroundImage === cardimg3 ? "185%" : card.backgroundImage === cardimg4 ? "140%" : "none",
+                    backgroundPosition: card.backgroundImage === cardimg1 ? "100px 10px" : 
+                                      card.backgroundImage === cardimg2 ? "-162px -130px" : 
+                                      card.backgroundImage === cardimg3 ? "-340px -110px" : 
+                                      card.backgroundImage === cardimg4 ? "-192px -150px" : "10px 10px",
+                    transform: card.backgroundImage === cardimg2 ? "rotate(180deg)" : 
+                               card.backgroundImage === cardimg3 ? "rotate(180deg)" : 
+                               card.backgroundImage === cardimg4 ? "rotate(180deg)" : "none",
+                    backgroundSize: card.backgroundImage === cardimg2 ? "110%" : 
+                                    card.backgroundImage === cardimg3 ? "185%" : 
+                                    card.backgroundImage === cardimg4 ? "140%" : "none",
                   }}
                 ></div>
-
-
-                {/* White overlay */}
                 <div className="absolute inset-0 bg-white opacity-30"></div>
-
-                {/* Card content with perfect vertical alignment */}
                 <CardContent className="relative h-full flex flex-col justify-between pb-5">
-                  <div className="flex items-center gap-3 ">
-                    <div className={`p-2  ${card.iconBgColor} rounded-lg`}>
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 ${card.iconBgColor} rounded-lg`}>
                       <IconComponent className="w-5 h-5 text-white" />
                     </div>
                     <span className="text-[20px] font-medium text-gray-700">{card.title}</span>
@@ -182,25 +194,25 @@ function LeaseManagement() {
                   <div className="text-3xl font-bold text-gray-900 pt-4">{card.value}</div>
                 </CardContent>
               </Card>
-            )
+            );
           })}
         </div>
 
         {/* Search and Filter */}
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center sm:justify-between">
-          <div className="relative flex-1 max-w-md  items-center">
+          <div className="relative flex-1 max-w-md items-center">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 transform text-gray-400 w-[19px] h-[19px] mt-2" />
             <Input
               type="text"
               placeholder="Search"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-[400px] h-[48px]  bg-[#B200FF0D]/5 border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400 text-[18px]"
+              className="pl-10 w-[400px] h-[48px] bg-[#B200FF0D]/5 border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400 text-[18px]"
             />
           </div>
 
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-[140px] bg-[#B200FF1A]/5 border-gray-300   rounded-lg h-10 text-purple-600 font-medium hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400 ">
+            <SelectTrigger className="w-full sm:w-[140px] bg-[#B200FF1A]/5 border-gray-300 rounded-lg h-10 text-purple-600 font-medium hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400">
               <SelectValue>
                 <span className="text-purple-600">
                   {statusFilter === "all" ? "All Status" : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1)}
@@ -227,12 +239,12 @@ function LeaseManagement() {
           </Select>
         </div>
 
-        <Card className="shadow-lg border rounded-2xl overflow-hidden ">
-          <CardContent className="pl-3 pr-3 ">
-            {/* Header Section with separate shadow */}
-           <div className="border shadow-md rounded-xl mb-[30px] overflow-hidden ">
-
-              <div className="overflow-x-auto ">
+        {/* Leases Table */}
+        <Card className="shadow-lg border rounded-2xl overflow-hidden">
+          <CardContent className="pl-3 pr-3">
+            {/* Table Header */}
+            <div className="border shadow-md rounded-xl mb-[30px] overflow-hidden">
+              <div className="overflow-x-auto">
                 <table className="w-full table-fixed">
                   <colgroup>
                     <col className="w-[25%]" />
@@ -243,7 +255,7 @@ function LeaseManagement() {
                     <col className="w-[10%]" />
                   </colgroup>
                   <thead>
-                    <tr className="text-left ">
+                    <tr className="text-left">
                       <th className="px-6 py-4 font-semibold text-gray-700 text-sm">Tenant & Unit</th>
                       <th className="px-6 py-4 font-semibold text-gray-700 text-sm">Leases Period</th>
                       <th className="px-6 py-4 font-semibold text-gray-700 text-sm">Rent & Deposit</th>
@@ -256,16 +268,16 @@ function LeaseManagement() {
               </div>
             </div>
 
-            {/* Body Section with separate shadow */}
-            <div className="space-y-6 ">
+            {/* Table Body */}
+            <div className="space-y-6">
               {filteredLeaseData.length > 0 ? (
                 filteredLeaseData.map((lease) => (
                   <div
                     key={lease.id}
-                    className="border shadow-md rounded-xl overflow-hidden hover:shadow-lg transition-shadow "
+                    className="border shadow-md rounded-xl overflow-hidden hover:shadow-lg transition-shadow"
                   >
-                    <div className="overflow-x-auto ">
-                      <table className="w-full table-fixed ">
+                    <div className="overflow-x-auto">
+                      <table className="w-full table-fixed">
                         <colgroup>
                           <col className="w-[25%]" />
                           <col className="w-[20%]" />
@@ -275,11 +287,11 @@ function LeaseManagement() {
                           <col className="w-[10%]" />
                         </colgroup>
                         <tbody>
-                          <tr className="hover:bg-gray-50 transition-colors ">
-                            <td className="px-6 py-4  ">
+                          <tr className="hover:bg-gray-50 transition-colors">
+                            <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
                                 <Avatar className="w-10 h-10">
-                                  <AvatarImage src={lease.avatar || "/placeholder.svg"} alt={lease.name} />
+                                  <AvatarImage src={lease.avatar} alt={lease.name} />
                                   <AvatarFallback className="bg-gray-200 text-gray-600 text-sm font-medium">
                                     {lease.name
                                       .split(" ")
@@ -305,7 +317,7 @@ function LeaseManagement() {
                               <Badge
                                 className={
                                   lease.status === "Active"
-                                    ? "bg-[#0D35D41A]/10 text-blue-700 border border-blue-200 font-medium px-3 py-1 rounded-lg "
+                                    ? "bg-[#0D35D41A]/10 text-blue-700 border border-blue-200 font-medium px-3 py-1 rounded-lg"
                                     : "bg-[#EE2F2F1A]/10 text-red-700 border border-red-200 font-medium px-3 py-1 rounded-lg"
                                 }
                               >
@@ -318,7 +330,7 @@ function LeaseManagement() {
                             </td>
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-2">
-                                 <Button
+                                <Button
                                   variant="ghost"
                                   size="sm"
                                   className="text-purple-600 hover:text-purple-700 hover:bg-purple-50 p-2 h-8 w-8"
@@ -343,25 +355,29 @@ function LeaseManagement() {
                 ))
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-gray-500 text-sm">No leases found matching your search criteria.</p>
+                  <p className="text-gray-500 text-sm">
+                    {leaseData.length === 0 
+                      ? "No leases available" 
+                      : "No leases match your search criteria"}
+                  </p>
                 </div>
               )}
             </div>
           </CardContent>
         </Card>
       </div>
-     {showLeaseForm && selectedLease && (
+
+      {/* Lease View Form Modal */}
+      {showLeaseForm && selectedLease && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 backdrop-blur-md" onClick={handleCloseForm} />
-
-          {/* Modal content */}
           <div className="relative z-10 w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4">
             <Leaseviewform leaseData={selectedLease} onClose={handleCloseForm} />
           </div>
         </div>
       )}
     </div>
-  )
+  );
 }
 
-export default LeaseManagement
+export default LeaseManagement;

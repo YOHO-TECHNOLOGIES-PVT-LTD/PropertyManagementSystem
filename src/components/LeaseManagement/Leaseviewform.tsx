@@ -34,7 +34,7 @@ export const Leaseviewform = ({ leaseData, onClose }: LeaseViewFormProps) => {
               <FileText className="w-3 h-3 text-white" />
             </div>
             <h1 className="text-lg font-medium text-gray-900">Lease Details</h1>
-          </div>
+          </div>            
           <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={onClose}>
             <X className="w-4 h-4" />
           </Button>
@@ -317,7 +317,7 @@ export const Leaseviewform = ({ leaseData, onClose }: LeaseViewFormProps) => {
 
         {/* Footer */}
         <div className="flex justify-end p-6 border-t bg-white">
-          <Button className="bg-blue-500 hover:bg-blue-600 text-white px-8 h-10" onClick={onClose}>
+          <Button className="bg-[#EBEFF3] hover:bg-[#EBEFF3] text-[#7D7D7D] px-8 h-10" onClick={onClose}>
             Close
           </Button>
         </div>
