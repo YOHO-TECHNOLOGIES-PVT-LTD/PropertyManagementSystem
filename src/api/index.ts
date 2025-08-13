@@ -47,6 +47,7 @@ class Client {
         getAll: (params: string) =>
 			HttpClient.get(HTTP_END_POINTS.rent.getAll, params),
 		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.rent.get, params),
+		update: (params: string) => HttpClient.get(HTTP_END_POINTS.rent.update, params)
     };
     lease = {
         getAll: (params: string) =>
