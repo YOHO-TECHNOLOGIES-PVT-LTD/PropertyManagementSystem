@@ -151,7 +151,7 @@ const DashBoard = () => {
       fill: ["#E800DC", "#006AFF", "#FF008C"][index % 3],
     })) || [];
 
-  const rentCollectionData = dashboardData?.rentCollectionGraph?.map((item) => {
+  const rentCollectionData = dashboardData?.data?.rentCollectionGraph?.map((item) => {
       const monthName = new Date(
         item._id.year,
         item._id.month - 1
