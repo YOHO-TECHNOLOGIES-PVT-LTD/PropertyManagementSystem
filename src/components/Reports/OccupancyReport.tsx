@@ -2,8 +2,8 @@ import { FONTS } from "../../constants/ui constants"
 "use client"
 
 import { Area, AreaChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "../../components/ui/chart"
 import { BarChart3 } from "lucide-react"
 import Buildings from '../../assets/Reports/buildings.png'
 
