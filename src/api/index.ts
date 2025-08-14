@@ -1,5 +1,6 @@
-import HttpClient from './httpClient';
-import { HTTP_END_POINTS } from './httpEndpoints';
+
+import HttpClient from "./httpClient";
+import { HTTP_END_POINTS } from "./httpEndpoints";
 
 class Client {
 	auth = {
@@ -11,12 +12,13 @@ class Client {
 		me: () => HttpClient.get(HTTP_END_POINTS.auth.getProfile),
 		update_profile: (data: any) =>
 			HttpClient.update(HTTP_END_POINTS.auth.updateProfile, data),
-	};
-	dashboard = {
-		get: (data: any) => HttpClient.get(HTTP_END_POINTS.DashBoard.get, data),
-	};
-	property = {
-		getAll: (params: string) =>
+		activity:(data:any)=>HttpClient.get(HTTP_END_POINTS.auth.activity,data),
+    };
+	dashboard={
+		get:(data:any)=>HttpClient.get(HTTP_END_POINTS.DashBoard.get,data),
+	}
+    property = {
+        getAll: (params: string) =>
 			HttpClient.get(HTTP_END_POINTS.property.getAll, params),
 		create: (params: string) =>
 			HttpClient.post(HTTP_END_POINTS.property.create, params),
@@ -94,22 +96,18 @@ class Client {
 			HttpClient.get(HTTP_END_POINTS.maintenance.getAll, params),
 		create: (params: string) =>
 			HttpClient.post(HTTP_END_POINTS.maintenance.create, params),
-		edit: (data: any, params: string) =>
-			HttpClient.update(HTTP_END_POINTS.maintenance.update, params, data),
-		delete: (params: string) =>
-			HttpClient.delete(HTTP_END_POINTS.maintenance.delete, params),
-		getByid: (params: string) =>
-			HttpClient.get(HTTP_END_POINTS.maintenance.get, params),
-	};
+		edit: (data: any, params: string) => HttpClient.update(HTTP_END_POINTS.maintenance.update, params, data),
+		delete: (params: string) => HttpClient.delete(HTTP_END_POINTS.maintenance.delete, params),
+		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.maintenance.get, params),
+    };
 
-	notification = {
-		getAll: (params: string) =>
-			HttpClient.get(HTTP_END_POINTS.Notification.getAll, params),
-		delete: (params: string) =>
-			HttpClient.delete(HTTP_END_POINTS.Notification.delete, params),
-		update: (data: any, params: string) =>
-			HttpClient.update(HTTP_END_POINTS.Notification.update, data, params),
-	};
+	notification ={
+		getAll:(params:string)=>
+			HttpClient.get(HTTP_END_POINTS.Notification.getAll,params),
+		delete:(params:any)=>
+			HttpClient.delete(HTTP_END_POINTS.Notification.delete + params?.uuid),
+		updatestatus:(params:any)=>HttpClient.update(HTTP_END_POINTS.Notification.update + params?.uuid, params)
+	}
 }
 
 export default new Client();

@@ -24,3 +24,15 @@ export const deleteNotification = async (params:any)=>{
         console.log(err,'error ')
     }
 }
+
+export const  updateStatusNotification = async (params:any)=>{
+    try{
+        const response =await Client.notification.updatestatus(params)
+        if(response){
+            return response
+        }
+    }
+    catch(err){
+        console.log(err,'error ')
+    }
+}

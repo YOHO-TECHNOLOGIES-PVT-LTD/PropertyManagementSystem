@@ -24,6 +24,7 @@ import cardimg4 from "../../assets/cardimg4.png"
 import { FONTS } from '../../constants/ui constants'
 import { selectNotification } from "../../features/notification/redecures/selectors"
 import { getNotificationAll } from "../../features/notification/redecures/thunks"
+import { deleteNotification, updateStatusNotification } from "../../features/notification/services"
 
 
 interface NotificationItem {
@@ -160,27 +161,19 @@ function Notifications() {
     currentPage * itemsPerPage
   )
 
-  const markAsRead = async (id: string) => {
-    try {
-      
-      setNotificationList(prev =>
-        prev.map(notification =>
-          notification.id === id ? { ...notification, isRead: true } : notification
-        )
+const markAsRead = async (uuid: string) => {
+  try {
+    await updateStatusNotification({uuid,  isRead: true })
+
+    setNotificationList(prev =>
+      prev.map(notification =>
+        notification.id === uuid ? { ...notification, isRead: true } : notification
       )
-      
-   
-      
-    } catch (err) {
-      console.error('Error marking notification as read:', err)
-     
-      setNotificationList(prev =>
-        prev.map(notification =>
-          notification.id === id ? { ...notification, isRead: false } : notification
-        )
-      )
-    }
+    )
+  } catch (err) {
+    console.error("Error marking as read:", err)
   }
+}
 
   const markAllAsRead = async () => {
     try {
@@ -196,18 +189,23 @@ function Notifications() {
     }
   }
 
-  const deleteNotification = async (id: string) => {
-    try {
-      
-      setNotificationList(prev =>
-        prev.filter(notification => notification.id !== id)
-      )
-      
-    } catch (err) {
-      console.error('Error deleting notification:', err)
-  
+  const deleteNotificationHandler = async (uuid: string) => {
+  try {
+    const res = await deleteNotification({uuid});
+    
+    if (res) {
+     
+        setNotificationList(prev =>
+        prev.filter(notification => notification.id !== uuid)
+      );
+    } else {
+      console.error("Failed to delete notification:", res);
     }
+  } catch (err) {
+    console.error("Error deleting notification:", err);
   }
+};
+
 
   const handleNotificationClick = (notification: NotificationItem) => {
     if (!notification.isRead) {
@@ -304,14 +302,14 @@ function Notifications() {
 
               <div className="absolute inset-0 bg-white opacity-30"></div>
 
-              <CardContent className="relative h-full flex flex-col justify-between p-6">
-                <div className="flex items-center gap-4">
+              <CardContent className="relative h-full -mt-5 flex flex-col justify-between p-6">
+                <div className="flex items-center  gap-4">
                   <div className={`p-2 ${card.iconBgColor} rounded-lg`}>
                     <IconComponent className="w-5 h-5  text-white" />
                   </div>
                   <span className="text-sm font-medium text-gray-700 " style={{...FONTS.card_headers}}>{card.title}</span>
                 </div>
-                <div className="text-3xl font-bold  text-gray-900 ">{card.value}</div>
+                <div className="text-3xl font-bold mt-5 text-gray-900 ">{card.value}</div>
               </CardContent>
             </Card>
           )
@@ -419,7 +417,7 @@ function Notifications() {
                         className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                         onClick={(e) => {
                           e.stopPropagation() 
-                          deleteNotification(notification.id)
+                         deleteNotificationHandler(notification.id)
                         }}
                       >
                         <img src={cancelicon} className="h-6 w-6" />
