@@ -15,3 +15,10 @@ export const updateProfileData = async (uuid: string, data: any) => {
   }
 };
 
+
+    export const getallactivity = async ( data: any) => { 
+      const response = await Client.auth.activity(data);
+  if (response) {
+    return response;
+  }
+};

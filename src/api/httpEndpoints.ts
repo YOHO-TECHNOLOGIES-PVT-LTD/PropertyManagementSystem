@@ -6,6 +6,7 @@ const generateEndPoints = () => {
             getProfile: "/api/auth/me",
             updateProfile: "/api/auth/update",
             updatePassword: "/api/auth/change-pass",
+            activity:"/api/activity/all"
         },
         property: {
             create: "/api/property/create",
