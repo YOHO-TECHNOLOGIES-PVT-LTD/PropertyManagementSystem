@@ -198,7 +198,6 @@ function Notifications() {
 
   const deleteNotification = async (id: string) => {
     try {
-      
       setNotificationList(prev =>
         prev.filter(notification => notification.id !== id)
       )
