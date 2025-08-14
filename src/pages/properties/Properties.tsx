@@ -42,6 +42,9 @@ import {
   fetchEditProperty,
 } from "../../features/Properties/Reducers/PropertiesThunk";
 import { editProperty } from "../../features/Properties/Services";
+import { GetallPropertyThunks } from "../../features/maintenance/reducers/thunks";
+import { useNavigate } from "react-router-dom";
+
 
 type ModalMode = "add" | "view" | "edit";
 
@@ -177,6 +180,46 @@ function Properties() {
   // const [properties, setProperties] = useState<Property[]>(initialProperties);
   const dispatch = useDispatch<any>();
   const properties = useSelector(selectProperties);
+  const [addunits, setaddunits] = useState(false)
+  const [propertyTypes, setPropertyTypes] = useState<string[]>([])
+  const [preview, setPreview] = useState<string | null>(null);
+  const [openunits, setopenunits] = useState(false)
+  const navigate = useNavigate();
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPreview(URL.createObjectURL(file)); // show preview
+      setFormData((prev) => ({ ...prev, unit_image: file })); // store file
+    }
+  };
+
+  const units = [
+    {
+      id: 1,
+      property_name: "Adamsmith",
+      unit_name: "101",
+      unit_sq_feet: 1880,
+      unit_address: "12, Main Road, OMR Chennai",
+    },
+    {
+      id: 2,
+      property_name: "Sunrise Apartments",
+      unit_name: "B-204",
+      unit_sq_feet: 1250,
+      unit_address: "45, Beach Road, Chennai",
+    },
+  ];
+
+
+
+  useEffect(() => {
+    ; (async () => {
+      const maintenancedata = await dispatch(GetallPropertyThunks({ property_type: "commercial" }))
+      console.log("commercial:", maintenancedata)
+      setPropertyTypes(maintenancedata)
+    })()
+  }, [dispatch])
 
   useEffect(() => {
     dispatch(fetchGetProperties());
@@ -431,14 +474,232 @@ function Properties() {
               </p>
             </div>
 
-            <Button
-              className="bg-[#B200FF] hover:bg-[#B200FF] text-white px-6"
-              onClick={openAddModal}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Property
-            </Button>
+
+            <div className="flex gap-2">
+              <Button
+                className="bg-[#B200FF] hover:bg-[#B200FF] text-white px-6"
+                onClick={openAddModal}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Property
+              </Button>
+              <Button
+                className="bg-[#B200FF] hover:bg-[#B200FF] text-white px-6"
+                onClick={() => { setaddunits(true) }}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Unit
+              </Button>
+            </div>
+
+
           </div>
+
+          {addunits && (
+            <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
+              <form
+                onSubmit={handleSubmit} // <-- your submit function
+                className="bg-white rounded-lg shadow-xl w-[650px] max-h-[90vh] overflow-y-auto"
+              >
+                {/* Header */}
+                <div className="flex justify-between items-center border-b px-6 py-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-semibold flex items-center gap-2">
+                      🏢 Add New Unit
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setaddunits(false);
+                    }}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    ✖
+                  </button>
+                </div>
+
+                {/* Body */}
+                <div className="px-6 py-4">
+                  {/* Upload image */}
+                  <div className="flex items-center gap-3 mb-6">
+                    {/* Preview circle */}
+                    <div className="w-20 h-20 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center">
+                      {preview ? (
+                        <img
+                          src={preview}
+                          alt="Unit preview"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <span className="text-gray-400 text-sm">No image</span>
+                      )}
+                    </div>
+
+                    {/* File upload */}
+                    <label className="mt-3">
+                      <input
+                        type="file"
+                        name="unit_image"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        accept="image/*"
+                      />
+                      <span className="px-4 py-2 bg-teal-500 text-white rounded-lg cursor-pointer hover:bg-teal-600">
+                        ⬆ Upload Image
+                      </span>
+                    </label>
+                  </div>
+
+
+                  {/* Unit Information */}
+                  <h2 className="font-semibold text-lg flex items-center gap-2 mb-4">
+                    🏢 Unit Information
+                  </h2>
+
+                  {/* Form Fields */}
+                  <div className="grid grid-cols-2 gap-4 mb-4">
+                    {/* Property */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Property
+                      </label>
+                      <select
+                        name="property"
+
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      >
+                        <option value="">Select Property</option>
+                        {properties.map((item: any) => (
+                          <option key={item._id} value={item.uuid}>
+                            {item.property_name}
+                          </option>
+                        ))}
+                      </select>
+
+                    </div>
+
+                    {/* Unit Name */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Unit Name
+                      </label>
+                      <input
+                        type="text"
+                        name="unit_name"
+
+                        placeholder="Unit Name"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                      />
+
+                    </div>
+                  </div>
+
+                  {/* Sq Feet */}
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Unit Sq Feet
+                    </label>
+                    <input
+                      type="number"
+                      name="unit_sq_feet"
+
+                      placeholder="23456"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    />
+
+                  </div>
+
+                  {/* Address */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Unit Address
+                    </label>
+                    <textarea
+                      name="unit_address"
+
+                      placeholder="Enter Complete Address"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none"
+                    ></textarea>
+
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="flex justify-between border-t px-6 py-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setaddunits(false);
+                    }}
+                    className="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-100"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-2 rounded-lg text-white"
+                    style={{
+                      background: "linear-gradient(to right, #9b30ff, #8000ff)",
+                    }}
+                  >
+                    Create Unit
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {openunits && (
+            <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50">
+
+              <div className="p-4 rounded-xl  bg-white shadow-lg w-[80%] max-w-4xl">
+
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setopenunits(false);
+                      // setIsModalOpen(true)
+                    }}
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-black text-white hover:bg-gray-800"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* Header */}
+                <div className="grid grid-cols-5 bg-purple-600 text-white rounded-t-xl font-semibold text-center">
+                  <div className="py-3 rounded-tl-xl">Property Name</div>
+                  <div className="py-3">Unit Name</div>
+                  <div className="py-3">Unit Sq Feet</div>
+                  <div className="py-3">Unit Address</div>
+                  <div className="py-3 rounded-tr-xl">Actions</div>
+                </div>
+
+                {/* Rows */}
+                {units.map((unit) => (
+                  <div
+                    key={unit.id}
+                    className="grid grid-cols-5 items-center text-center border-t border-gray-200"
+                  >
+                    <div className="py-4">{unit.property_name}</div>
+                    <div className="py-4">{unit.unit_name}</div>
+                    <div className="py-4">{unit.unit_sq_feet}</div>
+                    <div className="py-4">{unit.unit_address}</div>
+                    <div className="py-4">
+                      <button
+                        className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600"
+                      >
+                        ✏️
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
 
           {/* Search Bar and Filter */}
           <div className="flex items-center gap-4 justify-between">
@@ -507,6 +768,8 @@ function Properties() {
             </Select>
           </div>
         </div>
+
+
 
         {/* Properties Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -855,21 +1118,41 @@ function Properties() {
 											type='number'
 										/>
 									</div> */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-[#7D7D7D]">
-                      Square Feet
-                    </label>
-                    <Input
-                      placeholder="Enter Square Feet"
-                      value={formData.squareFeet}
-                      onChange={(e) =>
-                        handleInputChange("squareFeet", e.target.value)
-                      }
-                      className="bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000]"
-                      disabled={modalMode === "view"}
-                      type="number"
-                    />
+                  <div className="space-y-2 flex">
+                    <div>
+                      <label className="text-sm font-medium text-[#7D7D7D]">
+                        Square Feet
+                      </label>
+                      <Input
+                        placeholder="Enter Square Feet"
+                        value={formData.squareFeet}
+                        onChange={(e) =>
+                          handleInputChange("squareFeet", e.target.value)
+                        }
+                        className="bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000]"
+                        disabled={modalMode === "view"}
+                        type="number"
+                      />
+                    </div>
+                    {/* <button
+                      onClick={() => {
+                        setopenunits(true);
+                        setIsModalOpen(false);
+                      }}
+                      className="text-[#5EABD6]"
+                    >
+                      View All Units
+                    </button> */}
+
+                    <button
+                      className="text-[#5EABD6]"
+                      onClick={() => navigate("/view-units")}
+                    >
+                      View All Units
+                    </button>
+
                   </div>
+
                 </div>
 
                 <div className="space-y-2">
@@ -1000,6 +1283,7 @@ function Properties() {
             </div>
           </DialogContent>
         </Dialog>
+
 
         {/* Delete Confirmation Modal */}
         <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>

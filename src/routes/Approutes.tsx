@@ -12,6 +12,7 @@ import Settings from '../pages/settings/Settings';
 import Maintenance from '../pages/maintenance/Maintenance';
 import Login from '../pages/auth/login/Login';
 import { useAuth } from '../components/auth/AuthContext';
+import ViewAllUnits from '../components/property/viewallunit/viewallunit';
 
 function Approutes() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -39,6 +40,7 @@ function Approutes() {
         <Route path='/reports' element={<FinancialReports />} />
         <Route path='/settings' element={<Settings />} />
         <Route path='/maintenance' element={<Maintenance />} />
+        <Route path='/view-units' element={<ViewAllUnits />} />
 
       </Route>
     </Routes>
