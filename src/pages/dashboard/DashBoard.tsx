@@ -151,22 +151,6 @@ const DashBoard = () => {
       fill: ["#E800DC", "#006AFF", "#FF008C"][index % 3],
     })) || [];
 
-  const rentCollectionData = dashboardData?.rentCollectionGraph?.map((item) => {
-      const monthName = new Date(
-        item._id.year,
-        item._id.month - 1
-      ).toLocaleString("default", { month: "short" });
-      const paid =
-        item.collected && item.collected > 0 ? item.collected : 50000;
-      const totalExpected =
-        item.totalExpected && item.totalExpected > 0
-          ? item.totalExpected
-          : 75000;
-
-      const pending = totalExpected - paid;
-      return { month: monthName, paid, pending: pending < 0 ? 0 : pending };
-    }) || [];
-
   const formatIndianCurrency = (value: number): string => {
     if (value === 0) return "₹0";
     if (value >= 10000000) return `₹${(value / 10000000).toFixed(1)}Cr`;
@@ -174,6 +158,50 @@ const DashBoard = () => {
     if (value >= 1000) return `₹${(value / 1000).toFixed(1)}K`;
     return `₹${value}`;
   };
+
+  // Process Occupancy Graph
+  const processedOccupancyGraph =
+    dashboardData?.occupancyGraph?.map((item) => ({
+      ...item,
+      occupancyRate: Number(item.occupancyRate.toFixed(1)), // 1 decimal place
+    })) || [];
+
+  // Merge Overdue entries in Payment Status Breakdown
+  const mergedPaymentStatus = (() => {
+    const statusMap: Record<string, number> = {};
+
+    dashboardData?.paymentStatusBreakdownGraph?.forEach((item) => {
+      const key =
+        item._id.toLowerCase() === "overdue"
+          ? "Overdue"
+          : item._id.charAt(0).toUpperCase() + item._id.slice(1);
+      statusMap[key] = (statusMap[key] || 0) + item.count;
+    });
+
+    return Object.entries(statusMap).map(([name, value], index) => ({
+      name,
+      value,
+      fill: ["#E800DC", "#006AFF", "#FF008C"][index % 3],
+    }));
+  })();
+
+  // Rent Collection Graph stays the same
+  const rentCollectionData =
+    dashboardData?.rentCollectionGraph?.map((item) => {
+      const monthName = new Date(
+        item._id.year,
+        item._id.month - 1
+      ).toLocaleString("default", { month: "short" });
+
+      const paid = item.collected > 0 ? item.collected : 50000;
+      const totalExpected = item.totalExpected > 0 ? item.totalExpected : 75000;
+
+      const pending = totalExpected - paid;
+      return { month: monthName, paid, pending: pending < 0 ? 0 : pending };
+    }) || [];
+
+  // Example of applying 1 decimal for any percentage values you display
+  const formatPercent = (value: number) => `${Number(value).toFixed(1)}%`;
 
   return (
     <div className="p-3 flex flex-col gap-6">
@@ -262,7 +290,9 @@ const DashBoard = () => {
           icon={<Building2 />}
           title="Occupancy Rate"
           subText="This Month"
-          value={`${currentOccupancyRate}%`}
+          value={formatPercent(
+            processedOccupancyGraph?.[0]?.occupancyRate || 0
+          )}
           iconBg="bg-[#3091EB26]/15"
           iconTextColor="text-[#3091EB]"
         />
@@ -281,7 +311,7 @@ const DashBoard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <OccupancyRateTrend
           data={
-            dashboardData?.occupancyGraph?.map((item) => ({
+            processedOccupancyGraph.map((item) => ({
               month: new Date(0, item.month - 1).toLocaleString("default", {
                 month: "short",
               }),
@@ -304,7 +334,7 @@ const DashBoard = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <RadialChart data={radialData} />
+        <RadialChart data={mergedPaymentStatus} />
         <RentCollectionRate data={rentCollectionData} />
       </div>
 

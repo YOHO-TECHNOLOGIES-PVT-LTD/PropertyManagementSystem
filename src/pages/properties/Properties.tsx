@@ -70,9 +70,7 @@ function Properties() {
   const [selectedType, setSelectedType] = useState<string>("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(
-    null
-  );
+  const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(null);
   const [modalMode, setModalMode] = useState<ModalMode>("add");
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(
     null
@@ -254,8 +252,8 @@ function Properties() {
 
       if (modalMode === "edit" && selectedProperty) {
         const params = {
-          uuid: selectedProperty?.uuid,
-        };
+           uuid: selectedProperty?.uuid,
+        }
 
         if (!params) {
           toast.error("Property UUID not found");
@@ -296,26 +294,26 @@ function Properties() {
   };
 
   const handleDeleteProperty = async () => {
-    if (!propertyToDelete?.uuid) {
-      toast.error("Property UUID not found");
-      return;
-    }
+  if (!propertyToDelete?.uuid) {
+    toast.error("Property UUID not found");
+    return;
+  }
 
-    try {
-      await dispatch(fetchDeleteProperty(propertyToDelete.uuid));
-      // await deleteProperty(propertyToDelete.uuid)
-      console.log("Delete UUid", propertyToDelete.uuid);
-      toast.success(`${propertyToDelete.name} deleted successfully`);
-      setIsDeleteModalOpen(false);
-      setPropertyToDelete(null);
+  try {
+    await dispatch(fetchDeleteProperty(propertyToDelete.uuid));
+    // await deleteProperty(propertyToDelete.uuid)
+    console.log("Delete UUid",propertyToDelete.uuid)
+    toast.success(`${propertyToDelete.name} deleted successfully`);
+    setIsDeleteModalOpen(false);
+    setPropertyToDelete(null);
 
-      // Refresh the list
-      await dispatch(fetchGetProperties());
-    } catch (error) {
-      console.error("Error deleting property:", error);
-      toast.error("Failed to delete property");
-    }
-  };
+    // Refresh the list
+    await dispatch(fetchGetProperties());
+  } catch (error) {
+    console.error("Error deleting property:", error);
+    toast.error("Failed to delete property");
+  }
+};
 
   const getModalTitle = () => {
     switch (modalMode) {
