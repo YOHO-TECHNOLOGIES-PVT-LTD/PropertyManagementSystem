@@ -38,12 +38,14 @@ import {
   fetchCreateProperty,
   fetchEditProperty,
   fetchDeleteProperty,
+  fetchCreateUnit,
 } from "../../features/Properties/Reducers/PropertiesThunk";
-
 type ModalMode = "add" | "view" | "edit";
+type UnitModalMode = "add" | "edit";
 
 interface Property {
   id: number;
+  _id?:string;
   uuid?: string;
   name: string;
   location: string;
@@ -66,11 +68,24 @@ interface Property {
   };
 }
 
+interface Unit {
+  id?: string;
+  property: string;
+  propertyId?: string;
+  propertyUuid?: string;
+  name: string;
+  sqFeet: string;
+  address: string;
+  image?: string;
+}
+
 function Properties() {
   const [selectedType, setSelectedType] = useState<string>("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(null);
+  const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(
+    null
+  );
   const [modalMode, setModalMode] = useState<ModalMode>("add");
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(
     null
@@ -78,9 +93,19 @@ function Properties() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  // const [properties, setProperties] = useState<Property[]>(initialProperties);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const dispatch = useDispatch<any>();
   const properties = useSelector(selectProperties);
+  const [isUnitModalOpen, setIsUnitModalOpen] = useState(false);
+  const [unitModalMode, setUnitModalMode] = useState<UnitModalMode>("add");
+  const [editingUnit, setEditingUnit] = useState<Unit | null>(null);
+  const [unitForm, setUnitForm] = useState<Unit>({
+    property: "",
+    propertyId: "",
+    name: "",
+    sqFeet: "",
+    address: "",
+  });
 
   useEffect(() => {
     dispatch(fetchGetProperties());
@@ -97,6 +122,44 @@ function Properties() {
     phone: "",
     ownerAddress: "",
   });
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.propertyName.trim()) {
+      newErrors.propertyName = "Property name is required";
+    }
+
+    if (!formData.propertyType) {
+      newErrors.propertyType = "Property type is required";
+    }
+
+    if (!formData.squareFeet.trim()) {
+      newErrors.squareFeet = "Square feet is required";
+    } else if (isNaN(Number(formData.squareFeet))) {
+      newErrors.squareFeet = "Square feet must be a number";
+    }
+
+    if (!formData.address.trim()) {
+      newErrors.address = "Property address is required";
+    }
+
+    if (!formData.ownerName.trim()) {
+      newErrors.ownerName = "Owner name is required";
+    }
+
+    if (formData.email && !/^\S+@\S+\.\S+$/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    if (formData.phone && !/^[0-9+\- ]+$/.test(formData.phone)) {
+      newErrors.phone = "Please enter a valid phone number";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const mappedProperties: Property[] =
     properties?.map((p: any, index: number) => ({
       id: index + 1,
@@ -120,9 +183,9 @@ function Properties() {
         occupancyRate: p.occupancy_rate || 0,
       },
       uuid: p.uuid,
+      _id:p._id
     })) || [];
 
-  // Step 2: Apply your filter
   const filteredProperties = mappedProperties.filter((property) => {
     const propertyTag = property.tag?.toLowerCase() || "";
     const searchTermLower = searchTerm.toLowerCase();
@@ -138,8 +201,17 @@ function Properties() {
 
     return typeMatch && searchMatch;
   });
+
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -171,6 +243,7 @@ function Properties() {
     });
     setUploadedImage(null);
     setImageFile(null);
+    setErrors({});
     setIsModalOpen(true);
   };
 
@@ -190,6 +263,7 @@ function Properties() {
     });
     setUploadedImage(property.image);
     setImageFile(null);
+    setErrors({});
     setIsModalOpen(true);
   };
 
@@ -209,28 +283,12 @@ function Properties() {
     });
     setUploadedImage(property.image);
     setImageFile(null);
+    setErrors({});
     setIsModalOpen(true);
   };
 
   const handleSubmit = async () => {
-    if (!formData.propertyName) {
-      toast.error("Property name is required");
-      return;
-    }
-    if (!formData.propertyType) {
-      toast.error("Property type is required");
-      return;
-    }
-    if (!formData.squareFeet) {
-      toast.error("Square feet is required");
-      return;
-    }
-    if (!formData.address) {
-      toast.error("Property address is required");
-      return;
-    }
-    if (!formData.ownerName) {
-      toast.error("Owner name is required");
+    if (!validateForm()) {
       return;
     }
 
@@ -252,10 +310,10 @@ function Properties() {
 
       if (modalMode === "edit" && selectedProperty) {
         const params = {
-           uuid: selectedProperty?.uuid,
-        }
+          uuid: selectedProperty?.uuid,
+        };
 
-        if (!params) {
+        if (!params.uuid) {
           toast.error("Property UUID not found");
           return;
         }
@@ -294,26 +352,22 @@ function Properties() {
   };
 
   const handleDeleteProperty = async () => {
-  if (!propertyToDelete?.uuid) {
-    toast.error("Property UUID not found");
-    return;
-  }
+    if (!propertyToDelete?.uuid) {
+      toast.error("Property UUID not found");
+      return;
+    }
 
-  try {
-    await dispatch(fetchDeleteProperty(propertyToDelete.uuid));
-    // await deleteProperty(propertyToDelete.uuid)
-    console.log("Delete UUid",propertyToDelete.uuid)
-    toast.success(`${propertyToDelete.name} deleted successfully`);
-    setIsDeleteModalOpen(false);
-    setPropertyToDelete(null);
-
-    // Refresh the list
-    await dispatch(fetchGetProperties());
-  } catch (error) {
-    console.error("Error deleting property:", error);
-    toast.error("Failed to delete property");
-  }
-};
+    try {
+      await dispatch(fetchDeleteProperty(propertyToDelete.uuid));
+      toast.success(`${propertyToDelete.name} deleted successfully`);
+      setIsDeleteModalOpen(false);
+      setPropertyToDelete(null);
+      await dispatch(fetchGetProperties());
+    } catch (error) {
+      console.error("Error deleting property:", error);
+      toast.error("Failed to delete property");
+    }
+  };
 
   const getModalTitle = () => {
     switch (modalMode) {
@@ -332,6 +386,92 @@ function Properties() {
     setSearchTerm("");
   };
 
+  const handleUnitImageUpload = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setUnitForm({ ...unitForm, image: e.target?.result as string });
+      };
+      reader.readAsDataURL(file);
+      toast.success("Image Uploaded");
+    }
+  };
+
+  const openAddUnitModal = () => {
+    setUnitModalMode("add");
+    setEditingUnit(null);
+    setUnitForm({
+      property: "",
+      propertyId: "",
+      name: "",
+      sqFeet: "",
+      address: "",
+      image: "",
+    });
+    setIsUnitModalOpen(true);
+  };
+
+  const openEditUnitModal = (unit: Unit) => {
+    setUnitModalMode("edit");
+    setEditingUnit(unit);
+    setUnitForm({
+      property: unit.property,
+      propertyId: unit.propertyId,
+      name: unit.name,
+      sqFeet: unit.sqFeet,
+      address: unit.address,
+      image: unit.image || "",
+    });
+    setIsUnitModalOpen(true);
+  };
+  const handleSubmitUnit = async () => {
+  // if (
+  //   !unitForm.propertyUuid || // Validate UUID exists
+  //   !unitForm.name ||
+  //   !unitForm.sqFeet ||
+  //   !unitForm.address
+  // ) {
+  //   toast.error("Please fill all required fields");
+  //   return;
+  // }
+
+  try {
+    const unitData = {
+      propertyId: unitForm.propertyId, 
+      unit_name: unitForm.name,
+      unit_sqft: unitForm.sqFeet,
+      unit_address: unitForm.address,
+      image: unitForm.image || null,
+    };
+
+    if (unitModalMode === "edit" && editingUnit) {
+      toast.success("Unit updated successfully");
+    } else {
+      console.log("uuid",unitData.propertyId)
+      await dispatch(fetchCreateUnit(unitData));
+      toast.success("Unit added successfully");
+    }
+    await dispatch(fetchGetProperties());
+
+    setIsUnitModalOpen(false);
+    setUnitForm({
+      property: "",
+      propertyId: "",
+      propertyUuid: "",
+      name: "",
+      sqFeet: "",
+      address: "",
+      image: "",
+    });
+  } catch (error) {
+    console.error("Error submitting unit:", error);
+    toast.error("Failed to submit unit. Please try again.");
+  }
+};
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -345,14 +485,22 @@ function Properties() {
                 Properties)
               </p>
             </div>
-
-            <Button
-              className="bg-[#B200FF] hover:bg-[#B200FF] text-white px-6"
-              onClick={openAddModal}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Add Property
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                className="bg-[#B200FF] hover:bg-[#B200FF] text-white px-6"
+                onClick={openAddModal}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Property
+              </Button>
+              <Button
+                className="bg-[#B200FF] hover:bg-[#B200FF] text-white px-6"
+                onClick={openAddUnitModal}
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Add Unit
+              </Button>
+            </div>
           </div>
 
           {/* Search Bar and Filter */}
@@ -700,9 +848,16 @@ function Properties() {
                       onChange={(e) =>
                         handleInputChange("propertyName", e.target.value)
                       }
-                      className="bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000]"
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
+                        errors.propertyName ? "border-red-500" : ""
+                      }`}
                       disabled={modalMode === "view"}
                     />
+                    {errors.propertyName && (
+                      <p className="text-red-500 text-xs">
+                        {errors.propertyName}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-[#7D7D7D]">
@@ -715,7 +870,11 @@ function Properties() {
                       }
                       disabled={modalMode === "view"}
                     >
-                      <SelectTrigger className="bg-white border border-[#E5E5E5] shadow-lg text-[#7D7D7D] font-semibold">
+                      <SelectTrigger
+                        className={`bg-white border border-[#E5E5E5] shadow-lg text-[#7D7D7D] font-semibold ${
+                          errors.propertyType ? "border-red-500" : ""
+                        }`}
+                      >
                         <SelectValue placeholder="Property Type" />
                       </SelectTrigger>
                       <SelectContent>
@@ -751,13 +910,18 @@ function Properties() {
                         </SelectItem>
                       </SelectContent>
                     </Select>
+                    {errors.propertyType && (
+                      <p className="text-red-500 text-xs">
+                        {errors.propertyType}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-[#7D7D7D]">
-                      Square Feet
+                      Square Feet <span className="text-red-500">*</span>
                     </label>
                     <Input
                       placeholder="Enter Square Feet"
@@ -765,10 +929,17 @@ function Properties() {
                       onChange={(e) =>
                         handleInputChange("squareFeet", e.target.value)
                       }
-                      className="bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000]"
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
+                        errors.squareFeet ? "border-red-500" : ""
+                      }`}
                       disabled={modalMode === "view"}
                       type="number"
                     />
+                    {errors.squareFeet && (
+                      <p className="text-red-500 text-xs">
+                        {errors.squareFeet}
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -782,9 +953,14 @@ function Properties() {
                     onChange={(e) =>
                       handleInputChange("address", e.target.value)
                     }
-                    className="bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] min-h-[80px]"
+                    className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] min-h-[80px] ${
+                      errors.address ? "border-red-500" : ""
+                    }`}
                     disabled={modalMode === "view"}
                   />
+                  {errors.address && (
+                    <p className="text-red-500 text-xs">{errors.address}</p>
+                  )}
                 </div>
               </div>
 
@@ -806,7 +982,7 @@ function Properties() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-[#7D7D7D]">
-                      Owner Name
+                      Owner Name <span className="text-red-500">*</span>
                     </label>
                     <Input
                       placeholder="Enter Owner Name"
@@ -814,9 +990,14 @@ function Properties() {
                       onChange={(e) =>
                         handleInputChange("ownerName", e.target.value)
                       }
-                      className="bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000]"
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
+                        errors.ownerName ? "border-red-500" : ""
+                      }`}
                       disabled={modalMode === "view"}
                     />
+                    {errors.ownerName && (
+                      <p className="text-red-500 text-xs">{errors.ownerName}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-[#7D7D7D]">
@@ -829,9 +1010,14 @@ function Properties() {
                       onChange={(e) =>
                         handleInputChange("email", e.target.value)
                       }
-                      className="bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000]"
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
+                        errors.email ? "border-red-500" : ""
+                      }`}
                       disabled={modalMode === "view"}
                     />
+                    {errors.email && (
+                      <p className="text-red-500 text-xs">{errors.email}</p>
+                    )}
                   </div>
                 </div>
 
@@ -846,9 +1032,14 @@ function Properties() {
                       onChange={(e) =>
                         handleInputChange("phone", e.target.value)
                       }
-                      className="bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000]"
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
+                        errors.phone ? "border-red-500" : ""
+                      }`}
                       disabled={modalMode === "view"}
                     />
+                    {errors.phone && (
+                      <p className="text-red-500 text-xs">{errors.phone}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-[#7D7D7D]">
@@ -935,6 +1126,160 @@ function Properties() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Unit Edit and Delete */}
+        {isUnitModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 no-scrollbar">
+            <div className="max-w-[650px] w-full bg-white rounded-lg shadow-xl p-6 overflow-y-auto max-h-[90vh]">
+              {/* Header */}
+              <div className="pb-2 border-b border-gray-200 mb-4">
+                <h2 className="text-xl font-semibold text-black flex items-center gap-2">
+                  🏢 {unitModalMode === "edit" ? "Edit Unit" : "Add New Unit"}
+                </h2>
+              </div>
+
+              <div className="space-y-4">
+                {/* Upload Image */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-20 h-20 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center">
+                    {unitForm.image ? (
+                      <img
+                        src={unitForm.image}
+                        alt="unit"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-gray-400">No Image</span>
+                    )}
+                  </div>
+                  <div>
+                    <input
+                      type="file"
+                      id="unit-image-upload"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleUnitImageUpload}
+                    />
+                    <label
+                      htmlFor="unit-image-upload"
+                      className="px-4 py-2 bg-[#13A5A5] hover:bg-[#13A5A5]/90 text-white rounded-lg cursor-pointer flex items-center gap-2"
+                    >
+                      <img src={uploadImg} alt="upload" className="w-4 h-4" />
+                      Upload Image
+                    </label>
+                  </div>
+                </div>
+
+                {/* Unit Information */}
+                <h2 className="font-semibold text-lg flex items-center gap-2 mb-2">
+                  🏢 Unit Information
+                </h2>
+
+                {/* Form Fields */}
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  {/* Property */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-[#7D7D7D]">
+                      Property <span className="text-red-500">*</span>
+                    </label>
+                    <Select
+                      value={unitForm.property}
+                      onValueChange={(value) => {
+                        const selectedProp = mappedProperties.find(
+                          (p) => p.name === value
+                        );
+                        setUnitForm({
+                          ...unitForm,
+                          property: value,
+                          propertyUuid: selectedProp?.uuid || "",
+                          propertyId: selectedProp?._id || "",
+                        });
+                      }}
+                    >
+                      <SelectTrigger className="bg-white border-[#e5e5e5]">
+                        <SelectValue placeholder="Select Property" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {mappedProperties.map((property) => (
+                          <SelectItem
+                            key={property._id}
+                            value={property.name}
+                            className="text-[#7D7D7D]"
+                          >
+                            {property.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Unit Name */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-[#7D7D7D]">
+                      Unit Name <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      placeholder="Unit Name"
+                      value={unitForm.name}
+                      onChange={(e) =>
+                        setUnitForm({ ...unitForm, name: e.target.value })
+                      }
+                      className="bg-white border-[#e5e5e5]"
+                    />
+                  </div>
+                </div>
+
+                {/* Sq Feet */}
+                <div className="space-y-2 mb-4">
+                  <label className="block text-sm font-medium text-[#7D7D7D]">
+                    Unit Sq Feet <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="number"
+                    placeholder="23456"
+                    value={unitForm.sqFeet}
+                    onChange={(e) =>
+                      setUnitForm({ ...unitForm, sqFeet: e.target.value })
+                    }
+                    className="bg-white border-[#e5e5e5]"
+                  />
+                </div>
+
+                {/* Address */}
+                <div className="space-y-2 mb-4">
+                  <label className="block text-sm font-medium text-[#7D7D7D]">
+                    Unit Address <span className="text-red-500">*</span>
+                  </label>
+                  <Textarea
+                    placeholder="Enter Complete Address"
+                    value={unitForm.address}
+                    onChange={(e) =>
+                      setUnitForm({ ...unitForm, address: e.target.value })
+                    }
+                    className="bg-white border-[#e5e5e5] min-h-[100px]"
+                  />
+                </div>
+
+                {/* Footer */}
+                <div className="flex justify-end gap-3 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsUnitModalOpen(false)}
+                    className="px-6 rounded-lg bg-[#EBEFF3] text-[#7D7D7D] border border-[#7D7D7D]"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className="bg-[#B200FF] hover:bg-[#B200FF] text-white px-6 rounded-lg"
+                    onClick={handleSubmitUnit}
+                  >
+                    {unitModalMode === "edit" ? "Update Unit" : "Create Unit"}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

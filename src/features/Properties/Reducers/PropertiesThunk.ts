@@ -1,5 +1,5 @@
-import { createProperty, deleteProperty, editProperty, getAllProperties } from "../Services/index"
-import { setProperty, setLoading, setError, addProperty, updateProperty, removeProperty } from "./PropertiesSlice"
+import { createProperty, createUnit, deleteProperty, editProperty, getAllProperties } from "../Services/index"
+import { setProperty, setLoading, setError, addProperty, updateProperty, removeProperty, addUnit } from "./PropertiesSlice"
 
 //Get All Property
 export const fetchGetProperties = (params?: any) => async (dispatch: any) => {
@@ -47,5 +47,17 @@ export const fetchDeleteProperty = (uuid: any) => async (dispatch: any) => {
   } catch (error) {
     console.log("Error deleting property:", error);
     dispatch(setError("Failed to delete property"));
+  }
+};
+
+//Create Unit 
+export const fetchCreateUnit = (data: any) => async (dispatch: any) => {
+  try {
+    dispatch(setLoading(true));
+    const res = await createUnit(data);
+    dispatch(addUnit(res?.data));
+  } catch (error) {
+    console.log("Error creating unit:", error);
+    dispatch(setError("Failed to create unit"));
   }
 };

@@ -141,15 +141,15 @@ const DashBoard = () => {
       0
     ) || 0;
 
-  const currentOccupancyRate =
-    dashboardData?.occupancyGraph?.[0]?.occupancyRate || 0;
+  // const currentOccupancyRate =
+  //   dashboardData?.occupancyGraph?.[0]?.occupancyRate || 0;
 
-  const radialData =
-    dashboardData?.paymentStatusBreakdownGraph?.map((item, index) => ({
-      name: item._id.charAt(0).toUpperCase() + item._id.slice(1),
-      value: item.count,
-      fill: ["#E800DC", "#006AFF", "#FF008C"][index % 3],
-    })) || [];
+  // const radialData =
+  //   dashboardData?.paymentStatusBreakdownGraph?.map((item, index) => ({
+  //     name: item._id.charAt(0).toUpperCase() + item._id.slice(1),
+  //     value: item.count,
+  //     fill: ["#E800DC", "#006AFF", "#FF008C"][index % 3],
+  //   })) || [];
 
   const formatIndianCurrency = (value: number): string => {
     if (value === 0) return "₹0";

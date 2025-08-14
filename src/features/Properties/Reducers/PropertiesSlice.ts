@@ -42,6 +42,10 @@ const propertySlice = createSlice({
     removeProperty(state, action) {
       state.data = state.data.filter((prop) => prop.id !== action.payload);
     },
+    addUnit(state, action) {
+      state.data.push(action.payload);
+      state.loading = false;
+    },
   },
 });
 
@@ -51,7 +55,8 @@ export const {
   setError,
   addProperty,
   updateProperty,
-   removeProperty,
+  removeProperty,
+  addUnit,
 } = propertySlice.actions;
 
 export default propertySlice.reducer;
