@@ -49,6 +49,8 @@ class Client {
 		create: (params: string) =>
 			HttpClient.post(HTTP_END_POINTS.unit.create, params),
 		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.unit.get, params),
+		getbypropertyid:(params:string)=>HttpClient.get(HTTP_END_POINTS.unit.getbyId+params),
+		update:(params:string,data:any)=>HttpClient.update(HTTP_END_POINTS.unit.update+params,data)
     };
     rent = {
         getAll: (params: any) =>

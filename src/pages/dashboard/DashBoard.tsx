@@ -187,7 +187,7 @@ const DashBoard = () => {
 
   // Rent Collection Graph stays the same
   const rentCollectionData =
-    dashboardData?.rentCollectionGraph?.map((item) => {
+    dashboardData?.rentCollectionGraph?.data?.map((item:any) => {
       const monthName = new Date(
         item._id.year,
         item._id.month - 1

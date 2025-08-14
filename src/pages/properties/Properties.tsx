@@ -1,4 +1,4 @@
-import { Plus, X } from "lucide-react";
+import { Building2, Plus, X } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Card, CardContent } from "../../components/ui/card";
@@ -186,7 +186,7 @@ function Properties() {
         occupancyRate: p.occupancy_rate || 0,
       },
       uuid: p.uuid,
-      _id: p._id
+      _id: p._id,
     })) || [];
 
   const filteredProperties = mappedProperties.filter((property) => {
@@ -250,26 +250,25 @@ function Properties() {
     setIsModalOpen(true);
   };
 
-  const openViewModal = (property: Property) => {
-    setModalMode("view");
-    setSelectedProperty(property);
-    setFormData({
-      propertyName: property.name,
-      propertyType: property.tag,
-      totalUnits: property.stats.totalUnits.toString(),
-      squareFeet: property.stats.totalSquareFeet.toString(),
-      address: property.location,
-      ownerName: property.owner.name,
-      email: property.owner.email,
-      phone: property.owner.phone,
-      ownerAddress: property.owner.address,
-    });
-    setUploadedImage(property.image);
-    setImageFile(null);
-    setErrors({});
-    setIsModalOpen(true);
-
-  };
+  // const openViewModal = (property: Property) => {
+  //   setModalMode("view");
+  //   setSelectedProperty(property);
+  //   setFormData({
+  //     propertyName: property.name,
+  //     propertyType: property.tag,
+  //     totalUnits: property.stats.totalUnits.toString(),
+  //     squareFeet: property.stats.totalSquareFeet.toString(),
+  //     address: property.location,
+  //     ownerName: property.owner.name,
+  //     email: property.owner.email,
+  //     phone: property.owner.phone,
+  //     ownerAddress: property.owner.address,
+  //   });
+  //   setUploadedImage(property.image);
+  //   setImageFile(null);
+  //   setErrors({});
+  //   setIsModalOpen(true);
+  // };
 
   const openEditModal = (property: Property) => {
     setModalMode("edit");
@@ -454,7 +453,7 @@ function Properties() {
       if (unitModalMode === "edit" && editingUnit) {
         toast.success("Unit updated successfully");
       } else {
-        console.log("uuid", unitData.propertyId)
+        console.log("uuid", unitData.propertyId);
         await dispatch(fetchCreateUnit(unitData));
         toast.success("Unit added successfully");
       }
@@ -575,10 +574,8 @@ function Properties() {
           </div>
         </div>
 
-
-
         {/* Properties Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {filteredProperties.length ? (
             filteredProperties?.map((property) => (
               <Card
@@ -740,16 +737,15 @@ function Properties() {
 
                     {/* View Button */}
 
-                 
-
                     <Button
                       className="w-full bg-[#B200FF] hover:bg-[#B200FF] text-white"
-                      onClick={() => navigate(`/viewunits`)}
+                      onClick={() =>
+                        navigate(`/viewunits`, { state: { property } })
+                      }
                     >
                       <img src={eyeImg} alt="eye" className="w-4 h-4" />
                       <p className="">View</p>
                     </Button>
-
                   </div>
                 </CardContent>
               </Card>
@@ -858,8 +854,9 @@ function Properties() {
                       onChange={(e) =>
                         handleInputChange("propertyName", e.target.value)
                       }
-                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${errors.propertyName ? "border-red-500" : ""
-                        }`}
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
+                        errors.propertyName ? "border-red-500" : ""
+                      }`}
                       disabled={modalMode === "view"}
                     />
                     {errors.propertyName && (
@@ -880,8 +877,9 @@ function Properties() {
                       disabled={modalMode === "view"}
                     >
                       <SelectTrigger
-                        className={`bg-white border border-[#E5E5E5] shadow-lg text-[#7D7D7D] font-semibold ${errors.propertyType ? "border-red-500" : ""
-                          }`}
+                        className={`bg-white border border-[#E5E5E5] shadow-lg text-[#7D7D7D] font-semibold ${
+                          errors.propertyType ? "border-red-500" : ""
+                        }`}
                       >
                         <SelectValue placeholder="Property Type" />
                       </SelectTrigger>
@@ -937,8 +935,9 @@ function Properties() {
                       onChange={(e) =>
                         handleInputChange("squareFeet", e.target.value)
                       }
-                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${errors.squareFeet ? "border-red-500" : ""
-                        }`}
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
+                        errors.squareFeet ? "border-red-500" : ""
+                      }`}
                       disabled={modalMode === "view"}
                       type="number"
                     />
@@ -960,8 +959,9 @@ function Properties() {
                     onChange={(e) =>
                       handleInputChange("address", e.target.value)
                     }
-                    className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] min-h-[80px] ${errors.address ? "border-red-500" : ""
-                      }`}
+                    className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] min-h-[80px] ${
+                      errors.address ? "border-red-500" : ""
+                    }`}
                     disabled={modalMode === "view"}
                   />
                   {errors.address && (
@@ -996,8 +996,9 @@ function Properties() {
                       onChange={(e) =>
                         handleInputChange("ownerName", e.target.value)
                       }
-                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${errors.ownerName ? "border-red-500" : ""
-                        }`}
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
+                        errors.ownerName ? "border-red-500" : ""
+                      }`}
                       disabled={modalMode === "view"}
                     />
                     {errors.ownerName && (
@@ -1015,8 +1016,9 @@ function Properties() {
                       onChange={(e) =>
                         handleInputChange("email", e.target.value)
                       }
-                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${errors.email ? "border-red-500" : ""
-                        }`}
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
+                        errors.email ? "border-red-500" : ""
+                      }`}
                       disabled={modalMode === "view"}
                     />
                     {errors.email && (
@@ -1036,8 +1038,9 @@ function Properties() {
                       onChange={(e) =>
                         handleInputChange("phone", e.target.value)
                       }
-                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${errors.phone ? "border-red-500" : ""
-                        }`}
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
+                        errors.phone ? "border-red-500" : ""
+                      }`}
                       disabled={modalMode === "view"}
                     />
                     {errors.phone && (
@@ -1095,7 +1098,6 @@ function Properties() {
           </DialogContent>
         </Dialog>
 
-
         {/* Delete Confirmation Modal */}
         <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
           <DialogContent className="max-w-md fixed top-2/3 left-3/4 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-lg shadow-xl p-6">
@@ -1133,12 +1135,13 @@ function Properties() {
 
         {/* Unit Edit and Delete */}
         {isUnitModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 no-scrollbar">
-            <div className="max-w-[650px] w-full bg-white rounded-lg shadow-xl p-6 overflow-y-auto max-h-[90vh]">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 ">
+            <div className="max-w-[650px] w-full bg-white rounded-lg shadow-xl p-6 overflow-y-auto max-h-[95vh] no-scrollbar">
               {/* Header */}
               <div className="pb-2 border-b border-gray-200 mb-4">
                 <h2 className="text-xl font-semibold text-black flex items-center gap-2">
-                  🏢 {unitModalMode === "edit" ? "Edit Unit" : "Add New Unit"}
+                  <Building2 />{" "}
+                  {unitModalMode === "edit" ? "Edit Unit" : "Add New Unit"}
                 </h2>
               </div>
 
@@ -1175,8 +1178,8 @@ function Properties() {
                 </div>
 
                 {/* Unit Information */}
-                <h2 className="font-semibold text-lg flex items-center gap-2 mb-2">
-                  🏢 Unit Information
+                <h2 className="font-semibold text-lg flex items-center gap-2 mb-2 ">
+                  <Building2 /> Unit Information
                 </h2>
 
                 {/* Form Fields */}

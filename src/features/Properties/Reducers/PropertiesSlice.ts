@@ -1,9 +1,20 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+interface Unit {
+  id: string;
+  propertyId: string;
+  name: string;
+  sqFeet: string;
+  address: string;
+  image?: string;
+  status?: 'occupied' | 'vacant';
+}
+
 interface Property {
   id: string;
   name: string;
   location?: string;
+  units?: Unit[];
 }
 
 const propertySlice = createSlice({
@@ -12,6 +23,7 @@ const propertySlice = createSlice({
     data: [] as Property[],
     loading: false,
     error: null as string | null,
+    units: [] as Unit[],
   },
   reducers: {
     setProperty(state, action) {
@@ -43,8 +55,18 @@ const propertySlice = createSlice({
       state.data = state.data.filter((prop) => prop.id !== action.payload);
     },
     addUnit(state, action) {
-      state.data.push(action.payload);
+      state.units.push(action.payload);
       state.loading = false;
+    },
+    setUnits(state, action) {
+      state.units = action.payload;
+      state.loading = false;
+    },
+    updateUnit(state, action) {
+      const index = state.units.findIndex(unit => unit.uuid === action.payload.uuid);
+      if (index !== -1) {
+        state.units[index] = { ...state.units[index], ...action.payload };
+      }
     },
   },
 });
@@ -57,6 +79,8 @@ export const {
   updateProperty,
   removeProperty,
   addUnit,
+  setUnits, 
+  updateUnit,
 } = propertySlice.actions;
 
 export default propertySlice.reducer;

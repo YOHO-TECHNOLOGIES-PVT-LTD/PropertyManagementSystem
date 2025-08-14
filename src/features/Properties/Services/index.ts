@@ -64,3 +64,25 @@ export const createUnit = async (data: any) => {
     throw error
   }
 }
+
+export const GetunitPropertyID=async(id:any)=>{
+  try {
+    const res=await Client.unit.getbypropertyid(id)
+    console.log("Getting Unit:",res)
+    return res
+  } catch (error) {
+    console.log("Error Getting unit:",error)
+    throw error
+  }
+}
+
+export const updatePropertyId=async(uuid:any,data:any)=>{
+  try {
+    const res=await Client.unit.update(uuid,data);
+    console.log("Update data:",res)
+    return res
+  } catch (error) {
+    console.log("Error update unit:",error)
+    throw error
+  }
+}

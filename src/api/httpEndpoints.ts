@@ -19,6 +19,8 @@ const generateEndPoints = () => {
             create: "/api/unit/create",
             getAll: "/api/unit/",
             get: "/api/unit/:uuid",
+            getbyId:"/api/unit/get/",
+            update:"/api/unit/",
         },
         tenant: {
             create: "/api/tenant/create",
