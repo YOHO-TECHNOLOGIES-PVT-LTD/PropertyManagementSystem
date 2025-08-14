@@ -1,8 +1,10 @@
-import React from 'react'
+// import React from 'react'
+
+import Reports from "../../components/Reports/Reports"
 
 function FinancialReports() {
   return (
-    <div>FinancialReports</div>
+    <div><Reports/></div>
   )
 }
 
