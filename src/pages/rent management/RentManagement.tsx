@@ -1,8 +1,11 @@
 import React from 'react'
+import Rent from '../../components/RentManagement/Rent'
 
 function RentManagement() {
   return (
-    <div>RentManagement</div>
+    <div>
+      <Rent />
+    </div>
   )
 }
 

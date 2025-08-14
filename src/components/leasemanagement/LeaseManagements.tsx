@@ -39,7 +39,9 @@ const LeaseCard = ({ title, count, bg, icon, iconBg }: LeaseCardProps) => {
           >
             <img src={icon} className="w-5 h-5" alt="icon" />
           </div>
-          <p className="font-afacad font-semibold text-[18px] text-[#7D7D7D] leading-[100%] tracking-[0%] capitalize">{title}</p>
+          <p className="font-afacad font-semibold text-[18px] text-[#7D7D7D] leading-[100%] tracking-[0%] capitalize">
+            {title}
+          </p>
         </div>
         <h2 className="text-xl font-semibold">{count}</h2>
       </div>
@@ -98,8 +100,11 @@ const LeaseManagement = () => {
   ];
 
   const filteredLeases = leases.filter((lease) => {
-    const matchesSearch = lease.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === "All Status" || lease.status === statusFilter;
+    const matchesSearch = lease.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesStatus =
+      statusFilter === "All Status" || lease.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
 
@@ -128,19 +133,35 @@ const LeaseManagement = () => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="text-sm text-base text-gray-500">Full Name</label>
-            <input className="border text-[#7D7D7D] p-3 rounded-lg w-full" placeholder="JohnDoe" />
+            <input
+              className="border text-[#7D7D7D] p-3 rounded-lg w-full"
+              placeholder="JohnDoe"
+            />
           </div>
           <div>
-            <label className="text-sm text-base text-gray-500">Email Address</label>
-            <input className="border text-[#7D7D7D] p-3 rounded-lg w-full" placeholder="jondoe@Email.Com" />
+            <label className="text-sm text-base text-gray-500">
+              Email Address
+            </label>
+            <input
+              className="border text-[#7D7D7D] p-3 rounded-lg w-full"
+              placeholder="jondoe@Email.Com"
+            />
           </div>
           <div>
-            <label className="text-sm text-base text-gray-500">Phone Number</label>
-            <input className="border text-[#7D7D7D] p-3 rounded-lg w-full" placeholder="+9109876543" />
+            <label className="text-sm text-base text-gray-500">
+              Phone Number
+            </label>
+            <input
+              className="border text-[#7D7D7D] p-3 rounded-lg w-full"
+              placeholder="+9109876543"
+            />
           </div>
           <div>
             <label className="text-sm text-base text-gray-500">Unit</label>
-            <input className="border text-[#7D7D7D] p-3 rounded-lg w-full" placeholder="Unit101" />
+            <input
+              className="border text-[#7D7D7D] p-3 rounded-lg w-full"
+              placeholder="Unit101"
+            />
           </div>
         </div>
       </div>
@@ -153,12 +174,22 @@ const LeaseManagement = () => {
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-sm text-base text-gray-500">Rent Amount</label>
-            <input className="border text-[#7D7D7D] p-3 rounded-lg w-full" placeholder="₹25,000 "/>
+            <label className="text-sm text-base text-gray-500">
+              Rent Amount
+            </label>
+            <input
+              className="border text-[#7D7D7D] p-3 rounded-lg w-full"
+              placeholder="₹25,000 "
+            />
           </div>
           <div>
-            <label className="text-sm text-base text-gray-500">Security Deposit</label>
-            <input className="border text-[#7D7D7D] p-3 rounded-lg w-full" placeholder="₹50,000 " />
+            <label className="text-sm text-base text-gray-500">
+              Security Deposit
+            </label>
+            <input
+              className="border text-[#7D7D7D] p-3 rounded-lg w-full"
+              placeholder="₹50,000 "
+            />
           </div>
         </div>
       </div>
@@ -171,16 +202,26 @@ const LeaseManagement = () => {
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col">
-            <label className="text-sm text-base text-gray-500">Lease Start Date</label>
+            <label className="text-sm text-base text-gray-500">
+              Lease Start Date
+            </label>
             <div className="flex items-center border rounded-lg px-3">
-              <input className="flex-1 text-[#7D7D7D] p-3 outline-none" placeholder="Jun1,2025" />
+              <input
+                className="flex-1 text-[#7D7D7D] p-3 outline-none"
+                placeholder="Jun1,2025"
+              />
               <img src={calendar} alt="calendar" className="w-5 h-5" />
             </div>
           </div>
           <div className="flex flex-col">
-            <label className="text-sm text-base text-gray-500">Lease End Date</label>
+            <label className="text-sm text-base text-gray-500">
+              Lease End Date
+            </label>
             <div className="flex items-center border rounded-lg px-3">
-              <input className="flex-1 text-[#7D7D7D] p-3 outline-none" placeholder="May31,2025" />
+              <input
+                className="flex-1 text-[#7D7D7D] p-3 outline-none"
+                placeholder="May31,2025"
+              />
               <img src={calendar} alt="calendar" className="w-5 h-5" />
             </div>
           </div>
@@ -195,12 +236,22 @@ const LeaseManagement = () => {
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-sm text-base text-gray-500">Contact Name</label>
-            <input className="border text-[#7D7D7D] p-3 rounded-lg w-full" placeholder="John Doe" />
+            <label className="text-sm text-base text-gray-500">
+              Contact Name
+            </label>
+            <input
+              className="border text-[#7D7D7D] p-3 rounded-lg w-full"
+              placeholder="John Doe"
+            />
           </div>
           <div>
-            <label className="text-sm text-base text-gray-500">Contact Phone</label>
-            <input className="border text-[#7D7D7D] p-3 rounded-lg w-full" placeholder="+91234567890" />
+            <label className="text-sm text-base text-gray-500">
+              Contact Phone
+            </label>
+            <input
+              className="border text-[#7D7D7D] p-3 rounded-lg w-full"
+              placeholder="+91234567890"
+            />
           </div>
         </div>
       </div>
@@ -212,10 +263,22 @@ const LeaseManagement = () => {
           <h3 className="font-semibold">Bank Details</h3>
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <input className="border p-3 rounded-lg" placeholder="Enter Account Number" />
-          <input className="border p-3 rounded-lg" placeholder="Enter Bank Name" />
-          <input className="border p-3 rounded-lg" placeholder="Enter IFSC Code" />
-          <input className="border p-3 rounded-lg" placeholder="Enter Account Holder Name" />
+          <input
+            className="border p-3 rounded-lg"
+            placeholder="Enter Account Number"
+          />
+          <input
+            className="border p-3 rounded-lg"
+            placeholder="Enter Bank Name"
+          />
+          <input
+            className="border p-3 rounded-lg"
+            placeholder="Enter IFSC Code"
+          />
+          <input
+            className="border p-3 rounded-lg"
+            placeholder="Enter Account Holder Name"
+          />
         </div>
       </div>
 
@@ -240,15 +303,37 @@ const LeaseManagement = () => {
             <h1 className="text-2xl font-Afacad font-bold">Lease Management</h1>
             <p className="text-gray-500">Manage Tenant Leases And Agreements</p>
           </div>
-
           {/* Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-10 font-Afacad">
-            <LeaseCard title="Active Leases" count="2" bg={yellow} icon={lease1} iconBg="bg-purple-100" />
-            <LeaseCard title="Expiring Soon" count="1" bg={purple} icon={lease2} iconBg="bg-yellow-100" />
-            <LeaseCard title="Expired" count="1" bg={green} icon={lease3} iconBg="bg-green-100" />
-            <LeaseCard title="Security Deposits" count="₹1,56,000" bg={pink} icon={lease4} iconBg="bg-pink-100" />
+            <LeaseCard
+              title="Active Leases"
+              count="2"
+              bg={yellow}
+              icon={lease1}
+              iconBg="bg-purple-100"
+            />
+            <LeaseCard
+              title="Expiring Soon"
+              count="1"
+              bg={purple}
+              icon={lease2}
+              iconBg="bg-yellow-100"
+            />
+            <LeaseCard
+              title="Expired"
+              count="1"
+              bg={green}
+              icon={lease3}
+              iconBg="bg-green-100"
+            />
+            <LeaseCard
+              title="Security Deposits"
+              count="₹1,56,000"
+              bg={pink}
+              icon={lease4}
+              iconBg="bg-pink-100"
+            />
           </div>
-
           {/* Search + Filter */}
           <div className="flex items-center font-Afacad justify-between mb-8">
             <input
@@ -268,7 +353,13 @@ const LeaseManagement = () => {
               </button>
               {isStatusDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg p-4 space-y-3 font-semibold text-gray-700 z-50">
-                  {["All Status", "Active", "Expired", "Terminated", "Renewed"].map((status) => (
+                  {[
+                    "All Status",
+                    "Active",
+                    "Expired",
+                    "Terminated",
+                    "Renewed",
+                  ].map((status) => (
                     <button
                       key={status}
                       onClick={() => {
@@ -286,7 +377,6 @@ const LeaseManagement = () => {
               )}
             </div>
           </div>
-
           {/* Table */}
           <div className="bg-white p-6 rounded-lg font-Afacad shadow-md overflow-x-auto">
             <table className="min-w-full text-[18px] text-left font-Afacad">
@@ -302,7 +392,10 @@ const LeaseManagement = () => {
               </thead>
               <tbody>
                 {filteredLeases.map((lease) => (
-                  <tr key={lease.id} className="bg-white rounded-lg shadow-md">
+                  <tr
+                    key={lease.id}
+                    className="bg-white rounded-[50px] shadow-md"
+                  >
                     <td className="py-5 px-6 flex items-center space-x-4 rounded-lg">
                       <img
                         src={lease.profilePic}
@@ -367,9 +460,10 @@ const LeaseManagement = () => {
               </tbody>
             </table>
           </div>
-        </>
-      ) : (
-  <LeaseDetailsForm lease={selectedLease} />
+           
+        </>
+      ) : (
+        <LeaseDetailsForm lease={selectedLease} />
       )}
     </div>
   );

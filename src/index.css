@@ -1,31 +1,41 @@
-@import url('https://fonts.googleapis.com/css2?family=Afacad:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Afacad:wght@400;500;600;700&display=swap');
 
-body {
-  font-family: 'Afacad', sans-serif;
-}
+    * {
+      font-family: 'Afacad', sans-serif;
+    }
 
+    .clip-hex {
+      clip-path: polygon(50% 0%,
+          /* Top */
+          93% 25%,
+          /* Top right */
+          93% 75%,
+          /* Bottom right */
+          50% 100%,
+          /* Bottom */
+          7% 75%,
+          /* Bottom left */
+          7% 25%
+          /* Top left */
+        );
+      border-radius: 8px;
+      /* adjust for more/less molding */
+    }
 
-.clip-hex {
-  clip-path: polygon(
-    50% 0%,   /* Top */
-    93% 25%,  /* Top right */
-    93% 75%,  /* Bottom right */
-    50% 100%, /* Bottom */
-    7% 75%,   /* Bottom left */
-    7% 25%    /* Top left */
-  );
-  border-radius: 8px; /* adjust for more/less molding */
-}
+@import 'tailwindcss';
 
+@import "tw-animate-css";
 
-.no-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
-}
-.no-scrollbar {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-}
+@custom-variant dark (&:is(.dark *));
 
-.input {
-  @apply w-full px-4 py-2 border border-gray-300 rounded-md text-sm outline-none focus:border-purple-500 placeholder-gray-400;
-}
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+      /* Chrome, Safari */
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      /* IE and Edge */
+      scrollbar-width: none;
+      /* Firefox */
+    }
