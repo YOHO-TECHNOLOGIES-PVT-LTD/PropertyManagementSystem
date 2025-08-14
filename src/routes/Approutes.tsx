@@ -12,6 +12,7 @@ import Settings from '../pages/settings/Settings';
 import Maintenance from '../pages/maintenance/Maintenance';
 import Login from '../pages/auth/login/Login';
 import { useAuth } from '../components/auth/AuthContext';
+import LandHome from '../pages/Land/LandHome';
 
 function Approutes() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -39,7 +40,7 @@ function Approutes() {
         <Route path='/reports' element={<FinancialReports />} />
         <Route path='/settings' element={<Settings />} />
         <Route path='/maintenance' element={<Maintenance />} />
-
+        <Route path='/lands' element={<LandHome />} />
       </Route>
     </Routes>
   )
