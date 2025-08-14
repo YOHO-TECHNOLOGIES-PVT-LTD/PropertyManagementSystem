@@ -31,7 +31,21 @@ interface LeaseData {
   email?: string
   phone?: string
   address?: string
-  
+  propertyType?: string
+  propertyName?: string
+  paymentStatus?: string
+  maintenanceCharge?: string
+  emergencyContact?: {
+    name: string
+    phone: string
+    relation: string
+  }
+  bankDetails?: {
+    accountNumber: string
+    bankName: string
+    ifscCode: string
+    accountHolderName: string
+  }
 }
 
 function LeaseManagement() {
@@ -61,7 +75,7 @@ function LeaseManagement() {
     setSelectedLease(null)
   }
 
-  // Helper function to format date
+ 
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A"
     const date = new Date(dateString)
@@ -72,7 +86,7 @@ function LeaseManagement() {
     })
   }
 
-  // Helper function to calculate days difference
+ 
   const getDaysDifference = (dateString: string) => {
     if (!dateString) return 0
     const targetDate = new Date(dateString)
@@ -82,7 +96,7 @@ function LeaseManagement() {
     return daysDiff
   }
 
-  // Helper function to get expiry note
+
   const getExpiryNote = (endDate: string) => {
     if (!endDate) return "N/A"
     const daysDiff = getDaysDifference(endDate)
@@ -97,7 +111,7 @@ function LeaseManagement() {
     }
   }
 
-  // Transform backend data to frontend format
+
   const transformedLeaseData: LeaseData[] = Leases.filter((lease: any) => lease.tenantId && lease.tenantId !== null).map((lease: any) => {
     const tenant = lease.tenantId
     const unit = tenant?.unit
@@ -105,7 +119,6 @@ function LeaseManagement() {
     const personalInfo = tenant?.personal_information
     const leaseDuration = tenant?.lease_duration
     
-    // Calculate lease duration properly
     let duration = "N/A"
     let period = "N/A"
     
@@ -113,7 +126,6 @@ function LeaseManagement() {
       const start = new Date(leaseDuration.start_date)
       const end = new Date(leaseDuration.end_date)
       
-      // If both dates are same, assume it's a 1-year lease from that date
       if (start.getTime() === end.getTime()) {
         const actualEnd = new Date(start)
         actualEnd.setFullYear(actualEnd.getFullYear() + 1)
@@ -126,19 +138,20 @@ function LeaseManagement() {
       }
     }
 
-    // Format deposit amount properly
     let formattedDeposit = "N/A"
     if (unit?.unit_deposit) {
       const depositStr = unit.unit_deposit.toString().replace(/,/g, '')
       const depositNum = parseInt(depositStr)
-      formattedDeposit = `₹${depositNum.toLocaleString('en-IN')}`
+      if (!isNaN(depositNum)) {
+        formattedDeposit = `₹${depositNum.toLocaleString('en-IN')}`
+      }
     }
     
    
 return {
   id: lease._id || lease.uuid,
   name: personalInfo?.full_name || "No Name",
-  unit: `${unit?.unit_name || "N/A"} • ${unit?.unit_sqft ? unit.unit_sqft + ' sqft' : 'Commercial'}`,
+  unit: `${unit?.unit_name || "N/A"} `,
   avatar: man,
   period: period,
   duration: duration,
@@ -157,28 +170,34 @@ return {
   phone: personalInfo?.phone,
   address: personalInfo?.address,
 
-maintenanceCharge: unit?.maintenance_charge ? `₹${parseInt(unit.maintenance_charge).toLocaleString('en-IN')}` : "Not Available",
-emergencyContact: {
-  name: tenant?.emergency_contact?.name || "",        
-  phone: tenant?.emergency_contact?.phone || "",      
-  relation: tenant?.emergency_contact?.relation || "" 
-},
+  propertyType: property?.property_type || "Not Available",
+  propertyName: property?.property_name || "Not Available",
+  
+  paymentStatus: "Not Available",
+
+  maintenanceCharge: unit?.maintenance_charge ? `₹${parseInt(unit.maintenance_charge).toLocaleString('en-IN')}` : "Not Available",
+  emergencyContact: {
+    name: tenant?.emergency_contact?.name || "Not Available",        
+    phone: tenant?.emergency_contact?.phone || "Not Available",      
+    relation: tenant?.emergency_contact?.relation || "Not Available" 
+  },
   
  
-bankDetails: {
-  accountNumber: tenant?.bank_details?.account_number || "Not Available",
-  bankName: tenant?.bank_details?.bank_name || "Not Available", 
-  ifscCode: tenant?.bank_details?.ifsc_code || "Not Available",
-  accountHolderName: tenant?.bank_details?.account_holder_name || personalInfo?.full_name || "Not Available"
-}
+  bankDetails: {
+    accountNumber: tenant?.bank_details?.account_number || "Not Available",
+    bankName: tenant?.bank_details?.bank_name || "Not Available", 
+    ifscCode: tenant?.bank_details?.ifsc_code || "Not Available",
+    accountHolderName: tenant?.bank_details?.account_holder_name || personalInfo?.full_name || "Not Available"
+  }
 }
   })
 
-  // Calculate statistics from the transformed data
   const activeLeasesCount = transformedLeaseData.filter(lease => lease.status === 'Active').length
   const totalDeposits = transformedLeaseData.reduce((total, lease) => {
+    if (lease.deposit === "N/A") return total
     const deposit = lease.deposit.replace(/[₹,]/g, '')
-    return total + (parseInt(deposit) || 0)
+    const depositNum = parseInt(deposit)
+    return total + (isNaN(depositNum) ? 0 : depositNum)
   }, 0)
 
   const cardData = [
@@ -212,7 +231,7 @@ bankDetails: {
     {
       id: 4,
       title: "Security Deposits",
-      value: statsData.totalDepositAmount 
+      value: statsData.totalDepositAmount && statsData.totalDepositAmount > 0
         ? `₹${statsData.totalDepositAmount.toLocaleString('en-IN')}`
         : `₹${totalDeposits.toLocaleString('en-IN')}`,
       icon: Shield,
@@ -250,7 +269,6 @@ bankDetails: {
             const IconComponent = card.icon
             return (
               <Card key={card.id} className="relative overflow-hidden shadow-md border w-[298px] h-[127px]">
-                {/* Background image with precise positioning */}
                 <div
                   className="absolute inset-0 bg-no-repeat bg-[length:150%] opacity-35"
                   style={{
@@ -261,10 +279,8 @@ bankDetails: {
                   }}
                 ></div>
 
-                {/* White overlay */}
                 <div className="absolute inset-0 bg-white opacity-30"></div>
 
-                {/* Card content with perfect vertical alignment */}
                 <CardContent className="relative h-full flex flex-col justify-between pb-5">
                   <div className="flex items-center gap-3 ">
                     <div className={`p-2  ${card.iconBgColor} rounded-lg`}>
@@ -322,7 +338,6 @@ bankDetails: {
 
         <Card className="shadow-lg border rounded-2xl overflow-hidden ">
           <CardContent className="pl-3 pr-3 ">
-            {/* Header Section with separate shadow */}
            <div className="border shadow-md rounded-xl mb-[30px] overflow-hidden ">
 
               <div className="overflow-x-auto ">
@@ -349,7 +364,6 @@ bankDetails: {
               </div>
             </div>
 
-            {/* Body Section with separate shadow */}
             <div className="space-y-6 ">
               {filteredLeaseData.length > 0 ? (
                 filteredLeaseData.map((lease) => (
@@ -447,7 +461,6 @@ bankDetails: {
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 backdrop-blur-md" onClick={handleCloseForm} />
 
-          {/* Modal content */}
           <div className="relative z-10 w-full max-w-4xl max-h-[90vh] overflow-y-auto mx-4">
             <Leaseviewform leaseData={selectedLease} onClose={handleCloseForm} />
           </div>

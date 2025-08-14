@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
+
 import { Button } from "../../components/ui/button";
 import { Accordion, AccordionContent, AccordionItem } from "../../components/ui/accordion";
-import { Calendar, X, User, DollarSign, FileText, Phone, Building } from "lucide-react";
+import {  X, User, DollarSign, FileText } from "lucide-react";
 
 interface LeaseData {
   id: string;
@@ -21,6 +21,10 @@ interface LeaseData {
   email?: string;
   phone?: string;
   address?: string;
+  propertyType?: string;
+  propertyName?: string;
+  paymentStatus?: string;
+  maintenanceCharge?: string;
   emergencyContact?: {
     name: string;
     phone: string;
@@ -60,12 +64,9 @@ interface FormErrors {
   bankName?: string;
   ifscCode?: string;
   accountHolderName?: string;
-
-  
 }
 
 export const Leaseviewform = ({ leaseData, onClose }: LeaseViewFormProps) => {
-  // Extract lease period start and end dates
   const extractDatesFromPeriod = (period: string) => {
     if (!period || period === "N/A") return { startDate: "", endDate: "" };
     
@@ -83,18 +84,16 @@ export const Leaseviewform = ({ leaseData, onClose }: LeaseViewFormProps) => {
 
   const [formData, setFormData] = useState({
     fullName: leaseData?.name || "",
-    email: leaseData?.email || "",
-    phone: leaseData?.phone || "",
-    propertyType: "",
-    propertyName: "",
+    email: leaseData?.email || "Not Available",
+    phone: leaseData?.phone || "Not Available",
+    propertyType: leaseData?.propertyType || "Not Available",
+    propertyName: leaseData?.propertyName || "Not Available",
     unit: leaseData?.unit || "",
-    address: leaseData?.address || "",
+    address: leaseData?.address || "Not Available",
     monthlyRent: leaseData?.rent || "",
     securityDeposit: leaseData?.deposit || "",
-    paymentStatus: "",
-      maintenanceCharge: leaseData?.maintenanceCharge || "Not Available",  
-
-    
+    paymentStatus: leaseData?.paymentStatus || "Not Available",
+    maintenanceCharge: leaseData?.maintenanceCharge || "Not Available",
     leaseStartDate: startDate,
     leaseEndDate: leaseData?.expiry || endDate,
     contactName: leaseData?.emergencyContact?.name || "Not Available",
@@ -104,8 +103,8 @@ export const Leaseviewform = ({ leaseData, onClose }: LeaseViewFormProps) => {
     bankName: leaseData?.bankDetails?.bankName || "Not Available",
     ifscCode: leaseData?.bankDetails?.ifscCode || "Not Available",
     accountHolderName: leaseData?.bankDetails?.accountHolderName || "Not Available"
-   
   });
+  
   const [errors, setErrors] = useState<FormErrors>({});
 
   const validateForm = () => {
@@ -146,7 +145,7 @@ export const Leaseviewform = ({ leaseData, onClose }: LeaseViewFormProps) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({ ...prev, [id]: value }));
-    // Clear error when user types
+   
     if (errors[id as keyof FormErrors]) {
       setErrors(prev => ({ ...prev, [id]: undefined }));
     }
@@ -154,7 +153,6 @@ export const Leaseviewform = ({ leaseData, onClose }: LeaseViewFormProps) => {
 
   const handleSelectChange = (field: keyof typeof formData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user selects
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
@@ -163,7 +161,6 @@ export const Leaseviewform = ({ leaseData, onClose }: LeaseViewFormProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      // Form is valid, proceed with submission
       console.log("Form submitted:", formData);
       onClose();
     }
@@ -249,37 +246,28 @@ export const Leaseviewform = ({ leaseData, onClose }: LeaseViewFormProps) => {
                     <Label htmlFor="propertyType" className="text-sm text-gray-600 font-normal">
                       Property Type
                     </Label>
-                    <Select
+                    <Input
+                      id="propertyType"
                       value={formData.propertyType}
-                      onValueChange={(value) => handleSelectChange("propertyType", value)}
-                    >
-                      <SelectTrigger className="h-[48px] w-[369px] border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400">
-                        <SelectValue placeholder="Flat" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="flat">Flat</SelectItem>
-                        <SelectItem value="house">House</SelectItem>
-                        <SelectItem value="villa">Villa</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      onChange={handleInputChange}
+                      placeholder="Enter Property Type"
+                      className="h-[48px] w-[369px] border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400"
+                      readOnly
+                    />
                     {errors.propertyType && <p className="text-red-500 text-xs mt-1">{errors.propertyType}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="propertyName" className="text-sm text-gray-600 font-normal">
                       Property Name
                     </Label>
-                    <Select
+                    <Input
+                      id="propertyName"
                       value={formData.propertyName}
-                      onValueChange={(value) => handleSelectChange("propertyName", value)}
-                    >
-                      <SelectTrigger className="h-[48px] w-[369px] border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400">
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="property1">Property 1</SelectItem>
-                        <SelectItem value="property2">Property 2</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      onChange={handleInputChange}
+                      placeholder="Enter Property Name"
+                      className="h-[48px] w-[369px] border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400"
+                      readOnly
+                    />
                     {errors.propertyName && <p className="text-red-500 text-xs mt-1">{errors.propertyName}</p>}
                   </div>
                   <div className="space-y-2">
@@ -326,20 +314,7 @@ export const Leaseviewform = ({ leaseData, onClose }: LeaseViewFormProps) => {
               </div>
               <AccordionContent className="px-6 pb-6">
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="monthlyRent" className="text-sm text-gray-600 font-normal">
-                      Monthly Rent
-                    </Label>
-                    <Input
-                      id="monthlyRent"
-                      value={formData.monthlyRent}
-                      onChange={handleInputChange}
-                      placeholder="$10,000"
-                      className="h-[48px] w-[369px] border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400"
-                      readOnly
-                    />
-                    {errors.monthlyRent && <p className="text-red-500 text-xs mt-1">{errors.monthlyRent}</p>}
-                  </div>
+                  
                   <div className="space-y-2">
                     <Label htmlFor="securityDeposit" className="text-sm text-gray-600 font-normal">
                       Security Deposit
@@ -358,33 +333,19 @@ export const Leaseviewform = ({ leaseData, onClose }: LeaseViewFormProps) => {
                     <Label htmlFor="paymentStatus" className="text-sm text-gray-600 font-normal">
                       Payment Status
                     </Label>
-                    <Select
-                      value={formData.paymentStatus}
-                      onValueChange={(value) => handleSelectChange("paymentStatus", value)}
-                    >
-                      <SelectTrigger className="h-[48px] w-[369px] border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400">
-                        <SelectValue placeholder="Paid" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="paid">Paid</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="overdue">Overdue</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    {errors.paymentStatus && <p className="text-red-500 text-xs mt-1">{errors.paymentStatus}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="maintenanceCharge" className="text-sm text-gray-600 font-normal">
-                      Maintenance Charge
-                    </Label>
                     <Input
-                      id="maintenanceCharge"
-                      value={formData.maintenanceCharge}
+                      id="paymentStatus"
+                      value={formData.paymentStatus}
                       onChange={handleInputChange}
-                      placeholder="Free Maintenance Charge"
+                      placeholder="Enter payment status"
                       className="h-[48px] w-[369px] border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400"
+                      readOnly
                     />
+                    {errors.paymentStatus && (
+                      <p className="text-red-500 text-xs mt-1">{errors.paymentStatus}</p>
+                    )}
                   </div>
+                 
                 </div>
               </AccordionContent>
             </AccordionItem>
@@ -414,7 +375,7 @@ export const Leaseviewform = ({ leaseData, onClose }: LeaseViewFormProps) => {
                         className="h-[48px] w-[369px] border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400"
                         readOnly
                       />
-                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                     
                     </div>
                     {errors.leaseStartDate && <p className="text-red-500 text-xs mt-1">{errors.leaseStartDate}</p>}
                   </div>
@@ -431,7 +392,6 @@ export const Leaseviewform = ({ leaseData, onClose }: LeaseViewFormProps) => {
                         className="h-[48px] w-[369px] border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400"
                         readOnly
                       />
-                      <Calendar className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                     </div>
                     {errors.leaseEndDate && <p className="text-red-500 text-xs mt-1">{errors.leaseEndDate}</p>}
                   </div>
@@ -439,136 +399,7 @@ export const Leaseviewform = ({ leaseData, onClose }: LeaseViewFormProps) => {
               </AccordionContent>
             </AccordionItem>
 
-            {/* Emergency Contact */}
-            <AccordionItem value="emergency" className="border-b">
-              <div className="px-6 py-4 hover:no-underline">
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 bg-blue-500 rounded-sm flex items-center justify-center">
-                    <Phone className="w-3 h-3 text-white" />
-                  </div>
-                  <span className="text-base font-medium text-gray-900">Emergency Contact</span>
-                </div>
-              </div>
-              <AccordionContent className="px-6 pb-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="contactName" className="text-sm text-gray-600 font-normal">
-                      Contact Name
-                    </Label>
-                    <Input
-                      id="contactName"
-                      value={formData.contactName}
-                      onChange={handleInputChange}
-                      placeholder="John Doe"
-                      className="h-[48px] w-[369px] border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400"
-                      readOnly
-                    />
-                    {errors.contactName && <p className="text-red-500 text-xs mt-1">{errors.contactName}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="contactPhone" className="text-sm text-gray-600 font-normal">
-                      Contact Phone
-                    </Label>
-                    <Input
-                      id="contactPhone"
-                      value={formData.contactPhone}
-                      onChange={handleInputChange}
-                      placeholder="+91 9876543210"
-                      className="h-[48px] w-[369px] border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400"
-                      readOnly
-                    />
-                    {errors.contactPhone && <p className="text-red-500 text-xs mt-1">{errors.contactPhone}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="relationship" className="text-sm text-gray-600 font-normal">
-                      Relationship
-                    </Label>
-                    <Input
-                      id="relationship"
-                      value={formData.relationship}
-                      onChange={handleInputChange}
-                      placeholder="Spouse"
-                      className="h-[48px] w-[369px] border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400"
-                      readOnly
-                    />
-                    {errors.relationship && <p className="text-red-500 text-xs mt-1">{errors.relationship}</p>}
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-
-            {/* Bank Details */}
-            <AccordionItem value="bank" className="border-b-0">
-              <div className="px-6 py-4 hover:no-underline">
-                <div className="flex items-center gap-3">
-                  <div className="w-5 h-5 bg-blue-500 rounded-sm flex items-center justify-center">
-                    <Building className="w-3 h-3 text-white" />
-                  </div>
-                  <span className="text-base font-medium text-gray-900">Bank Details</span>
-                </div>
-              </div>
-              <AccordionContent className="px-6 pb-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="accountNumber" className="text-sm text-gray-600 font-normal">
-                      Account Number
-                    </Label>
-                    <Input
-                      id="accountNumber"
-                      value={formData.accountNumber}
-                      onChange={handleInputChange}
-                      placeholder="Your Account Number"
-                      className="h-[48px] w-[369px] border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400"
-                      readOnly
-                    />
-                    {errors.accountNumber && <p className="text-red-500 text-xs mt-1">{errors.accountNumber}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="bankName" className="text-sm text-gray-600 font-normal">
-                      Sort Name
-                    </Label>
-                    <Input
-                      id="bankName"
-                      value={formData.bankName}
-                      onChange={handleInputChange}
-                      placeholder="Your Bank Name"
-                      className="h-[48px] w-[369px] border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400"
-                      readOnly
-                    />
-                    {errors.bankName && <p className="text-red-500 text-xs mt-1">{errors.bankName}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="ifscCode" className="text-sm text-gray-600 font-normal">
-                      IFSC Code
-                    </Label>
-                    <Input
-                      id="ifscCode"
-                      value={formData.ifscCode}
-                      onChange={handleInputChange}
-                      placeholder="Your IFSC Code"
-                      className="h-[48px] w-[369px] border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400"
-                      readOnly
-                    />
-                    {errors.ifscCode && <p className="text-red-500 text-xs mt-1">{errors.ifscCode}</p>}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="accountHolderName" className="text-sm text-gray-600 font-normal">
-                      Account Holder Name
-                    </Label>
-                    <Input
-                      id="accountHolderName"
-                      value={formData.accountHolderName}
-                      onChange={handleInputChange}
-                      placeholder="Your Account Holder Name"
-                      className="h-[48px] w-[369px] border border-gray-300 placeholder:text-gray-500 hover:border-gray-400 focus:border-gray-400 focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:border-gray-400"
-                      readOnly
-                    />
-                    {errors.accountHolderName && <p className="text-red-500 text-xs mt-1">{errors.accountHolderName}</p>}
-                  </div>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+                 </Accordion>
         </div>
 
         {/* Footer */}
@@ -576,7 +407,6 @@ export const Leaseviewform = ({ leaseData, onClose }: LeaseViewFormProps) => {
           <Button className="bg-[#EBEFF3] hover:bg-[#EBEFF3] text-[#7D7D7D] px-8 h-10" onClick={onClose} type="button">
             Close
           </Button>
-         
         </div>
       </form>
     </div>
