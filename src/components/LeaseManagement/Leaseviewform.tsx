@@ -200,9 +200,10 @@ export const Leaseviewform = ({ leaseData, onClose }: LeaseViewFormProps) => {
               <AccordionContent className="px-6 pb-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="fullName" className="text-sm text-gray-600 font-normal">
-                      Full Name
+                     <Label htmlFor="email" className="text-sm text-gray-600 font-normal">
+                     Full Name
                     </Label>
+                     
                     <Input
                       id="fullName"
                       value={formData.fullName}
