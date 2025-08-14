@@ -13,9 +13,6 @@ import {
 } from "../../components/ui/select";
 import { useEffect, useState } from "react";
 import propertyImg1 from "../../assets/properties/property1.png";
-import propertyImg2 from "../../assets/properties/property2.png";
-import propertyImg3 from "../../assets/properties/property3.png";
-import propertyImg4 from "../../assets/properties/property4.png";
 import buildingBlue from "../../assets/properties/building-blue.png";
 import buildingGreen from "../../assets/properties/building-green.png";
 import buildingPink from "../../assets/properties/building-pink.png";
@@ -40,8 +37,8 @@ import {
   fetchGetProperties,
   fetchCreateProperty,
   fetchEditProperty,
+  fetchDeleteProperty,
 } from "../../features/Properties/Reducers/PropertiesThunk";
-import { editProperty } from "../../features/Properties/Services";
 
 type ModalMode = "add" | "view" | "edit";
 
@@ -69,99 +66,8 @@ interface Property {
   };
 }
 
-const initialProperties: Property[] = [
-  {
-    id: 1,
-    name: "Sunrise Apartments",
-    location: "123 Main Street, Downtown",
-    image: propertyImg1,
-    tag: "Apartments",
-    owner: {
-      name: "John Smith",
-      role: "OWNER/RENTAL",
-      avatar: "/professional-man.png",
-      phone: "+91 9876543210",
-      email: "john@example.com",
-      address: "123 Owner Street, Downtown",
-    },
-    stats: {
-      totalUnits: 55,
-      totalSquareFeet: 3000,
-      occupiedUnits: 50,
-      vacantUnits: 5,
-      occupancyRate: 83.3,
-    },
-  },
-  {
-    id: 2,
-    name: "Green Valley Complex",
-    location: "789 Pine Avenue, Westside",
-    image: propertyImg2,
-    tag: "Apartments",
-    owner: {
-      name: "Sarah Johnson",
-      role: "OWNER/RENTAL",
-      avatar: "/professional-woman-diverse.png",
-      phone: "+91 9876543210",
-      email: "sarah@example.com",
-      address: "789 Owner Avenue, Westside",
-    },
-    stats: {
-      totalUnits: 36,
-      totalSquareFeet: 4500,
-      occupiedUnits: 34,
-      vacantUnits: 2,
-      occupancyRate: 94.4,
-    },
-  },
-  {
-    id: 3,
-    name: "Rose Cottage Villa",
-    location: "123 Main Street, Downtown",
-    image: propertyImg3,
-    tag: "Villa",
-    owner: {
-      name: "William",
-      role: "OWNER/RENTAL",
-      avatar: "/bearded-man.png",
-      phone: "+91 9876543210",
-      email: "william@example.com",
-      address: "123 Owner Street, Downtown",
-    },
-    stats: {
-      totalUnits: 12,
-      totalSquareFeet: 6000,
-      occupiedUnits: 12,
-      vacantUnits: 0,
-      occupancyRate: 48.3,
-    },
-  },
-  {
-    id: 4,
-    name: "Orchard House",
-    location: "789 Pine Avenue, Westside",
-    image: propertyImg4,
-    tag: "House",
-    owner: {
-      name: "Michael",
-      role: "OWNER/RENTAL",
-      avatar: "/young-professional-man.png",
-      phone: "+91 9876543210",
-      email: "michael@example.com",
-      address: "789 Owner Avenue, Westside",
-    },
-    stats: {
-      totalUnits: 43,
-      totalSquareFeet: 2000,
-      occupiedUnits: 39,
-      vacantUnits: 4,
-      occupancyRate: 72.3,
-    },
-  },
-];
-
 function Properties() {
-  const [selectedType, setSelectedType] = useState<string>("All Types");
+  const [selectedType, setSelectedType] = useState<string>("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(
@@ -193,61 +99,47 @@ function Properties() {
     phone: "",
     ownerAddress: "",
   });
-
-  // const filteredProperties = properties.filter((property) => {
-  // 	// Filter by type
-  // 	const typeMatch =
-  // 		selectedType === 'All Types' || property.tag === selectedType;
-
-  // 	// Filter by search term
-  // 	const searchMatch =
-  // 		searchTerm === '' ||
-  // 		property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  // 		property.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  // 		property.owner.name.toLowerCase().includes(searchTerm.toLowerCase());
-
-  // 	return typeMatch && searchMatch;
-  // });
-  // Step 1: Map API data to UI-friendly shape
-  const mappedProperties: Property[] = properties?.map(
-    (p: any, index: number) => ({
+  const mappedProperties: Property[] =
+    properties?.map((p: any, index: number) => ({
       id: index + 1,
       name: p.property_name,
-      location: p.owner_information?.address ?? "",
-      image: p.image ?? propertyImg1,
+      location: p.property_address || p.owner_information?.address || "",
+      image: p.image || propertyImg1,
       tag: p.property_type,
       owner: {
-        name: p.owner_information?.full_name ?? "",
+        name: p.owner_information?.full_name || "",
         role: "OWNER/RENTAL",
         avatar: "/professional-man.png",
-        phone: p.owner_information?.phone ?? "",
-        email: p.owner_information?.email ?? "",
-        address: p.owner_information?.address ?? "",
+        phone: p.owner_information?.phone || "",
+        email: p.owner_information?.email || "",
+        address: p.owner_information?.address || "",
       },
       stats: {
-        totalUnits: p.total_units,
+        totalUnits: p.total_units || 0,
         totalSquareFeet: Number(p.square_feet) || 0,
-        occupiedUnits: p.occupied_units,
-        vacantUnits: p.vacant_units,
-        occupancyRate: p.occupancy_rate,
+        occupiedUnits: p.occupied_units || 0,
+        vacantUnits: p.vacant_units || 0,
+        occupancyRate: p.occupancy_rate || 0,
       },
-    })
-  );
+      uuid: p.uuid,
+    })) || [];
 
   // Step 2: Apply your filter
   const filteredProperties = mappedProperties.filter((property) => {
+    const propertyTag = property.tag?.toLowerCase() || "";
+    const searchTermLower = searchTerm.toLowerCase();
+
     const typeMatch =
-      selectedType === "All Types" || property.tag === selectedType;
+      selectedType === "all" || propertyTag === selectedType.toLowerCase();
 
     const searchMatch =
       searchTerm === "" ||
-      property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      property.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      property.owner.name.toLowerCase().includes(searchTerm.toLowerCase());
+      (property.name?.toLowerCase() || "").includes(searchTermLower) ||
+      (property.location?.toLowerCase() || "").includes(searchTermLower) ||
+      (property.owner?.name?.toLowerCase() || "").includes(searchTermLower);
 
     return typeMatch && searchMatch;
   });
-
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
@@ -323,46 +215,61 @@ function Properties() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.propertyName || !formData.propertyType || !formData.address) {
-      toast.error("Please fill in all required fields");
+    if (!formData.propertyName) {
+      toast.error("Property name is required");
+      return;
+    }
+    if (!formData.propertyType) {
+      toast.error("Property type is required");
+      return;
+    }
+    if (!formData.squareFeet) {
+      toast.error("Square feet is required");
+      return;
+    }
+    if (!formData.address) {
+      toast.error("Property address is required");
+      return;
+    }
+    if (!formData.ownerName) {
+      toast.error("Owner name is required");
       return;
     }
 
     try {
       const formPayload = {
-        name: formData.propertyName,
-        location: formData.address,
-        tag: formData.propertyType,
+        property_name: formData.propertyName,
+        property_type: formData.propertyType,
+        square_feet: formData.squareFeet,
+        total_units: formData.totalUnits || "1",
+        property_address: formData.address,
         image: uploadedImage || null,
-        owner: {
-          name: formData.ownerName,
-          email: formData.email,
-          phone: formData.phone,
-          address: formData.ownerAddress,
-        },
-        stats: {
-          totalUnits: parseInt(formData.totalUnits) || 0,
-          totalSquareFeet: parseInt(formData.squareFeet) || 0,
+        owner_information: {
+          full_name: formData.ownerName,
+          email: formData.email || "",
+          phone: formData.phone || "",
+          address: formData.ownerAddress || formData.address,
         },
       };
 
       if (modalMode === "edit" && selectedProperty) {
-        const payload = {
-          uuid: ""
+        const params = {
+          uuid: selectedProperty?.uuid,
         };
-        await dispatch(
-          editProperty(String(selectedProperty.id), formPayload)
-        );
+
+        if (!params) {
+          toast.error("Property UUID not found");
+          return;
+        }
+
+        await dispatch(fetchEditProperty(params, formPayload));
         toast.success(`${formData.propertyName} details updated`);
       } else {
         await dispatch(fetchCreateProperty(formPayload));
         toast.success("New property added successfully!");
       }
 
-      // Refresh property list
       await dispatch(fetchGetProperties());
-
-      // Reset form
       setIsModalOpen(false);
       setUploadedImage(null);
       setImageFile(null);
@@ -383,21 +290,30 @@ function Properties() {
     }
   };
 
-
-
-
   const handleDeleteClick = (property: Property) => {
     setPropertyToDelete(property);
     setIsDeleteModalOpen(true);
   };
 
-  const handleDeleteProperty = () => {
-    if (propertyToDelete) {
-      properties.filter((property: any) => property.id !== propertyToDelete.id)
+  const handleDeleteProperty = async () => {
+    if (!propertyToDelete?.uuid) {
+      toast.error("Property UUID not found");
+      return;
+    }
 
+    try {
+      await dispatch(fetchDeleteProperty(propertyToDelete.uuid));
+      // await deleteProperty(propertyToDelete.uuid)
+      console.log("Delete UUid", propertyToDelete.uuid);
+      toast.success(`${propertyToDelete.name} deleted successfully`);
       setIsDeleteModalOpen(false);
       setPropertyToDelete(null);
-      toast.success(`${propertyToDelete.name} deleted`);
+
+      // Refresh the list
+      await dispatch(fetchGetProperties());
+    } catch (error) {
+      console.error("Error deleting property:", error);
+      toast.error("Failed to delete property");
     }
   };
 
@@ -427,7 +343,8 @@ function Properties() {
             <div>
               <h1 className="text-2xl font-bold text-[#000000]">Properties</h1>
               <p className="text-gray-600 text-sm mt-2">
-                Manage Your Property Portfolio ({properties.length} Properties)
+                Manage Your Property Portfolio ({mappedProperties.length}{" "}
+                Properties)
               </p>
             </div>
 
@@ -466,40 +383,40 @@ function Properties() {
               <SelectTrigger className="w-[140px] bg-[#B200FF1A] border-[#B200FF1A] text-[#B200FF] hover:bg-[#B200FF1A]">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-white border border-gray-200 shadow-lg">
+              <SelectContent>
                 <SelectItem
-                  value="All Types"
+                  value="all"
                   className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1"
                 >
-                  All Types
+                  all
                 </SelectItem>
                 <SelectItem
-                  value="Apartments"
-                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1"
+                  value="apartment"
+                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white"
                 >
-                  Apartments
+                  Apartment
                 </SelectItem>
                 <SelectItem
-                  value="Commercial"
-                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1"
+                  value="commercial"
+                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white"
                 >
                   Commercial
                 </SelectItem>
                 <SelectItem
-                  value="Villa"
-                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1"
+                  value="villa"
+                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white"
                 >
                   Villa
                 </SelectItem>
                 <SelectItem
-                  value="House"
-                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1"
+                  value="house"
+                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white"
                 >
                   House
                 </SelectItem>
                 <SelectItem
-                  value="Land"
-                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg"
+                  value="land"
+                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg bg-white"
                 >
                   Land
                 </SelectItem>
@@ -509,7 +426,7 @@ function Properties() {
         </div>
 
         {/* Properties Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {filteredProperties.length ? (
             filteredProperties?.map((property) => (
               <Card
@@ -692,7 +609,7 @@ function Properties() {
                   className="text-[#B200FF]"
                   onClick={() => {
                     setSearchTerm("");
-                    setSelectedType("All Types");
+                    setSelectedType("all");
                   }}
                 >
                   Clear filters
@@ -704,7 +621,7 @@ function Properties() {
 
         {/* Add/Edit/View Property Modal */}
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent className="min-w-2xl max-h-[90vh] overflow-y-auto fixed top-11/12 left-13/16 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-lg shadow-xl no-scrollbar">
+          <DialogContent className="min-w-2xl max-h-[90vh] overflow-y-auto fixed top-11/12 left-12/16 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-lg shadow-xl no-scrollbar">
             <DialogHeader className="flex flex-row items-center justify-between space-y-0">
               <div className="flex items-center gap-2">
                 <div className="p-2 bg-[#3065A426] rounded-full">
@@ -805,31 +722,31 @@ function Properties() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem
-                          value="Apartments"
+                          value="apartment"
                           className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white"
                         >
-                          Apartments
+                          Apartment
                         </SelectItem>
                         <SelectItem
-                          value="Commercial"
+                          value="commercial"
                           className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white"
                         >
                           Commercial
                         </SelectItem>
                         <SelectItem
-                          value="Villa"
+                          value="villa"
                           className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white"
                         >
                           Villa
                         </SelectItem>
                         <SelectItem
-                          value="House"
+                          value="house"
                           className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white"
                         >
                           House
                         </SelectItem>
                         <SelectItem
-                          value="Land"
+                          value="land"
                           className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg bg-white"
                         >
                           Land
@@ -840,21 +757,6 @@ function Properties() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  {/* <div className='space-y-2'>
-										<label className='text-sm font-medium text-[#7D7D7D]'>
-											Total Units
-										</label>
-										<Input
-											placeholder='Enter Total Units'
-											value={formData.totalUnits}
-											onChange={(e) =>
-												handleInputChange('totalUnits', e.target.value)
-											}
-											className='bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000]'
-											disabled={modalMode === 'view'}
-											type='number'
-										/>
-									</div> */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-[#7D7D7D]">
                       Square Feet

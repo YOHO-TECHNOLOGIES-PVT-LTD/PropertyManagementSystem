@@ -1,9 +1,9 @@
-import { createSlice } from "@reduxjs/toolkit"
+import { createSlice } from "@reduxjs/toolkit";
 
 interface Property {
-  id: string
-  name: string
-  location?: string
+  id: string;
+  name: string;
+  location?: string;
 }
 
 const propertySlice = createSlice({
@@ -15,32 +15,43 @@ const propertySlice = createSlice({
   },
   reducers: {
     setProperty(state, action) {
-      state.data = action.payload
-      state.loading = false
-      state.error = null
+      state.data = action.payload;
+      state.loading = false;
+      state.error = null;
     },
     setLoading(state, action) {
-      state.loading = action.payload
+      state.loading = action.payload;
     },
     setError(state, action) {
-      state.error = action.payload
-      state.loading = false
+      state.error = action.payload;
+      state.loading = false;
     },
     addProperty(state, action) {
-      state.data.push(action.payload)
-      state.loading = false
+      state.data.push(action.payload);
+      state.loading = false;
     },
     updateProperty(state, action) {
-      const index = state.data.findIndex((p: Property) => p.id === action.payload.id)
+      const index = state.data.findIndex(
+        (prop) => prop.id === action.payload.id
+      );
       if (index !== -1) {
-        state.data[index] = action.payload
+        state.data[index] = { ...state.data[index], ...action.payload };
       }
-      state.loading = false
+      state.loading = false;
+    },
+    removeProperty(state, action) {
+      state.data = state.data.filter((prop) => prop.id !== action.payload);
     },
   },
-})
+});
 
-export const { setProperty, setLoading, setError, addProperty, updateProperty } =
-  propertySlice.actions
+export const {
+  setProperty,
+  setLoading,
+  setError,
+  addProperty,
+  updateProperty,
+   removeProperty,
+} = propertySlice.actions;
 
-export default propertySlice.reducer
+export default propertySlice.reducer;

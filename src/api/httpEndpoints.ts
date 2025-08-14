@@ -12,7 +12,7 @@ const generateEndPoints = () => {
             getAll: "/api/property/",
             get: "/api/property/:uuid",
             update: "/api/property/",
-            delete: "/api/property/:uuid",
+            delete: "/api/property/",
             getProperty: "/api/property/get"
         },
         unit: {

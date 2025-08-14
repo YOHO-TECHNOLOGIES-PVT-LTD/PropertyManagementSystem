@@ -11,6 +11,7 @@ export const getAllProperties = async (params?: any) => {
   }
 }
 
+
 export const createProperty = async (data: any) => {
   try {
     const res = await Client.property.create(data)
@@ -22,10 +23,10 @@ export const createProperty = async (data: any) => {
   }
 }
 
-export const editProperty = async (uuid: string, data: any) => {
+
+export const editProperty = async (params: any, data: any) => {
     try {
-        const res =await Client.property.edit(uuid,data)
-        console.log("edit",res)
+        const res =await Client.property.edit(params,data)
         console.log("Edit data",res)
         return res
     } catch (error) {
@@ -34,9 +35,18 @@ export const editProperty = async (uuid: string, data: any) => {
     }
 }
 
-export const deleteProperty = async (id: string) => {
-  return await Client.property.delete(id)
+
+export const deleteProperty = async (uuid: any) => {
+  try {
+    const res= await Client.property.delete(uuid)
+    console.log("Delete:",res)
+     return res
+  } catch (error) {
+    console.log("Error:",error)
+        throw error
+  }
 }
+
 
 export const getPropertyById = async (id: string) => {
   return await Client.property.getByid(id)
