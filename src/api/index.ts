@@ -22,20 +22,14 @@ class Client {
 			HttpClient.get(HTTP_END_POINTS.property.getAll, params),
 		create: (params: string) =>
 			HttpClient.post(HTTP_END_POINTS.property.create, params),
-		edit: (data: any, params: string) =>
-			HttpClient.update(HTTP_END_POINTS.property.update + params, data),
-		delete: (params: string) =>
-			HttpClient.delete(HTTP_END_POINTS.property.delete, params),
-		getByid: (params: any) =>
-			HttpClient.get(
-				HTTP_END_POINTS.property.get.replace(':uuid', params.uuid),
-				params
-			),
-		getProperty: (data: any) =>
-			HttpClient.get(HTTP_END_POINTS.property.getProperty, data),
-	};
-	land = {
-		getAll: (params: string) =>
+		edit: (params: string, data: any) =>
+			 HttpClient.update(HTTP_END_POINTS.property.update+params.uuid, data),
+		delete: (params: string) => HttpClient.delete(HTTP_END_POINTS.property.delete+ params.uuid),
+		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.property.get.replace(":uuid", params), params),
+		getProperty: (data: any) => HttpClient.get(HTTP_END_POINTS.property.getProperty, data),
+    };
+    land = {
+        getAll: (params: string) =>
 			HttpClient.get(HTTP_END_POINTS.land.getAll, params),
 		create: (params: string) =>
 			HttpClient.post(HTTP_END_POINTS.land.create, params),
@@ -71,11 +65,12 @@ class Client {
 			HttpClient.get(HTTP_END_POINTS.unit.getAll, params),
 		create: (params: string) =>
 			HttpClient.post(HTTP_END_POINTS.unit.create, params),
-		getByid: (params: string) =>
-			HttpClient.get(HTTP_END_POINTS.unit.get, params),
-	};
-	rent = {
-		getAll: (params: any) =>
+		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.unit.get, params),
+		getbypropertyid:(params:string)=>HttpClient.get(HTTP_END_POINTS.unit.getbyId+params),
+		update:(params:string,data:any)=>HttpClient.update(HTTP_END_POINTS.unit.update+params,data)
+    };
+    rent = {
+        getAll: (params: any) =>
 			HttpClient.get(HTTP_END_POINTS.rent.getAll, params),
 		getByid: (params: string) =>
 			HttpClient.get(HTTP_END_POINTS.rent.get, params),

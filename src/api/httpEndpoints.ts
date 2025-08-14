@@ -80,13 +80,15 @@ export const HTTP_END_POINTS = generateEndPoints();
             getAll: "/api/property/",
             get: "/api/property/:uuid",
             update: "/api/property/",
-            delete: "/api/property/:uuid",
+            delete: "/api/property/",
             getProperty: "/api/property/get"
         },
         unit: {
             create: "/api/unit/create",
             getAll: "/api/unit/",
             get: "/api/unit/:uuid",
+            getbyId:"/api/unit/get/",
+            update:"/api/unit/",
         },
         tenant: {
             create: "/api/tenant/create",
