@@ -14,36 +14,34 @@ import Login from '../pages/auth/login/Login';
 import { useAuth } from '../components/auth/AuthContext';
 
 function Approutes() {
-  const { isAuthenticated, isLoading } = useAuth();
+	const { isAuthenticated, isLoading } = useAuth();
 
-  if (isLoading) return null;
+	if (isLoading) return null;
 
-  const AuthRoutes = () => (
-    <Routes>
-      <Route path='/login' element={<Login />} />
-      <Route path='*' element={<Navigate to='/login' />} />
-    </Routes>
-  );
+	const AuthRoutes = () => (
+		<Routes>
+			<Route path='/login' element={<Login />} />
+			<Route path='*' element={<Navigate to='/login' />} />
+		</Routes>
+	);
 
-  const PropertyRoutes = () => (
-    <Routes>
-
-      <Route path='/' element={<MainLayout />}>
-        <Route index element={<DashBoard />} />
-        <Route path='/notifications' element={<Notifications />} />
-        <Route path='/profile' element={<Profile />} />
-        <Route path='/properties' element={<Properties />} />
-        <Route path='/tenants' element={<Tenants />} />
-        <Route path='/rent' element={<RentManagement />} />
-        <Route path='/lease' element={<LeaseManagement />} />
-        <Route path='/reports' element={<FinancialReports />} />
-        <Route path='/settings' element={<Settings />} />
-        <Route path='/maintenance' element={<Maintenance />} />
-
-      </Route>
-    </Routes>
-  )
-  return isAuthenticated ? <PropertyRoutes /> : <AuthRoutes />
+	const PropertyRoutes = () => (
+		<Routes>
+			<Route path='/' element={<MainLayout />}>
+				<Route index element={<DashBoard />} />
+				<Route path='/notifications' element={<Notifications />} />
+				<Route path='/profile' element={<Profile />} />
+				<Route path='/properties' element={<Properties />} />
+				<Route path='/tenants' element={<Tenants />} />
+				<Route path='/rent' element={<RentManagement />} />
+				<Route path='/lease' element={<LeaseManagement />} />
+				<Route path='/reports' element={<FinancialReports />} />
+				<Route path='/settings' element={<Settings />} />
+				<Route path='/maintenance' element={<Maintenance />} />
+			</Route>
+		</Routes>
+	);
+	return isAuthenticated ? <PropertyRoutes /> : <AuthRoutes />;
 }
 
 export default Approutes;
