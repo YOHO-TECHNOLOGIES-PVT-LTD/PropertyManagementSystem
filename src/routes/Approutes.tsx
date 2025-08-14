@@ -40,7 +40,9 @@ function Approutes() {
         <Route path='/reports' element={<FinancialReports />} />
         <Route path='/settings' element={<Settings />} />
         <Route path='/maintenance' element={<Maintenance />} />
-        <Route path='/view-units' element={<ViewAllUnits />} />
+        <Route path='/viewunits' element={<ViewAllUnits />} />
+
+
 
       </Route>
     </Routes>

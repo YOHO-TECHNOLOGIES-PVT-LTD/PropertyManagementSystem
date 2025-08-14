@@ -40,12 +40,13 @@ import {
   fetchDeleteProperty,
   fetchCreateUnit,
 } from "../../features/Properties/Reducers/PropertiesThunk";
+import { useNavigate } from "react-router-dom";
 type ModalMode = "add" | "view" | "edit";
 type UnitModalMode = "add" | "edit";
 
 interface Property {
   id: number;
-  _id?:string;
+  _id?: string;
   uuid?: string;
   name: string;
   location: string;
@@ -106,6 +107,8 @@ function Properties() {
     sqFeet: "",
     address: "",
   });
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(fetchGetProperties());
@@ -183,7 +186,7 @@ function Properties() {
         occupancyRate: p.occupancy_rate || 0,
       },
       uuid: p.uuid,
-      _id:p._id
+      _id: p._id
     })) || [];
 
   const filteredProperties = mappedProperties.filter((property) => {
@@ -265,6 +268,7 @@ function Properties() {
     setImageFile(null);
     setErrors({});
     setIsModalOpen(true);
+
   };
 
   const openEditModal = (property: Property) => {
@@ -428,49 +432,49 @@ function Properties() {
     setIsUnitModalOpen(true);
   };
   const handleSubmitUnit = async () => {
-  // if (
-  //   !unitForm.propertyUuid || // Validate UUID exists
-  //   !unitForm.name ||
-  //   !unitForm.sqFeet ||
-  //   !unitForm.address
-  // ) {
-  //   toast.error("Please fill all required fields");
-  //   return;
-  // }
+    // if (
+    //   !unitForm.propertyUuid || // Validate UUID exists
+    //   !unitForm.name ||
+    //   !unitForm.sqFeet ||
+    //   !unitForm.address
+    // ) {
+    //   toast.error("Please fill all required fields");
+    //   return;
+    // }
 
-  try {
-    const unitData = {
-      propertyId: unitForm.propertyId, 
-      unit_name: unitForm.name,
-      unit_sqft: unitForm.sqFeet,
-      unit_address: unitForm.address,
-      image: unitForm.image || null,
-    };
+    try {
+      const unitData = {
+        propertyId: unitForm.propertyId,
+        unit_name: unitForm.name,
+        unit_sqft: unitForm.sqFeet,
+        unit_address: unitForm.address,
+        image: unitForm.image || null,
+      };
 
-    if (unitModalMode === "edit" && editingUnit) {
-      toast.success("Unit updated successfully");
-    } else {
-      console.log("uuid",unitData.propertyId)
-      await dispatch(fetchCreateUnit(unitData));
-      toast.success("Unit added successfully");
+      if (unitModalMode === "edit" && editingUnit) {
+        toast.success("Unit updated successfully");
+      } else {
+        console.log("uuid", unitData.propertyId)
+        await dispatch(fetchCreateUnit(unitData));
+        toast.success("Unit added successfully");
+      }
+      await dispatch(fetchGetProperties());
+
+      setIsUnitModalOpen(false);
+      setUnitForm({
+        property: "",
+        propertyId: "",
+        propertyUuid: "",
+        name: "",
+        sqFeet: "",
+        address: "",
+        image: "",
+      });
+    } catch (error) {
+      console.error("Error submitting unit:", error);
+      toast.error("Failed to submit unit. Please try again.");
     }
-    await dispatch(fetchGetProperties());
-
-    setIsUnitModalOpen(false);
-    setUnitForm({
-      property: "",
-      propertyId: "",
-      propertyUuid: "",
-      name: "",
-      sqFeet: "",
-      address: "",
-      image: "",
-    });
-  } catch (error) {
-    console.error("Error submitting unit:", error);
-    toast.error("Failed to submit unit. Please try again.");
-  }
-};
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -735,13 +739,17 @@ function Properties() {
                     </div>
 
                     {/* View Button */}
+
+                 
+
                     <Button
                       className="w-full bg-[#B200FF] hover:bg-[#B200FF] text-white"
-                      onClick={() => openViewModal(property)}
+                      onClick={() => navigate(`/viewunits`)}
                     >
                       <img src={eyeImg} alt="eye" className="w-4 h-4" />
                       <p className="">View</p>
                     </Button>
+
                   </div>
                 </CardContent>
               </Card>
@@ -850,9 +858,8 @@ function Properties() {
                       onChange={(e) =>
                         handleInputChange("propertyName", e.target.value)
                       }
-                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
-                        errors.propertyName ? "border-red-500" : ""
-                      }`}
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${errors.propertyName ? "border-red-500" : ""
+                        }`}
                       disabled={modalMode === "view"}
                     />
                     {errors.propertyName && (
@@ -873,9 +880,8 @@ function Properties() {
                       disabled={modalMode === "view"}
                     >
                       <SelectTrigger
-                        className={`bg-white border border-[#E5E5E5] shadow-lg text-[#7D7D7D] font-semibold ${
-                          errors.propertyType ? "border-red-500" : ""
-                        }`}
+                        className={`bg-white border border-[#E5E5E5] shadow-lg text-[#7D7D7D] font-semibold ${errors.propertyType ? "border-red-500" : ""
+                          }`}
                       >
                         <SelectValue placeholder="Property Type" />
                       </SelectTrigger>
@@ -931,9 +937,8 @@ function Properties() {
                       onChange={(e) =>
                         handleInputChange("squareFeet", e.target.value)
                       }
-                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
-                        errors.squareFeet ? "border-red-500" : ""
-                      }`}
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${errors.squareFeet ? "border-red-500" : ""
+                        }`}
                       disabled={modalMode === "view"}
                       type="number"
                     />
@@ -955,9 +960,8 @@ function Properties() {
                     onChange={(e) =>
                       handleInputChange("address", e.target.value)
                     }
-                    className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] min-h-[80px] ${
-                      errors.address ? "border-red-500" : ""
-                    }`}
+                    className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] min-h-[80px] ${errors.address ? "border-red-500" : ""
+                      }`}
                     disabled={modalMode === "view"}
                   />
                   {errors.address && (
@@ -992,9 +996,8 @@ function Properties() {
                       onChange={(e) =>
                         handleInputChange("ownerName", e.target.value)
                       }
-                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
-                        errors.ownerName ? "border-red-500" : ""
-                      }`}
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${errors.ownerName ? "border-red-500" : ""
+                        }`}
                       disabled={modalMode === "view"}
                     />
                     {errors.ownerName && (
@@ -1012,9 +1015,8 @@ function Properties() {
                       onChange={(e) =>
                         handleInputChange("email", e.target.value)
                       }
-                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
-                        errors.email ? "border-red-500" : ""
-                      }`}
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${errors.email ? "border-red-500" : ""
+                        }`}
                       disabled={modalMode === "view"}
                     />
                     {errors.email && (
@@ -1034,9 +1036,8 @@ function Properties() {
                       onChange={(e) =>
                         handleInputChange("phone", e.target.value)
                       }
-                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
-                        errors.phone ? "border-red-500" : ""
-                      }`}
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${errors.phone ? "border-red-500" : ""
+                        }`}
                       disabled={modalMode === "view"}
                     />
                     {errors.phone && (
