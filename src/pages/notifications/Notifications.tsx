@@ -29,7 +29,7 @@ import { deleteNotification, updateStatusNotification } from "../../features/not
 
 interface NotificationItem {
   id: string
-  type: "rent" | "lease" | "report" | "reminder"
+  notify_type: "rent" | "lease" | "report" | "reminder"
   title: string
   description: string
   timestamp: string
@@ -130,11 +130,11 @@ function Notifications() {
     
       const transformedNotifications = notifications.map((notification: any) => ({
         id: notification.id || notification._id,
-        type: notification.type || "reminder",
+        notify_type: notification.notify_type || "reminder",
         title: notification.title || "Notification",
         description: notification.description || notification.message || "",
         timestamp: notification.timestamp || notification.createdAt || new Date().toLocaleDateString(),
-        isRead: notification.isRead || false,
+        is_read: notification.is_read || false,
       }))
       
       setNotificationList(transformedNotifications)
@@ -144,12 +144,12 @@ function Notifications() {
   const filteredNotifications = notificationList.filter(notification => {
     const readMatch =
       readFilter === "all" ||
-      (readFilter === "read" && notification.isRead) ||
-      (readFilter === "unread" && !notification.isRead)
+      (readFilter === "read" && notification.is_read) ||
+      (readFilter === "unread" && !notification.is_read)
 
     const typeMatch =
       typeFilter === "all" ||
-      notification.type === typeFilter
+      notification.notify_type === typeFilter
 
     return readMatch && typeMatch
   })
@@ -163,11 +163,11 @@ function Notifications() {
 
 const markAsRead = async (uuid: string) => {
   try {
-    await updateStatusNotification({uuid,  isRead: true })
+    await updateStatusNotification({uuid})
 
     setNotificationList(prev =>
       prev.map(notification =>
-        notification.id === uuid ? { ...notification, isRead: true } : notification
+        notification.id === uuid ? { ...notification, is_read: true } : notification
       )
     )
   } catch (err) {
@@ -177,11 +177,11 @@ const markAsRead = async (uuid: string) => {
 
   const markAllAsRead = async () => {
     try {
-      const unreadIds = notificationList.filter(n => !n.isRead).map(n => n.id)
+      const unreadIds = notificationList.filter(n => !n.is_read).map(n => n.id)
       
      
       setNotificationList(prev =>
-        prev.map(notification => ({ ...notification, isRead: true }))
+        prev.map(notification => ({ ...notification, is_read: true }))
       )
       } catch (err) {
       console.error('Error marking all notifications as read:', err)
@@ -208,7 +208,7 @@ const markAsRead = async (uuid: string) => {
 
 
   const handleNotificationClick = (notification: NotificationItem) => {
-    if (!notification.isRead) {
+    if (!notification.is_read) {
       markAsRead(notification.id)
     }
   }
@@ -218,10 +218,10 @@ const markAsRead = async (uuid: string) => {
       return { ...card, value: notificationList.length.toString() }
     }
     if (card.title === "UnRead") {
-      return { ...card, value: notificationList.filter(n => !n.isRead).length.toString() }
+      return { ...card, value: notificationList.filter(n => !n.is_read).length.toString() }
     }
     if (card.title === "Rent Reminders") {
-      return { ...card, value: notificationList.filter(n => n.type === "rent").length.toString() }
+      return { ...card, value: notificationList.filter(n => n.notify_type === "rent").length.toString() }
     }
     if (card.title === "Today") {
       const today = new Date().toLocaleDateString()
@@ -268,7 +268,7 @@ const markAsRead = async (uuid: string) => {
         <Button
           className="bg-purple-600 hover:bg-purple-700 -mr-9 text-white"
           onClick={markAllAsRead}
-          disabled={notificationList.filter(n => !n.isRead).length === 0}
+          disabled={notificationList.filter(n => !n.is_read).length === 0}
         >
           Mark All Read
         </Button>
@@ -380,7 +380,7 @@ const markAsRead = async (uuid: string) => {
             <div
               key={notification.id}
               className={`p-6 rounded-lg mb-4 transition-all duration-200 ${
-                !notification.isRead
+                !notification.is_read
                   ? "border-2  bg-blue-50 cursor-pointer hover:bg-blue-100 shadow-md"
                   : "border border-gray-200 bg-white hover:bg-blue-100 opacity-70"
               }`}
@@ -389,25 +389,25 @@ const markAsRead = async (uuid: string) => {
               <div className="flex items-start gap-4">
                 <div
                   className={`p-2 rounded-lg border shadow-sm ${
-                    !notification.isRead ? "bg-blue-100 border-blue-300" : "bg-gray-50 border-gray-200"
+                    !notification.is_read ? "bg-blue-100 border-blue-300" : "bg-gray-50 border-gray-200"
                   }`}
                 >
-                  {getNotificationIcon(notification.type)}
+                  {getNotificationIcon(notification.notify_type)}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <h3 className={`font-semibold ${!notification.isRead ? "text-gray-900" : "text-gray-500"}`}>
+                        <h3 className={`font-semibold ${!notification.is_read ? "text-gray-900" : "text-gray-500"}`}>
                           {notification.title}
                         </h3>
-                        {!notification.isRead && <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>}
+                        {!notification.is_read && <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>}
                       </div>
-                      <p className={`text-sm mb-2 ${!notification.isRead ? "text-gray-700" : "text-gray-500"}`}>
+                      <p className={`text-sm mb-2 ${!notification.is_read ? "text-gray-700" : "text-gray-500"}`}>
                         {notification.description}
                       </p>
                      <p
-                          className={`text-xs ${!notification.isRead ? "text-gray-600" : "text-gray-400"}`}
+                          className={`text-xs ${!notification.is_read ? "text-gray-600" : "text-gray-400"}`}
                         >
                           {new Date(notification.timestamp).toLocaleString("en-GB", {
                             day: "2-digit",
