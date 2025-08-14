@@ -54,7 +54,8 @@ class Client {
 			HttpClient.get(HTTP_END_POINTS.rent.getAll, params),
 		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.rent.get, params),
 		update: (params: string) => HttpClient.update(HTTP_END_POINTS.rent.update+ params.uuid, params),
-		download: (uuid: string) => HttpClient.fileGet(HTTP_END_POINTS.rent.download+ uuid)
+		download: (uuid: string) => HttpClient.fileGet(HTTP_END_POINTS.rent.download+ uuid),
+		delete: (params: string) => HttpClient.delete(HTTP_END_POINTS.rent.delete+ params)
     };
     lease = {
         getAll: (params: string) =>

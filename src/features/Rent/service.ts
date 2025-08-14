@@ -33,3 +33,14 @@ export const updateRent = async (params: any) => {
   }
 };
 
+
+export const deleteRent = async (params: any) => {
+  try {
+    const response = await Client.rent.delete(params);
+    console.log("Backend FAQ data:", response);
+    return response;
+  } catch (error: any) {
+    throw new Error(error.message);
+  }
+};
+
