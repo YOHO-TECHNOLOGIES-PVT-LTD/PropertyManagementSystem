@@ -11,7 +11,7 @@ const generateEndPoints = () => {
         property: {
             create: "/api/property/create",
             getAll: "/api/property/",
-            get: "/api/property/:uuid",
+            get: "/api/property/",
             update: "/api/property/",
             delete: "/api/property/",
             getProperty: "/api/property/get"

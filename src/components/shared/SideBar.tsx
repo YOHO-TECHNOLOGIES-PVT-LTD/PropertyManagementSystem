@@ -10,6 +10,7 @@ import {
   Handshake,
   MoveHorizontal,
   LogOut,
+ AudioLines
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -17,18 +18,21 @@ import { FONTS } from "../../constants/ui constants";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 
+
 const Sidebar = ({ isOpen, setIsOpen } : any) => {
   const menuItems = [
     { icon: LayoutDashboard, path: "/", label: "DashBoard" },
     { icon: LandPlot, path: "/properties", label: "Properties" },
     { icon: FileText, path: "/tenants", label: "Tenants" },
-    { icon: BadgeIndianRupee, path: "/rent", label: "Rent Management" },
-    { icon: Handshake, path: "/lease", label: "Lease Management" },
-    { icon: Handshake, path: "/maintenance", label: "Maintenance" },
+    { icon: BadgeIndianRupee, path: "/rent", label: "Rent" },
+    { icon: Handshake, path: "/lease", label: "Lease " },
+    { icon: AudioLines, path: "/maintenance", label: "Maintenance" },
     { icon: TrendingUp, path: "/reports", label: "Reports" },
     { icon: Bell, path: "/notifications", label: "Notifications" },
     { icon: Settings, path: "/settings", label: "Settings" },
   ];
+
+ 
 
   
   const navigate = useNavigate();
@@ -70,7 +74,7 @@ const Sidebar = ({ isOpen, setIsOpen } : any) => {
             </div>
             {isOpen && (
               <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                Toggle Menu
+               
               </span>
             )}
           </div>

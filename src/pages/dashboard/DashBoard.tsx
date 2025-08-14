@@ -175,7 +175,7 @@ const DashBoard = () => {
 
   // Process Occupancy Graph
   const processedOccupancyGraph =
-    dashboardData?.occupancyGraph?.map((item) => ({
+    dashboardData?.occupancyGraph?.data?.map((item:any) => ({
       ...item,
       occupancyRate: Number(item.occupancyRate.toFixed(1)), // 1 decimal place
     })) || [];
