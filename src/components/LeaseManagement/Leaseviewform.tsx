@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
-
 import { Button } from "../../components/ui/button";
 import { Accordion, AccordionContent, AccordionItem } from "../../components/ui/accordion";
 import {  X, User, DollarSign, FileText } from "lucide-react";
