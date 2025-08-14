@@ -62,7 +62,7 @@ const Sidebar = ({ isOpen, setIsOpen } : any) => {
         {/* Fixed toggle button at top */}
         <div className="py-4 ml-3">
           <div
-            className="relative group cursor-pointer flex items-center gap-3 px-2 py-2"
+            className="relative group cursor-pointer flex items-center gap-3 p-2"
             onClick={() => setIsOpen(!isOpen)}
           >
             <div
@@ -73,14 +73,14 @@ const Sidebar = ({ isOpen, setIsOpen } : any) => {
             >
               <MoveHorizontal size={20} />
             </div>
-            {isOpen && (
+            {/* {isOpen && (
               <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
                
               </span>
-            )}
+            )} */}
           </div>
           {/* HR separator */}
-          <hr className="border-t border-[#B200FF] my-2 w-[40px] ml-3" />
+          <hr className="border-t border-[#B200FF] m-2" />
         </div>
 
         {/* Scrollable menu area */}

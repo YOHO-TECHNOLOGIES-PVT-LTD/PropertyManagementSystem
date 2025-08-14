@@ -13,42 +13,44 @@ import Frame_1 from '../../assets/Reports/Frame_1.png'
 import Frame_2 from '../../assets/Reports/Frame_2.png'
 import { useSelector } from "react-redux"
 import { selectDashboardData } from "../../features/Dashboard/Reducer/Selector"
+import { selectProperties } from "../../features/Properties/Reducers/Selectors"
 
-const revenueData = [
-    { month: "Jan", series1: 52, series2: 15 },
-    { month: "Feb", series2: 35, series1: 42 },
-    { month: "Mar", series1: 48, series2: 32 },
-    { month: "Apr", series1: 65, series2: 18 },
-    { month: "May", series1: 35, series2: 22 },
-    { month: "Jun", series1: 28, series2: 45 },
-    { month: "Jul", series1: 52, series2: 85 },
-    { month: "Aug", series1: 25, series2: 58 },
-    { month: "Sep", series1: 45, series2: 65 },
-    { month: "Oct", series1: 48, series2: 25 },
-    { month: "Nov", series1: 55, series2: 35 },
-    { month: "Dec", series1: 42, series2: 38 },
-]
 
-const revenueYearData = [
-    { month: "Jan", series1: 15, series2: 25 },
-    { month: "Feb", series1: 25, series2: 35 },
-    { month: "Mar", series1: 20, series2: 30 },
-    { month: "Apr", series1: 30, series2: 20 },
-    { month: "May", series1: 40, series2: 25 },
-    { month: "Jun", series1: 35, series2: 30 },
-    { month: "Jul", series1: 45, series2: 40 },
-    { month: "Aug", series1: 50, series2: 45 },
-    { month: "Sep", series1: 55, series2: 50 },
-    { month: "Oct", series1: 60, series2: 55 },
-    { month: "Nov", series1: 65, series2: 60 },
-    { month: "Dec", series1: 70, series2: 65 },
-]
 
 const FinancialReport = () => {
     const tableHeaders = Array.from({ length: 5 });
-      const ReportsData = useSelector(selectDashboardData);
+    const ReportsData = useSelector(selectDashboardData);
+    const properties = useSelector(selectProperties);
+    const { rentCollectionGraph }: any = ReportsData || {};
+    const revenueData = [
+        { month: "Jan", expense: rentCollectionGraph?.monthly?.jan?.exp, revenue: rentCollectionGraph?.monthly?.jan?.rev },
+        { month: "Feb", revenue: rentCollectionGraph?.monthly?.feb?.exp, expense: rentCollectionGraph?.monthly?.feb?.rev },
+        { month: "Mar", expense: rentCollectionGraph?.monthly?.mar?.exp, revenue: rentCollectionGraph?.monthly?.mar?.rev },
+        { month: "Apr", expense: rentCollectionGraph?.monthly?.apr?.exp, revenue: rentCollectionGraph?.monthly?.apr?.rev },
+        { month: "May", expense: rentCollectionGraph?.monthly?.may?.exp, revenue: rentCollectionGraph?.monthly?.may?.rev },
+        { month: "Jun", expense: rentCollectionGraph?.monthly?.jun?.exp, revenue: rentCollectionGraph?.monthly?.jun?.rev },
+        { month: "Jul", expense: rentCollectionGraph?.monthly?.jul?.exp, revenue: rentCollectionGraph?.monthly?.jul?.rev },
+        { month: "Aug", expense: rentCollectionGraph?.monthly?.aug?.exp, revenue: rentCollectionGraph?.monthly?.aug?.rev },
+        { month: "Sep", expense: rentCollectionGraph?.monthly?.sep?.exp, revenue: rentCollectionGraph?.monthly?.sep?.rev },
+        { month: "Oct", expense: rentCollectionGraph?.monthly?.oct?.exp, revenue: rentCollectionGraph?.monthly?.oct?.rev },
+        { month: "Nov", expense: rentCollectionGraph?.monthly?.nov?.exp, revenue: rentCollectionGraph?.monthly?.nov?.rev },
+        { month: "Dec", expense: rentCollectionGraph?.monthly?.dec?.exp, revenue: rentCollectionGraph?.monthly?.dec?.rev },
+    ]
 
-
+    const revenueYearData = [
+        // { year: "2014", expense: 15, revenue: 25 },
+        // { year: "2015", expense: 25, revenue: 35 },
+        // { year: "2016", expense: 20, revenue: 30 },
+        // { year: "2017", expense: 30, revenue: 20 },
+        // { year: "2018", expense: 40, revenue: 25 },
+        // { year: "2019", expense: 35, revenue: 30 },
+        // { year: "2020", expense: 45, revenue: 40 },
+        { year: "2021", expense: 50, revenue: 45 },
+        { year: "2022", expense: 55, revenue: 50 },
+        { year: "2023", expense: 60, revenue: 55 },
+        { year: "2024", expense: 65, revenue: 60 },
+        { year: "2025", expense: rentCollectionGraph?.yearly?.exp, revenue: rentCollectionGraph?.yearly?.rev },
+    ]
     const [isOpen, setIsOpen] = useState(false);
     const [selectedOption, setSelectedOption] = useState("Monthly");
 
@@ -135,12 +137,12 @@ const FinancialReport = () => {
                         <CardContent>
                             <ChartContainer
                                 config={{
-                                    series1: {
-                                        label: "Revenue Stream 1",
+                                    expense: {
+                                        label: "Expense",
                                         color: "#EF5DA8", // Pink color matching the image
                                     },
-                                    series2: {
-                                        label: "Revenue Stream 2",
+                                    revenue: {
+                                        label: "Revenue",
                                         color: "#7B00FF", // Purple color matching the image
                                     },
                                 }}
@@ -152,18 +154,18 @@ const FinancialReport = () => {
                                         margin={{ top: 20, right: 20, left: 0, bottom: 20 }}
                                     >
                                         <XAxis
-                                            dataKey="month"
+                                            dataKey={selectedOption.toLowerCase() === "monthly" ? "month" : "year"}
                                             axisLine={false}
                                             tickLine={false}
                                             tick={{ fill: "#9ca3af", fontSize: 14 }}
                                             dy={10}
                                         />
                                         <YAxis
-                                            domain={[0, 100]}
                                             axisLine={false}
                                             tickLine={false}
                                             tick={{ fill: "#9ca3af", fontSize: 14 }}
                                             dx={-10}
+                                            tickFormatter={(val) => formatIndianNumber(val)}  // ✅ format values in Lakhs/Cr
                                         />
                                         <ChartTooltip
                                             content={<ChartTooltipContent />}
@@ -172,30 +174,29 @@ const FinancialReport = () => {
                                         />
                                         <Area
                                             type="monotone"
-                                            dataKey="series1"
+                                            dataKey="expense"
                                             stroke="#EF5DA8"
-                                            strokeWidth={8}
+                                            strokeWidth={5}
                                             fill="transparent"
                                             dot={false}
                                             activeDot={{ r: 6, fill: "#EF5DA8" }}
                                         />
                                         <Area
                                             type="monotone"
-                                            dataKey="series2"
+                                            dataKey="revenue"
                                             stroke="#7B00FF"
-                                            strokeWidth={8}
+                                            strokeWidth={5}
                                             fill="transparent"
                                             dot={false}
                                             activeDot={{ r: 6, fill: "#7B00FF" }}
                                         />
                                     </AreaChart>
-                                </ResponsiveContainer>
 
+                                </ResponsiveContainer>
                             </ChartContainer>
                         </CardContent>
                     </Card>
                 </div>
-
 
                 <div className='w-full'>
                     <ExpenseBreakdown />
@@ -215,14 +216,14 @@ const FinancialReport = () => {
                     <p>Occupancy</p>
                 </div>
 
-                {tableHeaders.map((_, index) => (
-                    <div className='shadow-[0px_0px_15px_0px_#0000001A] rounded-lg p-4 grid grid-cols-4'>
-                        <p style={{ ...FONTS.Table_Header }}>Property</p>
-                        <p style={{ ...FONTS.Table_Body_2 }} className='text-[#7D7D7D]'>24</p>
+                {properties.map((data: any, index: any) => (
+                    <div key={index} className='shadow-[0px_0px_15px_0px_#0000001A] rounded-lg p-4 grid grid-cols-4'>
+                        <p style={{ ...FONTS.Table_Header }}>{data?.property_name}</p>
+                        <p style={{ ...FONTS.Table_Body_2 }} className='text-[#7D7D7D]'>{data?.total_units}</p>
                         <p style={{ ...FONTS.Table_Body_2 }} className='text-[#7D7D7D]'>240k</p>
-                        <p style={{ ...FONTS.Table_Body_2 }} className='text-[#7D7D7D]'>95%</p>
-                    </div>))}
-
+                        <p style={{ ...FONTS.Table_Body_2 }} className='text-[#7D7D7D]'>{data?.occupancy_rate} %</p>
+                    </div>
+                ))}
             </div>
         </div>
     )
