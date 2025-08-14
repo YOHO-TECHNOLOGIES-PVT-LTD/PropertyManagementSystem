@@ -77,7 +77,7 @@ class Client {
 			HttpClient.get(HTTP_END_POINTS.Notification.getAll,params),
 		delete:(params:any)=>
 			HttpClient.delete(HTTP_END_POINTS.Notification.delete + params?.uuid),
-		updatestatus:(params:string,data:any)=>HttpClient.update(HTTP_END_POINTS.Notification.update + params?.uuid,data)
+		updatestatus:(params:any)=>HttpClient.update(HTTP_END_POINTS.Notification.update + params?.uuid, params)
 	}
 }
 

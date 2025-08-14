@@ -24,7 +24,7 @@ import cardimg4 from "../../assets/cardimg4.png"
 import { FONTS } from '../../constants/ui constants'
 import { selectNotification } from "../../features/notification/redecures/selectors"
 import { getNotificationAll } from "../../features/notification/redecures/thunks"
-import { deleteNotification } from "../../features/notification/services"
+import { deleteNotification, updateStatusNotification } from "../../features/notification/services"
 
 
 interface NotificationItem {
@@ -161,27 +161,19 @@ function Notifications() {
     currentPage * itemsPerPage
   )
 
-  const markAsRead = async (id: string) => {
-    try {
-      
-      setNotificationList(prev =>
-        prev.map(notification =>
-          notification.id === id ? { ...notification, isRead: true } : notification
-        )
+const markAsRead = async (uuid: string) => {
+  try {
+    await updateStatusNotification({uuid,  isRead: true })
+
+    setNotificationList(prev =>
+      prev.map(notification =>
+        notification.id === uuid ? { ...notification, isRead: true } : notification
       )
-      
-   
-      
-    } catch (err) {
-      console.error('Error marking notification as read:', err)
-     
-      setNotificationList(prev =>
-        prev.map(notification =>
-          notification.id === id ? { ...notification, isRead: false } : notification
-        )
-      )
-    }
+    )
+  } catch (err) {
+    console.error("Error marking as read:", err)
   }
+}
 
   const markAllAsRead = async () => {
     try {

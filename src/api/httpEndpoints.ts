@@ -59,7 +59,7 @@ const generateEndPoints = () => {
         Notification:{
             getAll:"/api/notification/",
             delete:"/api/notification/",
-            update:"/api/notification/:uuid",
+            update:"/api/notification/",
         }
     }
 }

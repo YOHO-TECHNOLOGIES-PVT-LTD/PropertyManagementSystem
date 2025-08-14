@@ -25,9 +25,9 @@ export const deleteNotification = async (params:any)=>{
     }
 }
 
-export const  updateStatusNotification = async (params:any,data:any)=>{
+export const  updateStatusNotification = async (params:any)=>{
     try{
-        const response =await Client.notification.updatestatus(params,data)
+        const response =await Client.notification.updatestatus(params)
         if(response){
             return response
         }
