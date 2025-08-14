@@ -1,3 +1,4 @@
+
 import HttpClient from "./httpClient";
 import { HTTP_END_POINTS } from "./httpEndpoints";
 
@@ -9,7 +10,8 @@ class Client {
 		login: (data: any) => HttpClient.post(HTTP_END_POINTS.auth.login, data),
 		me: () => HttpClient.get(HTTP_END_POINTS.auth.getProfile),
 		update_profile: (data: any) =>
-			HttpClient.update(HTTP_END_POINTS.auth.updateProfile, data)
+			HttpClient.update(HTTP_END_POINTS.auth.updateProfile, data),
+		activity:(data:any)=>HttpClient.get(HTTP_END_POINTS.auth.activity,data),
     };
 	dashboard={
 		get:(data:any)=>HttpClient.get(HTTP_END_POINTS.DashBoard.get,data),
