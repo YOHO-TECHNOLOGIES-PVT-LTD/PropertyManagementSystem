@@ -5,6 +5,10 @@ import { Label } from "../../components/ui/label"
 import { X } from "lucide-react"
 import type { TenantFormData } from "./create-tenant-form"
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card"
+import { useEffect } from "react"
+import { useDispatch, useSelector } from "react-redux"
+import { getSingleTenantData } from "../../features/tenants/reducers/Thunks"
+import { singleTenantSelector } from "../../features/tenants/reducers/Selector"
 
 export interface Tenant {
   id: string
@@ -32,6 +36,21 @@ interface ViewTenantModalProps {
 export default function ViewTenantModal({ isOpen, tenant, onClose }: ViewTenantModalProps) {
   if (!isOpen || !tenant) return null
 
+ const dispatch = useDispatch<any>()
+ 
+ const singleTenantData = useSelector(singleTenantSelector)?.data
+
+ console.log("single :",singleTenantData)
+
+  useEffect(() => {
+    const fetchTenantId = async () => {
+            await dispatch(getSingleTenantData({
+               uuid: tenant
+            }))
+          }
+    fetchTenantId()
+        },[])
+
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm z-40" onClick={onClose}></div>
@@ -45,7 +64,7 @@ export default function ViewTenantModal({ isOpen, tenant, onClose }: ViewTenantM
                     <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold">
                       <span>👤</span>
                     </div>
-                    Tenant Details - {tenant.name}
+                    Tenant Details - {singleTenantData.personal_information.full_name}
                   </div>
                   <Button variant="ghost" size="sm" onClick={onClose} className="text-gray-500 hover:text-gray-700">
                     <X className="w-5 h-5" />
@@ -174,7 +193,7 @@ export default function ViewTenantModal({ isOpen, tenant, onClose }: ViewTenantM
                     <div className="space-y-2">
                       <Label>Bank Branch</Label>
                       <div className="p-2 bg-gray-50 rounded border text-sm">
-                        {tenant.fullData.bankBranch || "Not provided"}
+                        {tenant.fullData.accountHolder || "Not provided"}
                       </div>
                     </div>
                     <div className="space-y-2">
