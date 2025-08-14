@@ -11,8 +11,9 @@ const generateEndPoints = () => {
             create: "/api/property/create",
             getAll: "/api/property/",
             get: "/api/property/:uuid",
-            update: "/api/property/:uuid",
+            update: "/api/property/",
             delete: "/api/property/:uuid",
+            getProperty: "/api/property/get"
         },
         unit: {
             create: "/api/unit/create",
@@ -25,11 +26,13 @@ const generateEndPoints = () => {
             get: "/api/tenant/:uuid",
             update: "/api/tenant/:uuid",
             delete: "/api/tenant/:uuid",
+
         },
         rent: {
-            getAll: "/api/property/",
-            get: "/api/property/:uuid",
-            update: "/api/property/:uuid",
+            getAll: "/api/rent/",
+            get: "/api/rent/:uuid",
+            update: "/api/rent/",
+            download: "api/rent/download/pdf/"
         },
         lease: {
             getAll: "/api/lease/",

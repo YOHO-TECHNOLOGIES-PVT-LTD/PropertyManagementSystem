@@ -1,14 +1,9 @@
-// import { CiImport } from "react-icons/ci";
-// import { GoPlus } from "react-icons/go";
 import { Building2 } from "lucide-react";
-
 import Card1 from "../../components/dashboard/Card1/Card1";
 import Card2 from "../../components/dashboard/Card2/Card2";
-
 import frame1 from "../../assets/Bg_Frames/Frame_1.png";
 import frame2 from "../../assets/Bg_Frames/Frame_2.png";
 import frame3 from "../../assets/Bg_Frames/Frame_3.png";
-
 import MonthlyRevenueTrendBar from "../../components/dashboard/MonthlyRevenue/BarCharts/Barcharts";
 import MonthlyRevenueTrendLine from "../../components/dashboard/MonthlyRevenue/Linecharts/Linecharts";
 import OccupancyRateTrend from "../../components/dashboard/OccRate/RateLineCharts";
@@ -16,70 +11,52 @@ import PropertyTypesDistribution from "../../components/dashboard/PropertyType/P
 import RentCollectionRate from "../../components/dashboard/RentChart/Tooltip";
 import ActivityTabs from "../../components/dashboard/RecentActivity&task/Activity&task";
 import RadialChart from "../../components/dashboard/PaymentCharts/RadicalChart";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch } from "../../store/store";
+import { useEffect } from "react";
+import { DashboardThunks } from "../../features/Dashboard/Reducer/DashboardThunk";
+import { selectDashboardData } from "../../features/Dashboard/Reducer/Selector";
 
-// Bar chart data
-const barData = [
-  { year: "2021", revenue: 450000, netIncome: 250000 },
-  { year: "2022", revenue: 600000, netIncome: 400000 },
-  { year: "2023", revenue: 650000, netIncome: 500000 },
-  { year: "2024", revenue: 700000, netIncome: 550000 },
-  { year: "2025", revenue: 750000, netIncome: 600000 },
-];
+// Types
+export interface PropertyTotal {
+  _id: string;
+  count: number;
+}
 
-// Line chart data
-const lineData = [
-  { month: "Jan", revenue: 200000, expenses: 350000 },
-  { month: "Feb", revenue: 300000, expenses: 450000 },
-  { month: "Mar", revenue: 800000, expenses: 500000 },
-  { month: "Apr", revenue: 400000, expenses: 300000 },
-  { month: "May", revenue: 350000, expenses: 400000 },
-  { month: "Jun", revenue: 300000, expenses: 500000 },
-  { month: "Jul", revenue: 280000, expenses: 9500 },
-  { month: "Aug", revenue: 320000, expenses: 400000 },
-  { month: "Sep", revenue: 400000, expenses: 300000 },
-  { month: "Oct", revenue: 200000, expenses: 250000 },
-  { month: "Nov", revenue: 250000, expenses: 450000 },
-  { month: "Dec", revenue: 220000, expenses: 500000 },
-];
+export interface OccupancyGraph {
+  _id: {
+    month: number;
+    year: number;
+  };
+  occupiedCount: number;
+  month: number;
+  year: number;
+  occupancyRate: number;
+}
 
-const occupancyData = [
-  { month: "Jan", rate: 45 },
-  { month: "Feb", rate: 52 },
-  { month: "Mar", rate: 38 },
-  { month: "Apr", rate: 61 },
-  { month: "May", rate: 55 },
-  { month: "Jun", rate: 67 },
-  { month: "Jul", rate: 43 },
-  { month: "Aug", rate: 38 },
-  { month: "Sep", rate: 25 },
-  { month: "Oct", rate: 49 },
-  { month: "Nov", rate: 72 },
-  { month: "Dec", rate: 65 },
-];
-const samplePieData = [
+export interface DashboardData {
+  PropertiesTotal: PropertyTotal[];
+  totalTenants: number;
+  newTenantsThisMonth: number;
+  leasesExpiringSoon: number;
+  totalMonthlyRevenue: number;
+  totalExpected: number;
+  collectionRate: string;
+  YearlyRevenue: number;
+  OverAllRevenue: number;
+  totalMonthlyPending: number;
+  monthlyRevenueGraph: any[];
+  yearlyRevenueGraph: any[];
+  occupancyGraph: OccupancyGraph[];
+  paymentStatusBreakdownGraph: any[];
+  rentCollectionGraph: any[];
+}
 
-  { name: "Commercial", value: 25, color: "#06B6D4" },
-  { name: "Land", value: 25, color: "#EC4899" },
-  { name: "Villas", value: 10, color: "#EF4444" },
-  { name: "Houses", value: 5, color: "#8B5CF6" },
-    { name: "Apartment", value: 60, color: "#FACC15" },
-];
+export interface DashboardApiResponse {
+  data: DashboardData;
+}
 
-const chartData = [
-  { name: "Paid", value: 80, fill: "#E800DC" ,count: 64},
-  { name: "Pending", value: 55, fill: "#006AFF",count: 17 },
-  { name: "Overdue", value: 30, fill: "#FF008C",count: 4 },
-];
-
-const rentCollectionData = [
-  { month: "Jan", paid: 80, pending: 15 },
-  { month: "Feb", paid: 50, pending: 30 },
-  { month: "Mar", paid: 65, pending: 20 },
-  { month: "Apr", paid: 45, pending: 25 },
-  { month: "May", paid: 70, pending: 30 },
-  { month: "Jun", paid: 60, pending: 25 },
-];
-
+// Dummy data only for Activity & Task section
 const sampleActivityData = [
   {
     id: "1",
@@ -149,7 +126,55 @@ const sampleTaskData = [
     icon: "red",
   },
 ];
+
 const DashBoard = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const dashboardData = useSelector(selectDashboardData);
+
+  useEffect(() => {
+    dispatch(DashboardThunks());
+  }, [dispatch]);
+
+  const totalProperties =
+    dashboardData?.PropertiesTotal?.reduce(
+      (sum: number, property: PropertyTotal) => sum + (property.count || 0),
+      0
+    ) || 0;
+
+  const currentOccupancyRate =
+    dashboardData?.occupancyGraph?.[0]?.occupancyRate || 0;
+
+  const radialData =
+    dashboardData?.paymentStatusBreakdownGraph?.map((item, index) => ({
+      name: item._id.charAt(0).toUpperCase() + item._id.slice(1),
+      value: item.count,
+      fill: ["#E800DC", "#006AFF", "#FF008C"][index % 3],
+    })) || [];
+
+  const rentCollectionData = dashboardData?.rentCollectionGraph?.map((item) => {
+      const monthName = new Date(
+        item._id.year,
+        item._id.month - 1
+      ).toLocaleString("default", { month: "short" });
+      const paid =
+        item.collected && item.collected > 0 ? item.collected : 50000;
+      const totalExpected =
+        item.totalExpected && item.totalExpected > 0
+          ? item.totalExpected
+          : 75000;
+
+      const pending = totalExpected - paid;
+      return { month: monthName, paid, pending: pending < 0 ? 0 : pending };
+    }) || [];
+
+  const formatIndianCurrency = (value: number): string => {
+    if (value === 0) return "₹0";
+    if (value >= 10000000) return `₹${(value / 10000000).toFixed(1)}Cr`;
+    if (value >= 100000) return `₹${(value / 100000).toFixed(1)}L`;
+    if (value >= 1000) return `₹${(value / 1000).toFixed(1)}K`;
+    return `₹${value}`;
+  };
+
   return (
     <div className="p-3 flex flex-col gap-6">
       {/* Header */}
@@ -163,12 +188,12 @@ const DashBoard = () => {
         </div>
       </div>
 
-      {/* Card 1 Section */}
+      {/* Card 1 */}
       <div className="grid grid-cols-5 gap-6">
         <Card1
           title="Total Properties"
-          value={25}
-          subText="100 Total Units"
+          value={totalProperties}
+          subText={`${totalProperties} Properties`}
           percentage={8.2}
           icon={<Building2 />}
           iconBg="bg-[#3065A426]/15"
@@ -176,8 +201,8 @@ const DashBoard = () => {
         />
         <Card1
           title="Total Tenants"
-          value={85}
-          subText="85% Occupancy Rate"
+          value={dashboardData?.totalTenants || 0}
+          subText={`${dashboardData?.collectionRate || "0%"} Collection Rate`}
           percentage={3.1}
           icon={<Building2 />}
           iconBg="bg-[#EB821826]/15"
@@ -185,7 +210,7 @@ const DashBoard = () => {
         />
         <Card1
           title="Total Revenue"
-          value={7800000}
+          value={formatIndianCurrency(dashboardData?.OverAllRevenue || 0)}
           subText="All Time"
           percentage={15.2}
           icon={<Building2 />}
@@ -194,7 +219,7 @@ const DashBoard = () => {
         />
         <Card1
           title="Monthly Revenue"
-          value={650000}
+          value={formatIndianCurrency(dashboardData?.totalMonthlyRevenue || 0)}
           subText="This Month"
           percentage={8.3}
           icon={<Building2 />}
@@ -203,7 +228,7 @@ const DashBoard = () => {
         />
         <Card1
           title="Monthly Pending"
-          value={40000}
+          value={formatIndianCurrency(dashboardData?.totalMonthlyPending || 0)}
           subText="This Month"
           percentage={-8.2}
           icon={<Building2 />}
@@ -212,63 +237,82 @@ const DashBoard = () => {
         />
       </div>
 
-      {/* Card 2 Section */}
-      <div className="grid grid-cols-3 gap-6 ">
+      {/* Card 2 */}
+      <div className="grid grid-cols-3 gap-6">
         <Card2
           bgImage={frame1}
           icon={<Building2 />}
           title="New Tenants"
           subText="This Month"
-          value={3}
+          value={dashboardData?.newTenantsThisMonth || 0}
           iconBg="bg-[#B200FF26]/15"
           iconTextColor="text-[#B200FF]"
         />
         <Card2
           bgImage={frame2}
           icon={<Building2 />}
-          title="New Registrations"
-          subText="This Week"
-          value={7}
+          title="Leases Expiring Soon"
+          subText="This Month"
+          value={dashboardData?.leasesExpiringSoon || 0}
           iconBg="bg-[#FFBF0026]/15"
           iconTextColor="text-[#FFBF00]"
         />
         <Card2
           bgImage={frame3}
           icon={<Building2 />}
-          title="Pending Payments"
+          title="Occupancy Rate"
           subText="This Month"
-          value="96.2%"
+          value={`${currentOccupancyRate}%`}
           iconBg="bg-[#3091EB26]/15"
           iconTextColor="text-[#3091EB]"
         />
       </div>
 
-      {/* Charts Section-1 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 ">
-        <div className="">
-          <MonthlyRevenueTrendLine data={lineData} />
-        </div>
-        <div className="">
-          <MonthlyRevenueTrendBar data={barData} />
-        </div>
-      </div>
-
-      {/* Chaers Section-2 */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <OccupancyRateTrend data={occupancyData} />
-        <PropertyTypesDistribution data={samplePieData} />
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 ">
-        <RadialChart data={chartData} />
-        <RentCollectionRate data={rentCollectionData} />
-      </div>
-      <div>
-        <ActivityTabs
-          activityData={sampleActivityData}
-          taskData={sampleTaskData}
+      {/* Charts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <MonthlyRevenueTrendLine
+          data={dashboardData?.monthlyRevenueGraph || []}
+        />
+        <MonthlyRevenueTrendBar
+          data={dashboardData?.yearlyRevenueGraph || []}
         />
       </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <OccupancyRateTrend
+          data={
+            dashboardData?.occupancyGraph?.map((item) => ({
+              month: new Date(0, item.month - 1).toLocaleString("default", {
+                month: "short",
+              }),
+              rate: item.occupancyRate,
+            })) || []
+          }
+        />
+        <PropertyTypesDistribution
+          data={
+            dashboardData?.PropertiesTotal?.map((property, index) => ({
+              name:
+                property._id.charAt(0).toUpperCase() + property._id.slice(1),
+              value: property.count,
+              color: ["#06B6D4", "#EC4899", "#EF4444", "#8B5CF6", "#FACC15"][
+                index % 5
+              ],
+            })) || []
+          }
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <RadialChart data={radialData} />
+        <RentCollectionRate data={rentCollectionData} />
+      </div>
+
+      {/* Last section stays dummy */}
+      <ActivityTabs
+        activityData={sampleActivityData}
+        taskData={sampleTaskData}
+      />
     </div>
   );
 };
