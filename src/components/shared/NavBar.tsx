@@ -1,15 +1,23 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import { FiSearch } from "react-icons/fi";
 import { FaRegBell } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Profileicon from "../../assets/profileicon.png";
 import pmsicon from "../../assets/pmsicon (2).png";
+import { useDispatch, useSelector } from "react-redux";
+import { selectNotification } from "../../features/notification/redecures/selectors";
 
 export default function Navbar({ isSidebarOpen, toggleSidebar }) {
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
   const profileRef = useRef(null);
   const notificationRef = useRef(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  
+  const notifications = useSelector(selectNotification) || [];
+
+  // Calculate unread count
+  const unreadCount = notifications.filter(n => !n.is_read).length;
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -39,30 +47,25 @@ export default function Navbar({ isSidebarOpen, toggleSidebar }) {
   return (
     <div className="flex w-full gap-5">
       {/* Left: Logo + Name */}
-    <div
-  className={`flex items-center justify-start h-[80px] bg-white shadow-md rounded-br-xl rounded-bl-xl  ${isSidebarOpen?"px-4":"px-2"} cursor-pointer transition-all duration-300`}
-  style={{ width: isSidebarOpen ? "250px" : "80px" }}
-  onClick={toggleSidebar} // toggles only if NOT clicking logo
->
-  <img
-  className="object-fit w-[65px]"
-    src={pmsicon}
-    alt="logo"
-    // style={{ width: isSidebarOpen ? "60px" : "80px",
-    //     height: isSidebarOpen ? "25px" : "40px",
-    //  }}
-    onClick={(e) => e.stopPropagation()} // prevents parent click
-  />
-  <span
-    className={`ml-3 text-lg font-semibold text-gray-800 whitespace-nowrap transition-all duration-300 ${
-      isSidebarOpen ? "opacity-100" : "opacity-0"
-    }`}
-  >
-    MGM Properties
-  </span>
-</div>
-
-
+      <div
+        className={`flex items-center justify-start h-[80px] bg-white shadow-md rounded-br-xl rounded-bl-xl  ${isSidebarOpen ? "px-4" : "px-2"} cursor-pointer transition-all duration-300`}
+        style={{ width: isSidebarOpen ? "250px" : "80px" }}
+        onClick={toggleSidebar}
+      >
+        <img
+          className="object-fit w-[65px]"
+          src={pmsicon}
+          alt="logo"
+          onClick={(e) => e.stopPropagation()}
+        />
+        <span
+          className={`ml-3 text-lg font-semibold text-gray-800 whitespace-nowrap transition-all duration-300 ${
+            isSidebarOpen ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          MGM Properties
+        </span>
+      </div>
 
       {/* Right: Search + Notification + Profile */}
       <div className="flex items-center justify-between h-[80px] flex-1 bg-white shadow-xl px-6 rounded-br-xl rounded-bl-xl">
@@ -78,42 +81,48 @@ export default function Navbar({ isSidebarOpen, toggleSidebar }) {
 
         {/* Notification + Profile */}
         <div className="flex items-center gap-6">
-          {/* Notification */}
           <div className="relative" ref={notificationRef}>
             <div
-              className="h-10 w-10 flex items-center justify-center rounded-full bg-[#B200FF] text-white cursor-pointer hover:bg-purple-700 transition-colors"
+              className="h-10 w-10 flex items-center justify-center rounded-full bg-[#B200FF] text-white cursor-pointer hover:bg-purple-700 transition-colors relative"
               onClick={() => setShowNotificationDropdown(!showNotificationDropdown)}
             >
               <FaRegBell className="h-[20px] w-[20px]" />
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
             </div>
 
             {showNotificationDropdown && (
               <div className="absolute right-0 mt-2 w-[300px] bg-white rounded-md shadow-lg z-20 p-4">
-                <h3 className="font-semibold text-sm mb-2">All Notifications</h3>
+                <h3 className="font-semibold text-sm mb-2">Recent Notifications</h3>
                 <div className="space-y-3">
-                  {[
-                    {
-                      name: "Chendran",
-                      message: "It is a long established fact that...",
-                      time: "2 minutes ago",
-                    },
-                    {
-                      name: "Store Verification Done",
-                      message: "We have successfully received your request.",
-                      time: "1 Month Ago",
-                    },
-                    {
-                      name: "Check Your Mail",
-                      message: "All done! Now check your inbox...",
-                      time: "4 Months Ago",
-                    },
-                  ].map((item, i) => (
-                    <div key={i} className="border-b pb-2">
-                      <div className="text-sm font-medium">{item.name}</div>
-                      <p className="text-xs text-gray-600">{item.message}</p>
-                      <div className="text-[10px] text-gray-400">{item.time}</div>
-                    </div>
-                  ))}
+                  {notifications.length > 0 ? (
+                    [...notifications]
+                      .sort(
+                        (a, b) =>
+                          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                      )
+                      .slice(0, 3)
+                      .map((item, i) => (
+                        <div key={item._id || i} className="border-b pb-2">
+                          <div className="text-sm font-medium">
+                            {item.title || "No Title"}
+                          </div>
+                          <p className="text-xs text-gray-600">
+                            {item.message || item.description || ""}
+                          </p>
+                          <div className="text-[10px] text-gray-400">
+                            {item.createdAt
+                              ? new Date(item.createdAt).toLocaleString()
+                              : ""}
+                          </div>
+                        </div>
+                      ))
+                  ) : (
+                    <p className="text-xs text-gray-500">No notifications found</p>
+                  )}
                 </div>
                 <p
                   onClick={handleViewNotification}
