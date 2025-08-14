@@ -24,6 +24,7 @@ import cardimg4 from "../../assets/cardimg4.png"
 import { FONTS } from '../../constants/ui constants'
 import { selectNotification } from "../../features/notification/redecures/selectors"
 import { getNotificationAll } from "../../features/notification/redecures/thunks"
+import { deleteNotification } from "../../features/notification/services"
 
 
 interface NotificationItem {
@@ -196,17 +197,23 @@ function Notifications() {
     }
   }
 
-  const deleteNotification = async (id: string) => {
-    try {
-      setNotificationList(prev =>
-        prev.filter(notification => notification.id !== id)
-      )
-      
-    } catch (err) {
-      console.error('Error deleting notification:', err)
-  
+  const deleteNotificationHandler = async (uuid: string) => {
+  try {
+    const res = await deleteNotification({uuid});
+    
+    if (res) {
+     
+        setNotificationList(prev =>
+        prev.filter(notification => notification.id !== uuid)
+      );
+    } else {
+      console.error("Failed to delete notification:", res);
     }
+  } catch (err) {
+    console.error("Error deleting notification:", err);
   }
+};
+
 
   const handleNotificationClick = (notification: NotificationItem) => {
     if (!notification.isRead) {
@@ -418,7 +425,7 @@ function Notifications() {
                         className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                         onClick={(e) => {
                           e.stopPropagation() 
-                          deleteNotification(notification.id)
+                         deleteNotificationHandler(notification.id)
                         }}
                       >
                         <img src={cancelicon} className="h-6 w-6" />

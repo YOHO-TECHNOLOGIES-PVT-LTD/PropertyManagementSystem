@@ -58,7 +58,7 @@ const generateEndPoints = () => {
         },
         Notification:{
             getAll:"/api/notification/",
-            delete:"/api/notification/:uuid",
+            delete:"/api/notification/",
             update:"/api/notification/:uuid",
         }
     }

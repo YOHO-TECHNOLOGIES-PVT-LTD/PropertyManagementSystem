@@ -75,11 +75,10 @@ class Client {
 	notification ={
 		getAll:(params:string)=>
 			HttpClient.get(HTTP_END_POINTS.Notification.getAll,params),
-		delete:(params:string)=>
-			HttpClient.delete(HTTP_END_POINTS.Notification.delete,params),
-		update:(data:any,params:string)=>HttpClient.update(HTTP_END_POINTS.Notification.update,data,params)
+		delete:(params:any)=>
+			HttpClient.delete(HTTP_END_POINTS.Notification.delete + params?.uuid),
+		updatestatus:(params:string,data:any)=>HttpClient.update(HTTP_END_POINTS.Notification.update + params?.uuid,data)
 	}
-
 }
 
 export default new Client();
