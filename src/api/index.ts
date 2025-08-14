@@ -22,7 +22,7 @@ class Client {
 		edit: (params: string, data: any) =>
 			 HttpClient.update(HTTP_END_POINTS.property.update+params.uuid, data),
 		delete: (params: string) => HttpClient.delete(HTTP_END_POINTS.property.delete+ params.uuid),
-		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.property.get.replace(":uuid", params), params),
+		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.property.get + params.uuid),
 		getProperty: (data: any) => HttpClient.get(HTTP_END_POINTS.property.getProperty, data),
     };
     land = {

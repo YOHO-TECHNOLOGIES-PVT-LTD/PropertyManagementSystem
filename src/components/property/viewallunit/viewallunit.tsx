@@ -23,8 +23,8 @@ const ViewAllUnits = () => {
     ];
 
     return (
-        <div>
-            <div className="bg-white rounded-lg w-full h-full overflow-y-auto no-scrollbar p-6 relative shadow-lg">
+        <div className="">
+            <div className=" rounded-lg w-full h-full   no-scrollbar p-6 relative shadow-lg">
                 {/* Close Button */}
                 <button
                     onClick={() => navigate(`/properties`)}

@@ -743,7 +743,7 @@ function Properties() {
                  
 
                     <Button
-                      className="w-full bg-[#B200FF] hover:bg-[#B200FF] text-white"
+                      className="w-full bg-[#B200FF]  text-white"
                       onClick={() => navigate(`/viewunits`)}
                     >
                       <img src={eyeImg} alt="eye" className="w-4 h-4" />

@@ -1,158 +1,212 @@
 
-
-"use client"
-
-import type React from "react"
-
-import { useEffect, useState } from "react"
-import { FiSearch } from "react-icons/fi"
-import { FONTS } from "../../constants/ui constants"
-import { FaUser, FaPlus } from "react-icons/fa"
-import Background_Image_1 from "../../assets/Bg_Frames/Frame_1.png"
-import Background_Image_2 from "../../assets/Bg_Frames/Frame_3.png"
-import { Input } from "../../components/ui/input"
-import { Button } from "../../components/ui/button"
-import { useDispatch } from "react-redux"
+import type React from "react";
+import { useEffect, useState } from "react";
+import { FiSearch } from "react-icons/fi";
+import { FONTS } from "../../constants/ui constants";
+import { FaUser, FaPlus } from "react-icons/fa";
+import Background_Image_1 from "../../assets/Bg_Frames/Frame_1.png";
+import Background_Image_2 from "../../assets/Bg_Frames/Frame_3.png";
+import { Input } from "../../components/ui/input";
+import { Button } from "../../components/ui/button";
+import { useDispatch } from "react-redux";
 import {
   CreatMaintenanceThunks,
   GetallMaintenanceThunks,
   GetallPropertyThunks,
   GetallUnitThunks,
-} from "../../features/maintenance/reducers/thunks.ts"
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi"
+} from "../../features/maintenance/reducers/thunks.ts";
+import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import toast from "react-hot-toast";
+
+interface MaintenanceItem {
+  _id: string;
+  title: string;
+  description: string;
+  full_name: string;
+  property_type: string;
+  propertyId: string;
+  unitId: string | { _id: string; unit_name: string };
+  category: string;
+  scheduled: string;
+  estmate_cost: string;
+  createdAt: string;
+}
+
+interface Property {
+  _id: string;
+  uuid: string;
+  property_name: string;
+  property_type: string;
+}
+
+interface Unit {
+  _id: string;
+  unit_name: string;
+}
 
 const Maintenance = () => {
-  const [categoryFilter, setCategoryFilter] = useState<string>("All")
-  const [searchTerm, setSearchTerm] = useState<string>("")
-  const [Openrequest, setOpenrequest] = useState(false)
-  const dispatch = useDispatch<any>()
-  const [maintenanceList, setMaintenanceList] = useState<any[]>([])
-  const [propertyTypes, setPropertyTypes] = useState<string[]>([])
-  const [units, setUnits] = useState<any[]>([])
-  const [errors, setErrors] = useState<{ [key: string]: string }>({})
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 4
-
-  useEffect(() => {
-    ;(async () => {
-      const maintenancedata = await dispatch(GetallMaintenanceThunks({}))
-      console.log("all maintenance", maintenancedata)
-      setMaintenanceList(maintenancedata)
-    })()
-  }, [dispatch])
-
-  useEffect(() => {
-    ;(async () => {
-      const maintenancedata = await dispatch(GetallPropertyThunks({ property_type: "commercial" }))
-      console.log("commercial:", maintenancedata)
-      setPropertyTypes(maintenancedata)
-    })()
-  }, [dispatch])
-
-  const validateField = (name: string, value: string) => {
-    let error = ""
-    switch (name) {
-      case "title":
-        if (!value.trim()) error = "Title is required"
-        break
-      case "description":
-        if (!value.trim()) error = "Description is required"
-        break
-      case "full_name":
-        if (!value.trim()) error = "Full name is required"
-        break
-      case "property_type":
-        if (!value) error = "Property type is required"
-        break
-      case "propertyId":
-        if (!value) error = "Property name is required"
-        break
-      case "unitId":
-        if (!value) error = "Unit is required"
-        break
-      case "category":
-        if (!value.trim()) error = "Category is required"
-        break
-      case "scheduled":
-        if (!value) error = "Schedule date is required"
-        break
-      case "estmate_cost":
-        if (!value.trim()) error = "Estimated cost is required"
-        else if (isNaN(Number(value))) error = "Valid estimated cost is required"
-        break
-      default:
-        break
-    }
-    setErrors((prev) => ({ ...prev, [name]: error }))
-  }
+  const [categoryFilter, setCategoryFilter] = useState<string>("All");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [Openrequest, setOpenrequest] = useState(false);
+  const dispatch = useDispatch<any>();
+  const [maintenanceList, setMaintenanceList] = useState<MaintenanceItem[]>([]);
+  const [propertyTypes, setPropertyTypes] = useState<Property[]>([]);
+  const [units, setUnits] = useState<Unit[]>([]);
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4;
 
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     full_name: "",
-    property_type: "",
-    propertyId: "",
     unitId: "",
     category: "",
     scheduled: "",
     estmate_cost: "",
-  })
+  });
+
+  useEffect(() => {
+    (async () => {
+      const maintenancedata = await dispatch(GetallMaintenanceThunks({}));
+      console.log("all maintenance", maintenancedata);
+      setMaintenanceList(maintenancedata);
+    })();
+  }, [dispatch]);
+
+  useEffect(() => {
+    (async () => {
+      const propertyData = await dispatch(GetallPropertyThunks({ property_type: "commercial" }));
+      console.log("properties:", propertyData);
+      setPropertyTypes(propertyData);
+    })();
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (formData.propertyId) {
+      (async () => {
+        const params = { uuid: formData.propertyId }
+        const unitsData = await dispatch(GetallUnitThunks(params));
+        console.log("Units for selected property:", unitsData);
+        setUnits(unitsData);
+      })();
+    } else {
+      setUnits([]);
+    }
+  }, [dispatch, formData.propertyId]);
+
+  const validateField = (name: string, value: string) => {
+    let error = "";
+    switch (name) {
+      case "title":
+        if (!value.trim()) error = "Title is required";
+        break;
+      case "description":
+        if (!value.trim()) error = "Description is required";
+        break;
+      case "full_name":
+        if (!value.trim()) error = "Full name is required";
+        break;
+      case "property_type":
+        if (!value) error = "Property type is required";
+        break;
+      case "propertyId":
+        if (!value) error = "Property name is required";
+        break;
+      case "unitId":
+        if (!value) error = "Unit is required";
+        break;
+      case "category":
+        if (!value.trim()) error = "Category is required";
+        break;
+      case "scheduled":
+        if (!value) error = "Schedule date is required";
+        break;
+      case "estmate_cost":
+        if (!value.trim()) error = "Estimated cost is required";
+        else if (isNaN(Number(value))) error = "Valid estimated cost is required";
+        break;
+      default:
+        break;
+    }
+    setErrors((prev) => ({ ...prev, [name]: error }));
+  };
 
   const validateForm = () => {
-    const newErrors: { [key: string]: string } = {}
-    if (!formData.title.trim()) newErrors.title = "Title is required"
-    if (!formData.description.trim()) newErrors.description = "Description is required"
-    if (!formData.full_name.trim()) newErrors.full_name = "Full name is required"
-    if (!formData.property_type) newErrors.property_type = "Property type is required"
-    if (!formData.propertyId) newErrors.propertyId = "Property name is required"
-    if (!formData.unitId) newErrors.unitId = "Unit is required"
-    if (!formData.category.trim()) newErrors.category = "Category is required"
-    if (!formData.scheduled) newErrors.scheduled = "Schedule date is required"
-    if (!formData.estmate_cost.trim()) newErrors.estmate_cost = "Estimated cost is required"
-    else if (isNaN(Number(formData.estmate_cost))) newErrors.estmate_cost = "Valid estimated cost is required"
+    const newErrors: { [key: string]: string } = {};
+    if (!formData.title.trim()) newErrors.title = "Title is required";
+    if (!formData.description.trim()) newErrors.description = "Description is required";
+    if (!formData.full_name.trim()) newErrors.full_name = "Full name is required";
+    if (!formData.property_type) newErrors.property_type = "Property type is required";
+    if (!formData.propertyId) newErrors.propertyId = "Property name is required";
+    if (!formData.unitId) newErrors.unitId = "Unit is required";
+    if (!formData.category.trim()) newErrors.category = "Category is required";
+    if (!formData.scheduled) newErrors.scheduled = "Schedule date is required";
+    if (!formData.estmate_cost.trim()) newErrors.estmate_cost = "Estimated cost is required";
+    else if (isNaN(Number(formData.estmate_cost))) newErrors.estmate_cost = "Valid estimated cost is required";
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target
-    setFormData({
-      ...formData,
-      [name]: value,
-    })
-    // Validate field on change
-    validateField(name, value)
-  }
+    const { name, value } = e.target;
+    
+    setFormData((prev) => {
+      const newData = {
+        ...prev,
+        [name]: value,
+      };
+      
+      // Reset dependent fields when property type or property changes
+      if (name === "property_type") {
+        newData.propertyId = "";
+        newData.unitId = "";
+      } else if (name === "propertyId") {
+        newData.unitId = "";
+      }
+      
+      return newData;
+    });
+    
+    validateField(name, value);
+  };
 
   const handleCreate = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!validateForm()) return
-    const { property_type, propertyId, createdAt, ...dataToSend } = formData
-    dispatch(CreatMaintenanceThunks(dataToSend)).then((res: any) => {
-      console.log("Created maintenance:", res)
-      setOpenrequest(false)
-      dispatch(GetallMaintenanceThunks({})).then((data: any) => setMaintenanceList(data))
-      setFormData({
-        title: "",
-        description: "",
-        full_name: "",
-        property_type: "",
-        propertyId: "",
-        unitId: "",
-        category: "",
-        scheduled: "",
-        estmate_cost: "",
-      })
-      setErrors({})
-    })
-  }
+  e.preventDefault();
+  if (!validateForm()) return;
+  
+  // Destructure to remove property_type and propertyId
+  const { property_type, propertyId, ...dataToSend } = formData;
+  
+  dispatch(CreatMaintenanceThunks(dataToSend)).then((res: any) => {
+    if (res) {
+      toast.success("Maintenance request created successfully!");
+    } else {
+      toast.error("Failed to create maintenance request.");
+    }
 
-  const totalCount = maintenanceList?.length
+    console.log("Created maintenance:", res);
+    setOpenrequest(false);
+    dispatch(GetallMaintenanceThunks({})).then((data: any) => setMaintenanceList(data));
+    setFormData({
+      title: "",
+      description: "",
+      full_name: "",
+      unitId: "",
+      category: "",
+      scheduled: "",
+      estmate_cost: "",
+    });
+    setErrors({});
+  });
+};
+
+  const totalCount = maintenanceList?.length || 0;
   const totalCost = maintenanceList?.reduce((sum, item) => {
-    const numericCost = Number.parseInt(String(item.estmate_cost).replace(/[^0-9]/g, ""), 10)
-    return sum + (isNaN(numericCost) ? 0 : numericCost)
-  }, 0)
+    const numericCost = Number.parseInt(String(item.estmate_cost).replace(/[^0-9]/g, ""), 10);
+    return sum + (isNaN(numericCost) ? 0 : numericCost);
+  }, 0) || 0;
 
   const card = [
     { id: 1, icon: <FaUser />, title: "Total", number: totalCount, bg: Background_Image_1 },
@@ -163,32 +217,20 @@ const Maintenance = () => {
       number: `₹.${totalCost?.toLocaleString()}`,
       bg: Background_Image_2,
     },
-  ]
+  ];
 
   const filteredData = maintenanceList
     ?.filter((item) => categoryFilter === "All" || item.category === categoryFilter)
-    .filter((item) => item.full_name?.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter((item) => item.full_name?.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  const indexOfLastItem = currentPage * itemsPerPage
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage
-  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem)
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage)
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   const handlePageChange = (pageNumber: number) => {
-    setCurrentPage(pageNumber)
-  }
-
-  useEffect(() => {
-    if (formData.property_type) {
-      ;(async () => {
-        const unitsData = await dispatch(GetallUnitThunks({ uuid: "e465c027-3ad0-4e94-a755-178a4aa53115" }))
-        console.log("Units for selected property type:", unitsData)
-        setUnits(unitsData)
-      })()
-    } else {
-      setUnits([])
-    }
-  }, [dispatch, formData.property_type])
+    setCurrentPage(pageNumber);
+  };
 
   return (
     <div>
@@ -205,17 +247,15 @@ const Maintenance = () => {
             placeholder="SearchBy...name,unit_no,"
             value={searchTerm}
             onChange={(e) => {
-              setSearchTerm(e.target.value)
-              setCurrentPage(1) // Reset to first page when search changes
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
             }}
             className="w-full pl-12 pr-3 py-2 border border-gray-300 rounded-lg text-sm"
           />
         </div>
         <div>
           <Button
-            onClick={() => {
-              setOpenrequest(!Openrequest)
-            }}
+            onClick={() => setOpenrequest(!Openrequest)}
             className="flex items-center gap-2 bg-[#B200FF] text-white px-4 py-2 rounded-lg shadow"
           >
             <FaPlus />
@@ -262,7 +302,7 @@ const Maintenance = () => {
                   <div className="py-2">
                     <img
                       src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwiVqpNd0zv349lznWpZI0-KKoEyp-sFiA_g&s"
-                      alt={item.name}
+                      alt={item.full_name}
                       className="w-10 h-10 rounded-full object-cover"
                     />
                   </div>
@@ -336,7 +376,6 @@ const Maintenance = () => {
       {/* Pagination Controls */}
       {totalPages > 1 && (
         <div className="flex justify-center items-center gap-2 mt-6">
-          {/* Previous Button */}
           <button
             onClick={() => currentPage > 1 && handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
@@ -348,7 +387,6 @@ const Maintenance = () => {
           >
             <FiChevronLeft size={18} />
           </button>
-          {/* Page Numbers */}
           {Array.from({ length: totalPages }, (_, index) => (
             <button
               key={index}
@@ -360,7 +398,6 @@ const Maintenance = () => {
               {index + 1}
             </button>
           ))}
-          {/* Next Button */}
           <button
             onClick={() => currentPage < totalPages && handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages}
@@ -379,7 +416,6 @@ const Maintenance = () => {
       {Openrequest && (
         <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
           <form onSubmit={handleCreate} className="bg-white shadow rounded-lg p-4 w-full max-w-lg">
-            {/* Form header */}
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-800" style={FONTS.headers}>
                 Maintenance details
@@ -392,7 +428,6 @@ const Maintenance = () => {
                 ✕
               </button>
             </div>
-            {/* Personal Information */}
             <h3 className="text-lg font-bold text-gray-800 mb-2" style={FONTS.Table_Header}>
               Personal Information
             </h3>
@@ -421,9 +456,9 @@ const Maintenance = () => {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
                 >
                   <option value="">Property Type</option>
-                  {propertyTypes.map((item: any) => (
-                    <option key={item._id} value={item.uuid}>
-                      {item?.property_type}
+                  {[...new Set(propertyTypes.map((item) => item.property_type))].map((type) => (
+                    <option key={type} value={type}>
+                      {type}
                     </option>
                   ))}
                 </select>
@@ -436,13 +471,16 @@ const Maintenance = () => {
                   value={formData.propertyId}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  disabled={!formData.property_type}
                 >
                   <option value="">Property Name</option>
-                  {propertyTypes.map((item: any) => (
-                    <option key={item._id} value={item.uuid}>
-                      {item?.property_name}
-                    </option>
-                  ))}
+                  {propertyTypes
+                    .filter((item) => item.property_type === formData.property_type)
+                    .map((item) => (
+                      <option key={item._id} value={item.uuid}>
+                        {item.property_name}
+                      </option>
+                    ))}
                 </select>
                 {errors.propertyId && <p className="text-red-500 text-xs mt-1">{errors.propertyId}</p>}
               </div>
@@ -453,17 +491,14 @@ const Maintenance = () => {
                   value={formData.unitId}
                   onChange={handleInputChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  disabled={!formData.propertyId}
                 >
                   <option value="">Select Unit</option>
-                  {units.length > 0 ? (
-                    units.map((unit: any) => (
-                      <option key={unit._id} value={unit._id}>
-                        {unit.unit_name}
-                      </option>
-                    ))
-                  ) : (
-                    <option disabled>No units available</option>
-                  )}
+                  {units.map((unit) => (
+                    <option key={unit._id} value={unit._id}>
+                      {unit.unit_name}
+                    </option>
+                  ))}
                 </select>
                 {errors.unitId && <p className="text-red-500 text-xs mt-1">{errors.unitId}</p>}
               </div>
@@ -492,7 +527,7 @@ const Maintenance = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Maintenance
+export default Maintenance;
