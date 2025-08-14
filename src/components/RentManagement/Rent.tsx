@@ -1,162 +1,67 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
-import {Building2,X,User,Calendar,IndianRupee,CreditCard,Users} from "lucide-react";
+import { Building2, ChevronLeft, ChevronRight } from "lucide-react";
 import Card2 from "./Card";
 import frame1 from "../../assets/Bg_Frames/Frame_1.png";
 import frame2 from "../../assets/Bg_Frames/Frame_2.png";
 import frame3 from "../../assets/Bg_Frames/Frame_3.png";
 import { BiSolidBuildings } from "react-icons/bi";
-import { Input } from "../ui/input";
 import { FONTS } from "../../constants/ui constants";
+import { useDispatch, useSelector } from "react-redux";
+import { getRent } from "../../features/Rent/selector";
+import { fetchRentThunk } from "../../features/Rent/thunks";
+import { downloadRent, updateRent } from "../../features/Rent/service";
+import toast from "react-hot-toast";
 
-interface RentItem {
-  id: number;
-  fullName: string;
-  companyName: string;
-  amount: string;
-  dueDate: string;
-  status: string;
-  unit: number;
+
+interface PersonalInformation {
+  full_name: string;
   email: string;
   phone: string;
   address: string;
-  propertyType: string;
-  securityDeposit: string;
-  leaseStartDate: string;
-  leaseEndDate: string;
-  emergencyContact: string;
+}
+
+interface Tenant {
+  personal_information: PersonalInformation;
+  rent: string;
+  unit_number: number;
+  security_deposit: string;
+  lease_start_date: string;
+  lease_end_date: string;
+  emergency_contact: string;
+}
+
+interface RentItem {
+  uuid: string;
+  tenantId: Tenant;
+  paymentDueDay: string;
+  status: string;
   bankDetails: string;
 }
 
-interface FormData {
-  emailAddress: string;
-  phoneNumber: string;
-  propertyName: string;
-  fullName: string;
-  companyName: string;
-  email: string;
-  phone: string;
-  address: string;
-  propertyType: string;
-  unit: string;
-  amount: string;
-  dueDate: string;
-  status: string;
-  securityDeposit: string;
-  leaseStartDate: string;
-  leaseEndDate: string;
-  emergencyContact: string;
-  bankDetails: string;
-  tenantAddress: string;
-  monthlyRent: string;
-  paymentStatus: string;
-  contactName: string;
-  contactNumber: string;
-  relationship: string;
-  accountNumber: string;
-  accountHolderName: string;
-  ifscCode: string;
-  bankName: string;
+interface RentState {
+  rents: RentItem[];
+  loading: boolean;
+  error: string | null;
 }
 
 const Rent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [monthFilter, setMonthFilter] = useState("All Months");
-  const [modalData, setModalData] = useState<RentItem | null>(null);
-  const [isMonthDropdownOpen,setIsMonthDropdownOpen] = useState<boolean>(false)
-  const [isStatusDropdownOpen,setIsStatusDropdownOpen] = useState<boolean>(false)
-  const [isAddFormOpen, setIsAddFormOpen] = useState(false);
-  const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
+  const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState<boolean>(false);
+  const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState<boolean>(false);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedRent, setSelectedRent] = useState<RentItem | null>(null);
+const [isModalOpen, setIsModalOpen] = useState(false);
+
   const badgeRef = useRef<HTMLDivElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
-
-  const [rentData, setRentData] = useState<RentItem[]>([
-    {
-      id: 1,
-      fullName: "John Doe",
-      companyName: "John Doe",
-      amount: "₹21,000",
-      dueDate: "2025-01-30",
-      status: "Paid",
-      unit: 101,
-      email: "john@example.com",
-      phone: "+91 9876543210",
-      address: "123 Main St",
-      propertyType: "Office",
-      securityDeposit: "₹42,000",
-      leaseStartDate: "2024-01-01",
-      leaseEndDate: "2025-01-01",
-      emergencyContact: "+91 9876543211",
-      bankDetails: "HDFC Bank - 1234567890",
-    },
-    {
-      id: 2,
-      fullName: "John DuraiRaj",
-      companyName: "John DuraiRaj",
-      amount: "₹75,000",
-      dueDate: "2025-01-30",
-      status: "Overdue",
-      unit: 101,
-      email: "john@example.com",
-      phone: "+91 9876543210",
-      address: "123 Main St",
-      propertyType: "Office",
-      securityDeposit: "₹42,000",
-      leaseStartDate: "2024-01-01",
-      leaseEndDate: "2025-01-01",
-      emergencyContact: "+91 9876543211",
-      bankDetails: "HDFC Bank - 1234567890",
-    },
-    {
-      id: 3,
-      fullName: "Leo",
-      companyName: "Leo",
-      amount: "₹18,000",
-      dueDate: "2025-01-30",
-      status: "Pending",
-      unit: 101,
-      email: "john@example.com",
-      phone: "+91 9876543210",
-      address: "123 Main St",
-      propertyType: "Office",
-      securityDeposit: "₹42,000",
-      leaseStartDate: "2024-01-01",
-      leaseEndDate: "2025-01-01",
-      emergencyContact: "+91 9876543211",
-      bankDetails: "HDFC Bank - 1234567890",
-    },
-  ]);
-
-  const [formData, setFormData] = useState<FormData>({
-    emailAddress: "",
-    phoneNumber: "",
-    propertyName: "",
-    fullName: "",
-    companyName: "",
-    email: "",
-    phone: "",
-    address: "",
-    propertyType: "Office",
-    unit: "",
-    amount: "",
-    dueDate: "",
-    status: "Pending",
-    securityDeposit: "",
-    leaseStartDate: "",
-    leaseEndDate: "",
-    emergencyContact: "",
-    bankDetails: "",
-    tenantAddress: "",
-    monthlyRent: "",
-    paymentStatus: "Pending",
-    contactName: "",
-    contactNumber: "",
-    relationship: "",
-    accountNumber: "",
-    accountHolderName: "",
-    ifscCode: "",
-    bankName: "",
-  });
 
   const months = [
     "All Months",
@@ -174,7 +79,9 @@ const Rent: React.FC = () => {
     "December",
   ];
 
-  const statusOptions = ["Paid", "Pending", "Overdue"];
+  const statusOptions = ["paid", "pending", "overdue"];
+    const filterStatusOptions = ["All Status","paid", "pending", "overdue"];
+  const rowsPerPageOptions = [5, 10, 15, 20];
 
   const getStatusStyle = (status: string) => {
     switch (status) {
@@ -215,153 +122,132 @@ const Rent: React.FC = () => {
     };
   }, [openDropdownId]);
 
-  const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
+  const dispatch = useDispatch<any>();
+  const rents = useSelector(getRent);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const requiredFields = [
-      "fullName",
-      "emailAddress",
-      "phoneNumber",
-      "propertyName",
-      "propertyType",
-      "unit",
-      "tenantAddress",
-      "monthlyRent",
-      "securityDeposit",
-      "paymentStatus",
-      "leaseStartDate",
-      "leaseEndDate",
-      "contactName",
-      "contactNumber",
-      "relationship",
-      "accountNumber",
-      "accountHolderName",
-      "ifscCode",
-      "bankName",
-    ];
-
-    const missingFields = requiredFields.filter(
-      (field) => !formData[field as keyof FormData]
-    );
-
-    if (missingFields.length > 0) {
-      alert(
-        `Please fill in all required fields. Missing: ${missingFields.join(
-          ", "
-        )}`
-      );
-      return;
-    }
-
-    const newEntry: RentItem = {
-      fullName: formData.fullName,
-      id: rentData.length + 1,
-      companyName: formData.companyName || formData.fullName,
-      amount: formData.monthlyRent.startsWith("₹")
-        ? formData.monthlyRent
-        : `₹${formData.monthlyRent}`,
-      dueDate: formData.leaseStartDate,
-      status: formData.paymentStatus,
-      unit: parseInt(formData.unit || "0"),
-      email: formData.emailAddress,
-      phone: formData.phoneNumber,
-      address: formData.tenantAddress,
-      propertyType: formData.propertyType,
-      securityDeposit: formData.securityDeposit.startsWith("₹")
-        ? formData.securityDeposit
-        : `₹${formData.securityDeposit}`,
-      leaseStartDate: formData.leaseStartDate,
-      leaseEndDate: formData.leaseEndDate,
-      emergencyContact: `${formData.contactName} - ${formData.contactNumber}`,
-      bankDetails: `${formData.bankName} - ${formData.accountNumber} (${formData.ifscCode})`,
+  useEffect(() => {
+    const fetchRentData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const params = {
+          month: "8",
+          year: "2025"
+        };
+        await dispatch(fetchRentThunk(params));
+      } catch (err) {
+        setError("Failed to fetch rent data. Please try again.");
+        console.error("Error fetching rent data:", err);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    setRentData((prev) => [...prev, newEntry]);
-    setFormData({
-      emailAddress: "",
-      phoneNumber: "",
-      propertyName: "",
-      fullName: "",
-      companyName: "",
-      email: "",
-      phone: "",
-      address: "",
-      propertyType: "Office",
-      unit: "",
-      amount: "",
-      dueDate: "",
-      status: "Pending",
-      securityDeposit: "",
-      leaseStartDate: "",
-      leaseEndDate: "",
-      emergencyContact: "",
-      bankDetails: "",
-      tenantAddress: "",
-      monthlyRent: "",
-      paymentStatus: "Pending",
-      contactName: "",
-      contactNumber: "",
-      relationship: "",
-      accountNumber: "",
-      accountHolderName: "",
-      ifscCode: "",
-      bankName: "",
-    });
+    fetchRentData();
+  }, [dispatch]);
 
-    setIsAddFormOpen(false);
+  const handleDownload = async (uuid: string) => {
+    try {
+      setDownloadingId(uuid);
+      const response = await downloadRent(uuid);
+
+      const url = window.URL.createObjectURL(response?.data);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `rent_receipt_${uuid}_${new Date().toISOString().slice(0, 10)}.pdf`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Download failed:", error);
+     
+    } finally {
+      setDownloadingId(null);
+    }
   };
 
-  const handleStatusChange = (id: number, newStatus: string) => {
-    setRentData((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status: newStatus } : r))
-    );
-    setOpenDropdownId(null);
-  };
+  const handleStatusChange = async (uuid: string, newStatus: string) => {
+  try {
+    setUpdatingId(uuid);
+    const params = {
+      uuid: uuid,
+      status: newStatus
+    };
+    
+    await updateRent(params);
+    toast.success('Status updated successfully!');
+    
+    const fetchParams = {
+      month: "8",
+      year: "2025"
+    };
+    await dispatch(fetchRentThunk(fetchParams));
+  } catch (error) {
+    console.error('Status update failed:', error);
+    toast.error('Failed to update status. Please try again.');
+  } finally {
+    setUpdatingId(null);
+  }
+  setOpenDropdownId(null);
+};
 
   const filteredData = useMemo(() => {
-    return rentData.filter((item) => {
-      const matchesSearch = item.companyName
-        .toLowerCase()
+    if (!rents?.rents) return [];
+    return rents.rents.filter((item: RentItem) => {
+      const matchesSearch = item.tenantId?.personal_information?.full_name
+        ?.toLowerCase()
         .includes(searchTerm.toLowerCase());
       const matchesStatus =
         statusFilter === "All Status" ? true : item.status === statusFilter;
       const matchesMonth =
         monthFilter === "All Months"
           ? true
-          : months[new Date(item.dueDate).getMonth() + 1] === monthFilter;
+          : months[new Date(item.paymentDueDay).getMonth() + 1] === monthFilter;
       return matchesSearch && matchesStatus && matchesMonth;
     });
-  }, [searchTerm, statusFilter, monthFilter, rentData]);
+  }, [searchTerm, statusFilter, monthFilter, rents?.rents]);
 
-  const parseAmount = (amt: string) => Number(amt.replace(/[₹,]/g, "")) || 0;
+  const totalItems = filteredData.length;
+  const totalPages = Math.ceil(totalItems / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage;
+  const paginatedData = filteredData.slice(startIndex, endIndex);
 
-  const totalDue = rentData.reduce(
-    (sum, item) => sum + parseAmount(item.amount),
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, monthFilter, rowsPerPage]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  const handleRowsPerPageChange = (newRowsPerPage: number) => {
+    setRowsPerPage(newRowsPerPage);
+    setCurrentPage(1);
+  };
+
+  const totalDue = rents?.rents?.reduce(
+    (sum: number, item: RentItem) => sum + (Number(item.tenantId?.rent) || 0),
     0
-  );
-  const totalPaid = rentData
-    .filter((item) => item.status === "Paid")
-    .reduce((sum, item) => sum + parseAmount(item.amount), 0);
-  const totalPending = rentData
-    .filter((item) => item.status === "Pending")
-    .reduce((sum, item) => sum + parseAmount(item.amount), 0);
+  ) || 0;
+
+  const totalPaid = rents?.rents
+    ?.filter((item: RentItem) => item.status === "Paid")
+    ?.reduce((sum: number, item: RentItem) => sum + (Number(item.tenantId?.rent) || 0), 0) || 0;
+
+  const totalPending = rents?.rents
+    ?.filter((item: RentItem) => item.status === "Pending")
+    ?.reduce((sum: number, item: RentItem) => sum + (Number(item.tenantId?.rent) || 0), 0) || 0;
+
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
       <div className="flex justify-between items-center mb-6">
-        <div className="font-bold" >
-         <span className="text-3xl"> Rent Management </span><br />
+        <div className="font-bold">
+          <span className="text-3xl"> Rent Management </span>
+          <br />
           <span className="text-md font-normal text-gray-600">
             Track and Manage Rent Payments
           </span>
@@ -407,15 +293,15 @@ const Rent: React.FC = () => {
           className="border border-gray-300 rounded-lg px-3 py-2 w-full sm:w-1/3 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
-        {/* Header filters */}
         <div className="relative w-28 ml-auto ">
           <div
-            className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center  justify-between bg-[#B200FF1A]"
-            onClick={() =>{
-               setIsStatusDropdownOpen((prev) => !prev);
-              setStatusFilter((prev) => prev === "All Status" ? "All Status" : prev
-              );}
-            }
+            className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center justify-between bg-[#B200FF1A]"
+            onClick={() => {
+              setIsStatusDropdownOpen((prev) => !prev);
+              setStatusFilter((prev) =>
+                prev === "All Status" ? "All Status" : prev
+              );
+            }}
           >
             <span className="text-[#B200FF]">{statusFilter}</span>
             <svg
@@ -434,14 +320,14 @@ const Rent: React.FC = () => {
           </div>
           {isStatusDropdownOpen && (
             <div className="absolute w-full bg-white text-[#7D7D7D] shadow-xl mt-1 rounded-lg border border-gray-300 z-10 overflow-y-auto p-2 space-y-2">
-              {statusOptions.map((status) => (
+              {filterStatusOptions.map((status) => (
                 <div
                   key={status}
                   onClick={() => {
                     setStatusFilter(status);
                     setIsStatusDropdownOpen(false);
                   }}
-                  className={`px-3 py-2 rounded-md active:bg-[#B200FF] active:text-white cursor-pointer border  transition-colors ${
+                  className={`px-3 py-2 rounded-md active:bg-[#B200FF] active:text-white cursor-pointer border transition-colors ${
                     statusFilter === status ? "bg-[#B200FF] text-white" : ""
                   }`}
                 >
@@ -455,14 +341,12 @@ const Rent: React.FC = () => {
         <div className="relative w-28 ">
           <div
             className="border border-gray-300 rounded-lg px-3 py-2 w-full cursor-pointer flex items-center justify-between bg-[#B200FF1A]"
-            onClick={() =>
-             {
+            onClick={() => {
               setIsMonthDropdownOpen((prev) => !prev);
-               setMonthFilter((prev) =>
+              setMonthFilter((prev) =>
                 prev === "All Months" ? "All Months" : prev
-              )
-             }
-            }
+              );
+            }}
           >
             <span className="text-[#B200FF]">{monthFilter}</span>
             <svg
@@ -479,8 +363,7 @@ const Rent: React.FC = () => {
               />
             </svg>
           </div>
-
- {isMonthDropdownOpen && (
+          {isMonthDropdownOpen && (
             <div className="absolute w-full text-[#7D7D7D] bg-white shadow-xl rounded-lg mt-1 border border-gray-300 z-10 overflow-y-auto p-2 space-y-2">
               {months.map((month) => (
                 <div
@@ -489,7 +372,7 @@ const Rent: React.FC = () => {
                     setMonthFilter(month);
                     setIsMonthDropdownOpen(false);
                   }}
-                  className={`px-3 py-2 rounded-md active:bg-[#B200FF] active:text-white cursor-pointer border  transition-colors ${
+                  className={`px-3 py-2 rounded-md active:bg-[#B200FF] active:text-white cursor-pointer border transition-colors ${
                     monthFilter === month ? "bg-[#B200FF] text-white" : ""
                   }`}
                 >
@@ -497,13 +380,13 @@ const Rent: React.FC = () => {
                 </div>
               ))}
             </div>
-          )}        </div>
+          )}
+        </div>
       </div>
 
-      {/* Table */}
       <div className="bg-white rounded-xl p-3 shadow overflow-x-auto">
         <table className="w-full text-left border-separate border-spacing-y-6">
-          <thead className="bg-gray-100" style={{...FONTS.Table_Header}}>
+          <thead className="bg-gray-100" style={{ ...FONTS.Table_Header }}>
             <tr>
               <th className="px-6 py-4 rounded-l-lg">Company Name</th>
               <th className="px-6 py-4">Amount</th>
@@ -512,11 +395,11 @@ const Rent: React.FC = () => {
               <th className="px-6 py-4 rounded-r-lg">Actions</th>
             </tr>
           </thead>
-          <tbody style={{...FONTS.Table_Body}}>
-            {filteredData.length > 0 ? (
-              filteredData.map((item) => (
+          <tbody style={{ ...FONTS.Table_Body }}>
+            {paginatedData.length > 0 ? (
+              paginatedData.map((item: RentItem) => (
                 <tr
-                  key={item.id}
+                  key={item.uuid}
                   className="shadow-sm text-[#7D7D7D] hover:shadow-md transition-shadow"
                 >
                   <td className="px-6 py-4 flex rounded-l-lg text-lg border-l border-t border-b border-gray-200">
@@ -528,56 +411,59 @@ const Rent: React.FC = () => {
                       <BiSolidBuildings className="text-2xl" />
                     </span>
                     <div className="grid ml-3">
-                      <span className="font-bold text-black">{item.companyName}</span>
-                      <span className="text-sm">Unit {item.unit}</span>
+                      <span className="font-bold text-black">
+                        {item.tenantId?.personal_information?.full_name || "N/A"}
+                      </span>
+                      <span className="text-sm">{item.tenantId?.unit.unit_name || "N/A"}</span>
                     </div>
                   </td>
 
                   <td className="px-6 py-4 border-t border-b border-gray-200">
-                    {item.amount}
+                    ₹{item.tenantId?.rent || "0"}
                   </td>
 
                   <td className="px-6 py-4 border-t border-b border-gray-200">
-                    {item.dueDate}
+                    {item.paymentDueDay || "N/A"}
                   </td>
 
                   <td className="px-6 py-4 border-t border-b border-gray-200 relative">
-                   <div
-  ref={(el) => {
-    if (openDropdownId === item.id && el) badgeRef.current = el;
-  }}
-  onClick={(e) => {
-    badgeRef.current = e.currentTarget as HTMLDivElement;
-    setOpenDropdownId((prev) => (prev === item.id ? null : item.id));
-  }}
-  className={`inline-flex items-center justify-between cursor-pointer h-10 px-3 py-1 rounded-md border text-sm font-medium ${getStatusStyle(
-    item.status
-  )} min-w-[100px]`} 
->
-  <span className="flex items-center gap-2 truncate">
-    <span>{item.status}</span>
-  </span>
+                    <div
+                      ref={(el) => {
+                        if (openDropdownId === item.uuid && el)
+                          badgeRef.current = el;
+                      }}
+                      onClick={(e) => {
+                        badgeRef.current = e.currentTarget as HTMLDivElement;
+                        setOpenDropdownId((prev) =>
+                          prev === item.uuid ? null : item.uuid
+                        );
+                      }}
+                      className={`inline-flex items-center justify-between cursor-pointer h-10 px-3 py-1 rounded-md border text-sm font-medium ${getStatusStyle(
+                        item.status
+                      )} min-w-[100px] ${updatingId === item.uuid ? 'opacity-50 pointer-events-none' : ''}`}
+                    >
+                      <span className="flex items-center gap-2 truncate">
+                        <span>{updatingId === item.uuid ? 'Updating...' : item.status || "N/A"}</span>
+                      </span>
 
-  <svg
-    className={`w-4 h-4 ml-2 transition-transform ${
-      openDropdownId === item.id ? "rotate-180" : ""
-    }`}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M19 9l-7 7-7-7"
-    />
-  </svg>
-</div>
+                      <svg
+                        className={`w-4 h-4 ml-2 transition-transform ${
+                          openDropdownId === item.uuid ? "rotate-180" : ""
+                        }`}
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </div>
 
-
-                    {/* dropdown */}
-                    {openDropdownId === item.id && (
+                    {openDropdownId === item.uuid && (
                       <div
                         ref={dropdownRef}
                         style={{
@@ -590,7 +476,7 @@ const Rent: React.FC = () => {
                         {statusOptions.map((s) => (
                           <div
                             key={s}
-                            onClick={() => handleStatusChange(item.id, s)}
+                            onClick={() => handleStatusChange(item.uuid, s)}
                             className={`flex items-center px-3 text-[#7D7D7D] py-2 rounded-md cursor-pointer border hover:bg-blue-50 transition-colors ${
                               item.status === s
                                 ? "bg-blue-100 text-blue-600"
@@ -607,13 +493,22 @@ const Rent: React.FC = () => {
                   <td className="px-6 py-4 rounded-r-lg border-r border-t border-b border-gray-200">
                     <div className="flex gap-2">
                       <button
-                        className="bg-[#B200FF] text-white px-3 h-10 py-1 rounded-lg  transition-colors"
-                        onClick={() => setIsAddFormOpen(true)}
+                        className="bg-[#B200FF] text-white px-3 h-10 py-1 rounded-lg transition-colors hover:bg-[#9800cc]"
+                        onClick={() => {
+  setSelectedRent(item);
+  setIsModalOpen(true);
+}}
                       >
                         View
                       </button>
-                      <button className="bg-[#B200FF] text-white px-3 py-1 rounded-lg  transition-colors">
-                        Download
+                      <button 
+                        className={`bg-[#B200FF] text-white px-3 py-1 rounded-lg transition-colors hover:bg-[#9800cc] ${
+                          downloadingId === item.uuid ? 'opacity-50 pointer-events-none' : ''
+                        }`}
+                        onClick={() => handleDownload(item.uuid)}
+                        disabled={downloadingId === item.uuid}
+                      >
+                        {downloadingId === item.uuid ? 'Downloading...' : 'Download'}
                       </button>
                     </div>
                   </td>
@@ -621,318 +516,187 @@ const Rent: React.FC = () => {
               ))
             ) : (
               <tr>
-                <td className="text-center py-8 text-gray-500" colSpan={5}>
-                  No records found
+                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                  No rent data found
                 </td>
               </tr>
             )}
           </tbody>
         </table>
+
+        {totalItems > 0 && (
+          <div className="flex flex-col sm:flex-row items-center justify-between mt-6 pt-4 border-t border-gray-200 gap-4">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Rows per page:</span>
+              <select
+                value={rowsPerPage}
+                onChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
+                className="border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {rowsPerPageOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="text-sm text-gray-600">
+              Showing {startIndex + 1} to {Math.min(endIndex, totalItems)} of {totalItems} entries
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+
+              <div className="flex gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                  if (
+                    page === 1 ||
+                    page === totalPages ||
+                    (page >= currentPage - 1 && page <= currentPage + 1)
+                  ) {
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => handlePageChange(page)}
+                        className={`px-3 py-2 text-sm rounded-lg border transition-colors ${
+                          page === currentPage
+                            ? "bg-[#B200FF] text-white border-[#B200FF]"
+                            : "border-gray-300 hover:bg-gray-50"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  } else if (
+                    page === currentPage - 2 ||
+                    page === currentPage + 2
+                  ) {
+                    return (
+                      <span key={page} className="px-2 py-2 text-gray-400">
+                        ...
+                      </span>
+                    );
+                  }
+                  return null;
+                })}
+              </div>
+
+              <button
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Add Form Modal */}
-      {isAddFormOpen && (
-        <div className="fixed text-[#7D7D7D] inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Add New Tenant
-                </h2>
-                <button
-                  onClick={() => setIsAddFormOpen(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <X size={24} />
-                </button>
+      {isModalOpen && selectedRent && (
+  <div className="fixed inset-0 bg-black text-[#7D7D7D] bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="bg-white rounded-xl shadow-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+      <div className="flex justify-between items-center p-4 border-b">
+        <h2 className="text-xl font-bold">Rent Details</h2>
+        <button
+          className="text-gray-500 hover:text-gray-700"
+          onClick={() => setIsModalOpen(false)}
+        >
+          ✕
+        </button>
+      </div>
+
+      <div className="p-6 space-y-4">
+        <div className="flex  items-start gap-4 mb-6">
+          <div className={`rounded-lg p-3 ${getStatusStyle(selectedRent.status)}`}>
+            <BiSolidBuildings className="text-3xl" />
+          </div>
+          <div>
+            <h3 className="text-2xl text-black font-bold">
+              {selectedRent.tenantId?.personal_information?.full_name || "N/A"}
+            </h3>
+            <p className="text-gray-600">{selectedRent.tenantId?.unit.unit_name || "N/A"}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-semibold text-2xl border-b mb-2">Tenant Information</h4>
+              <div className="space-y-2">
+                <p><span className="text-xl">Email:</span> {selectedRent.tenantId?.personal_information?.email || "N/A"}</p>
+                <p><span className="text-xl">Phone:</span> {selectedRent.tenantId?.personal_information?.phone || "N/A"}</p>
+                <p><span className="text-xl">Address:</span> {selectedRent.tenantId?.personal_information?.address || "N/A"}</p>
               </div>
             </div>
 
-            <form onSubmit={handleSubmit} className="p-6">
-              <h3 className="col-span-2 text-lg font-semibold text-gray-900 flex items-center gap-2 border-b pb-2">
-                <Building2 size={20} />
-                Personal Information
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
-                {[
-                  { label: "Full Name *", name: "fullName", type: "text" },
-                  {
-                    label: "Email Address *",
-                    name: "emailAddress",
-                    type: "email",
-                  },
-                  { label: "Phone Number *", name: "phoneNumber", type: "tel" },
-                  { label: "Company Name", name: "companyName", type: "text" },
-                ].map((field, idx) => (
-                  <div key={idx}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {field.label}
-                    </label>
-                    <Input
-                      type={field.type}
-                      name={field.name}
-                      value={formData[field.name as keyof FormData]}
-                      onChange={handleInputChange}
-                      className="w-full border border-gray-300 h-12 rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      required={field.label.includes("*")}
-                    />
-                  </div>
-                ))}
-
-                {/* Property Information */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Property Type *
-                  </label>
-                  <select
-                    name="propertyType"
-                    value={formData.propertyType}
-                    onChange={handleInputChange}
-                    className="w-full border border-gray-300 h-12 rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    required
-                  >
-                    <option value="Office">Office</option>
-                    <option value="Retail">Retail</option>
-                    <option value="Warehouse">Warehouse</option>
-                    <option value="Residential">Residential</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Property Name *
-                  </label>
-                  <Input
-                    type="text"
-                    name="propertyName"
-                    value={formData.propertyName}
-                    onChange={handleInputChange}
-                    className="w-full border border-gray-300 h-12 rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Unit Number *
-                  </label>
-                  <Input
-                    type="text"
-                    name="unit"
-                    value={formData.unit}
-                    onChange={handleInputChange}
-                    className="w-full border border-gray-300 h-12 rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    required
-                  />
-                </div>
-
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Tenant Address *
-                  </label>
-                  <textarea
-                    name="tenantAddress"
-                    value={formData.tenantAddress}
-                    onChange={handleInputChange}
-                    rows={3}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    required
-                  />
-                </div>
+            <div>
+              <h4 className="font-semibold text-2xl border-b mb-2">Lease Information</h4>
+              <div className="space-y-2">
+                <p><span className="text-xl">Start Date:</span> {selectedRent.tenantId?.lease_duration.start_date || "N/A"}</p>
+                <p><span className="text-xl">End Date:</span> {selectedRent.tenantId?.lease_duration.end_date || "N/A"}</p>
               </div>
+            </div>
+          </div>
 
-              {/* Financial Information */}
-              <h3 className="col-span-2 text-lg font-semibold text-gray-900 flex items-center gap-2 border-b pb-2 mt-8">
-                 <Building2 size={20} />
-                Financial Information
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
-                {[
-                  {
-                    label: "Monthly Rent (₹) *",
-                    name: "monthlyRent",
-                    type: "number",
-                  },
-                  {
-                    label: "Security Deposit (₹) *",
-                    name: "securityDeposit",
-                    type: "number",
-                  },
-                ].map((field, idx) => (
-                  <div key={idx}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {field.label}
-                    </label>
-                    <Input
-                      type={field.type}
-                      name={field.name}
-                      value={formData[field.name as keyof FormData]}
-                      onChange={handleInputChange}
-                      className="w-full border border-gray-300 h-12 rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      required
-                    />
-                  </div>
-                ))}
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Payment Status *
-                  </label>
-                  <select
-                    name="paymentStatus"
-                    value={formData.paymentStatus}
-                    onChange={handleInputChange}
-                    className="w-full border border-gray-300 h-12 rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    required
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="Paid">Paid</option>
-                    <option value="Overdue">Overdue</option>
-                  </select>
-                </div>
+          <div className="space-y-4">
+            <div>
+              <h4 className="font-semibold text-2xl border-b mb-2">Payment Details</h4>
+              <div className="space-y-2">
+                <p><span className="text-xl">Amount:</span> ₹{selectedRent.tenantId?.rent || "0"}</p>
+                <p><span className="text-xl">Due Date:</span> {selectedRent.paymentDueDay || "N/A"}</p>
+                <p>
+                  <span className="text-xl">Status:</span> 
+                  <span className={`ml-2 px-2 py-1 rounded-md text-sm ${getStatusStyle(selectedRent.status)}`}>
+                    {selectedRent.status || "N/A"}
+                  </span>
+                </p>
+                <p><span className="text-xl">Security Deposit:</span> ₹{selectedRent.tenantId?.security_deposit || "0"}</p>
               </div>
+            </div> 
 
-              {/* Lease Information */}
-              <h3 className="col-span-2 text-lg font-semibold text-gray-900 flex items-center gap-2 border-b pb-2 mt-8">
-                 <Building2 size={20} />
-                Lease Information
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
-                {[
-                  {
-                    label: "Lease Start Date *",
-                    name: "leaseStartDate",
-                    type: "date",
-                  },
-                  {
-                    label: "Lease End Date *",
-                    name: "leaseEndDate",
-                    type: "date",
-                  },
-                ].map((field, idx) => (
-                  <div key={idx}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {field.label}
-                    </label>
-                    <Input
-                      type={field.type}
-                      name={field.name}
-                      value={formData[field.name as keyof FormData]}
-                      onChange={handleInputChange}
-                      className="w-full border border-gray-300 h-12 rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      required
-                    />
-                  </div>
-                ))}
-              </div>
+            <div>
+              <h4 className="font-semibold text-2xl border-b mb-2">Emergency Contact</h4>
+              <p>
+                Relation : {typeof selectedRent.tenantId?.emergency_contact === 'object' 
+                  ? `${selectedRent.tenantId.emergency_contact.relation || 'N/A'} `
+                  : selectedRent.tenantId?.emergency_contact || "N/A"}
+              </p>
+            </div>
 
-              {/* Emergency Contact */}
-              <h3 className="col-span-2 text-lg font-semibold text-gray-900 flex items-center gap-2 border-b pb-2 mt-8">
-                <Building2 size={20} />
-                Emergency Contact
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
-                {[
-                  {
-                    label: "Contact Name *",
-                    name: "contactName",
-                    type: "text",
-                  },
-                  {
-                    label: "Contact Number *",
-                    name: "contactNumber",
-                    type: "tel",
-                  },
-                ].map((field, idx) => (
-                  <div key={idx}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {field.label}
-                    </label>
-                    <Input
-                      type={field.type}
-                      name={field.name}
-                      value={formData[field.name as keyof FormData]}
-                      onChange={handleInputChange}
-                      className="w-full border border-gray-300 h-12 rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      required
-                    />
-                  </div>
-                ))}
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Relationship *
-                  </label>
-                  <select
-                    name="relationship"
-                    value={formData.relationship}
-                    onChange={handleInputChange}
-                    className="w-full border border-gray-300 h-12 rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    required
-                  >
-                    <option value="">Select Relationship</option>
-                    <option value="Spouse">Spouse</option>
-                    <option value="Parent">Parent</option>
-                    <option value="Friend">Friend</option>
-                    <option value="Business Partner">Business Partner</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Bank Details */}
-              <h3 className="col-span-2 text-lg font-semibold text-gray-900 flex items-center gap-2 border-b pb-2 mt-8">
-                <Building2 size={20} />
-                Bank Details
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-4">
-                {[
-                  {
-                    label: "Account Number *",
-                    name: "accountNumber",
-                    type: "text",
-                  },
-                  {
-                    label: "Account Holder Name *",
-                    name: "accountHolderName",
-                    type: "text",
-                  },
-                  { label: "Bank Name *", name: "bankName", type: "text" },
-                  { label: "IFSC Code *", name: "ifscCode", type: "text" },
-                ].map((field, idx) => (
-                  <div key={idx}>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {field.label}
-                    </label>
-                    <Input
-                      type={field.type}
-                      name={field.name}
-                      value={formData[field.name as keyof FormData]}
-                      onChange={handleInputChange}
-                      className="w-full border border-gray-300 h-12 rounded-lg px-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                      required
-                    />
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-end gap-4 mt-8 pt-6 border-t border-gray-200">
-                <button
-                  type="button"
-                  onClick={() => setIsAddFormOpen(false)}
-                  className="px-8 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-8 py-3 bg-[#B200FF] text-white rounded-lg transition-colors font-medium"
-                >
-                  Add Rent
-                </button>
-              </div>
-            </form>
           </div>
         </div>
-      )}
+      </div>
+
+      <div className="flex justify-end p-4 border-t gap-3">
+        {/* <button
+          className="bg-[#B200FF] text-white px-4 py-2 rounded-lg hover:bg-[#9800cc] transition-colors"
+          onClick={() => {
+            handleDownload(selectedRent.uuid);
+            setIsModalOpen(false);
+          }}
+        >
+          Download Receipt
+        </button> */}
+        <button
+          className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+          onClick={() => setIsModalOpen(false)}
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+    
     </div>
   );
 };

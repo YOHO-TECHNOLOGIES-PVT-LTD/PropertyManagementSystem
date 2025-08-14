@@ -18,7 +18,6 @@ const Card1: React.FC<CardProps> = ({
   iconBg = "bg-gray-400",
   iconTextColor = "text-white",
 }) => {
-  
   const formatValue =
     typeof value === "number"
       ? value.toLocaleString("en-IN", {
@@ -27,7 +26,7 @@ const Card1: React.FC<CardProps> = ({
       : value;
 
   return (
-    <div className="bg-white rounded-2xl shadow-[2px_2px_5px_rgba(0,0,0,0.25)] p-4  min-w-[230px] h-[166px] flex flex-col justify-between font-">
+    <div className="bg-white rounded-2xl shadow-[2px_2px_5px_rgba(0,0,0,0.25)] p-4  h-[166px] flex flex-col justify-between font-">
       {/* Header */}
       <div className="flex gap-3 items-center">
         <div

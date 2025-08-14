@@ -1,33 +1,47 @@
-import  { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { CgProfile } from "react-icons/cg";
 import { BsCloudUpload } from "react-icons/bs";
-import profile from "../../assets/profileicon.png";
+import profilePlaceholder from "../../assets/profileicon.png";
 import { FONTS } from "../../constants/ui constants";
 import toast from "react-hot-toast";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
+import { useDispatch, useSelector } from "react-redux";
+import { getProfileThunk } from "../../features/settings/reducers/thunks";
+import { selectProfile } from "../../features/settings/reducers/selectors";
 
 export default function AccountSettings() {
-  const [profileImage, setProfileImage] = useState(profile);
-  const fileInputRef = useRef(null);
+  const dispatch = useDispatch<any>();
+  const profileData = useSelector(selectProfile);
+ console.log("profile", profileData)
+  const [profileImage, setProfileImage] = useState(profilePlaceholder);
+  const fileInputRef = useRef<any>(null);
 
-  // Handle file selection
-  const handleFileChange = (event) => {
+  useEffect(() => {
+    dispatch(getProfileThunk());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (profileData?.data?.image) {
+      setProfileImage(profileData?.image);
+    }
+  }, [profileData]);
+
+  const handleFileChange = (event: any) => {
     const file = event.target.files[0];
     if (file && file.type.startsWith("image/")) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfileImage(reader.result); // Show preview
+        setProfileImage(reader.result as string);
       };
       reader.readAsDataURL(file);
     } else {
-      toast("Please upload a valid image file (JPG or PNG).");
+      toast.error("Please upload a valid image file (JPG or PNG).");
     }
   };
 
-  // Trigger hidden input click
   const handleUploadClick = () => {
-    fileInputRef.current.click();
+    fileInputRef.current?.click();
   };
 
   return (
@@ -40,7 +54,7 @@ export default function AccountSettings() {
       {/* Profile Picture Upload */}
       <div className="flex items-center gap-4 mb-6">
         <img
-          src={profileImage}
+          src={profileImage || profilePlaceholder}
           alt="Profile"
           className="w-16 h-16 rounded-full object-cover border"
         />
@@ -64,69 +78,42 @@ export default function AccountSettings() {
           />
         </div>
       </div>
-      
 
       {/* Account Form */}
       <form className="grid grid-cols-2 gap-4 text-[#7D7D7D]">
         <div>
-          <label className="block text-[18px] font-medium text-[#7D7D7D] mb-1">
+          <label className="block text-[18px] font-medium mb-1">
             Full Name
           </label>
           <Input
             type="text"
-            className="w-full border rounded-md text-[#7D7D7D] px-3 py-2"
-            defaultValue="Admin"
+            defaultValue={
+              `${profileData?.first_name || ""} ${profileData?.last_name || ""}`.trim()
+            }
           />
         </div>
         <div>
-          <label className="block text-[18px] font-medium text-[#7D7D7D] mb-1">
-            Last Name
-          </label>
-          <Input
-            type="text"
-            className="w-full border rounded-md px-3 py-2"
-            defaultValue="User"
-          />
+          <label className="block text-[18px] font-medium mb-1">Role</label>
+          <Input type="text" defaultValue={profileData?.role || ""} />
         </div>
         <div>
-          <label className="block text-[18px] font-medium text-[#7D7D7D] mb-1">
+          <label className="block text-[18px] font-medium mb-1">
             Email Address
           </label>
-          <Input
-            type="email"
-            className="w-full border rounded-md text-[#7D7D7D] px-3 py-2"
-            defaultValue="admin@propertypms.com"
-          />
+          <Input type="email" defaultValue={profileData?.email || ""} />
         </div>
         <div>
-          <label className="block text-[18px] font-medium text-[#7D7D7D] mb-1">
+          <label className="block text-[18px] font-medium mb-1">
             Phone Number
           </label>
           <Input
             type="tel"
-            className="w-full border rounded-md text-[#7D7D7D] px-3 py-2"
-            defaultValue="+91 9876567654"
-          />
-        </div>
-        <div>
-          <label className="block text-[18px] font-medium text-[#7D7D7D] mb-1">
-            Company Name
-          </label>
-          <Input
-            type="text"
-            className="w-full border rounded-md text-[#7D7D7D] px-3 py-2"
-            defaultValue="PropertyPMS Management"
+            defaultValue={profileData?.phone_number || ""}
           />
         </div>
         <div className="col-span-2">
-          <label className="block text-[18px] font-medium text-[#7D7D7D] mb-1">
-            Address
-          </label>
-          <Input
-            type="text"
-            className="w-full border rounded-md px-3 py-2"
-            defaultValue="123 Business Street, Suite 100, City, State 12345"
-          />
+          <label className="block text-[18px] font-medium mb-1">Address</label>
+          <Input type="text" defaultValue={profileData?.address || ""} />
         </div>
       </form>
 

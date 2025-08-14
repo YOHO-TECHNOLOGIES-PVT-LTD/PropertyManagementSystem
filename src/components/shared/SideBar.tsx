@@ -14,8 +14,10 @@ import {
 import toast from "react-hot-toast";
 import { NavLink, useNavigate } from "react-router-dom";
 import { FONTS } from "../../constants/ui constants";
+import { useDispatch } from "react-redux";
+import { useState } from "react";
 
-const Sidebar = ({ isOpen, setIsOpen }) => {
+const Sidebar = ({ isOpen, setIsOpen } : any) => {
   const menuItems = [
     { icon: LayoutDashboard, path: "/", label: "DashBoard" },
     { icon: LandPlot, path: "/properties", label: "Properties" },
@@ -23,15 +25,29 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     { icon: BadgeIndianRupee, path: "/rent", label: "Rent Management" },
     { icon: Handshake, path: "/lease", label: "Lease Management" },
     { icon: Handshake, path: "/maintenance", label: "Maintenance" },
-    { icon: TrendingUp, path: "/finance", label: "Financial Reports" },
+    { icon: TrendingUp, path: "/reports", label: "Reports" },
     { icon: Bell, path: "/notifications", label: "Notifications" },
     { icon: Settings, path: "/settings", label: "Settings" },
   ];
 
-  const handleLogout = () => {
-    toast.success("Logout successfully");
-  };
+  
+  const navigate = useNavigate();
+  // const dispatch = useDispatch()
+  // const[authenticated, setAuthenticated] = useState("")
 
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to log out?")) {
+      // Remove token from storage
+      localStorage.removeItem("@secure.s.token");
+      sessionStorage.removeItem("@secure.s.token");
+
+      // If you also store user/auth state in Redux or Context
+      // dispatch(setAuthenticated(false));
+
+      
+      navigate("/login");
+    }
+  };
   return (
     <div className="h-full flex">
       <div
@@ -71,12 +87,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               <NavLink
                 key={index}
                 to={item.path}
-                className="relative flex py-2 items-center gap-3 transition-all duration-300 px-2"
+                className={`relative flex py-2 items-center gap-3 transition-all duration-300 px-2 border-r-[4px] border-r-white`}
               >
                 {({ isActive }) => (
                   <>
                     {isActive && (
-                      <div className="absolute -right-1 top-0 h-full w-1 bg-[#B200FF] rounded-r" />
+                      <div className="absolute -right-1 top-0 h-full w-full  border-r-[4px] border-[#B200FF] rounded-r-lg" />
                     )}
                     <div
                       className={`w-12 h-12 flex items-center justify-center transition-all duration-300 clip-hex
@@ -101,26 +117,27 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
 
           {/* Logout */}
           <div className="mt-10 px-2">
-            <div
-              className="flex items-center gap-3 cursor-pointer"
-              onClick={handleLogout}
-            >
-              <div
-                className="w-12 h-12 flex items-center justify-center clip-hex 
-                           bg-red-600 text-white 
-                           hover:bg-red-700 
-                           transition-all duration-300"
-              >
-                <LogOut size={20} />
-              </div>
+      <div
+        className="flex items-center gap-3 cursor-pointer"
+        onClick={handleLogout}
+      >
+        <div
+          className="w-12 h-12 flex items-center justify-center clip-hex 
+                     bg-red-600 text-white 
+                     hover:bg-red-700 
+                     transition-all duration-300"
+        >
+          <LogOut size={20} />
+        </div>
 
-              {isOpen && (
-                <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
-                  Logout
-                </span>
-              )}
-            </div>
-          </div>
+        {isOpen && (
+          <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+            Logout
+          </span>
+        )}
+      </div>
+    </div>
+         
         </div>
       </div>
     </div>
