@@ -68,7 +68,7 @@ export default function Navbar({ isSidebarOpen, toggleSidebar }) {
       <div className="flex items-center justify-between h-[80px] flex-1 bg-white shadow-xl px-6 rounded-br-xl rounded-bl-xl">
         {/* Search */}
         <div className="relative w-[400px]">
-          <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+          <FiSearch className="absolute left-3 top-[30px] -translate-y-1/2 h-4 w-4 text-gray-500" />
           <input
             type="text"
             placeholder="Search or type"

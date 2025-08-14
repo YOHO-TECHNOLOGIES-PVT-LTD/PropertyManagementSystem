@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { BarChart3 } from "lucide-react"
 import Buildings from '../../assets/Reports/buildings.png'
+import { useSelector } from "react-redux"
+import { selectProperties } from "../../features/Properties/Reducers/Selectors"
 
 const data = [
   { month: "Jan", occupancy: 50 },
@@ -31,6 +33,8 @@ const chartConfig = {
 
 const OccupancyReport = () => {
   const tableHeaders = Array.from({ length: 5 });
+      const properties = useSelector(selectProperties);
+
 
   return (
     <div>
@@ -105,25 +109,24 @@ const OccupancyReport = () => {
         </Card>
       </div>
 
-
-      <div className='shadow-[0px_0px_15px_0px_#0000001A] rounded-lg p-4 grid gap-6'>
+      <div className='shadow-[0px_0px_15px_0px_#0000001A] rounded-lg p-3 grid gap-6'>
         <h1 style={{ ...FONTS.chart_Header }}>Property Performance</h1>
 
-        <div style={{ ...FONTS.Table_Header }} className='shadow-[0px_0px_15px_0px_#0000001A] rounded-lg p-3 grid grid-cols-4'>
+        <div style={{ ...FONTS.Table_Header }} className='shadow-[0px_0px_15px_0px_#0000001A] rounded-lg p-4 grid grid-cols-4'>
           <p>Property</p>
           <p>Units</p>
           <p>Revenue</p>
           <p>Occupancy</p>
         </div>
 
-        {tableHeaders.map((_, index) => (
-          <div className='shadow-[0px_0px_15px_0px_#0000001A] rounded-lg p-4 grid grid-cols-4'>
-            <p style={{ ...FONTS.Table_Header }}>Property</p>
-            <p style={{ ...FONTS.Table_Body_2 }} className='text-[#7D7D7D]'>24</p>
+        {properties.map((data:any, index:any) => (
+          <div key={index} className='shadow-[0px_0px_15px_0px_#0000001A] rounded-lg p-4 grid grid-cols-4'>
+            <p style={{ ...FONTS.Table_Header }}>{data?.property_name}</p>
+            <p style={{ ...FONTS.Table_Body_2 }} className='text-[#7D7D7D]'>{data?.total_units}</p>
             <p style={{ ...FONTS.Table_Body_2 }} className='text-[#7D7D7D]'>240k</p>
-            <p style={{ ...FONTS.Table_Body_2 }} className='text-[#7D7D7D]'>95%</p>
-          </div>))}
-
+            <p style={{ ...FONTS.Table_Body_2 }} className='text-[#7D7D7D]'>{data?.occupancy_rate} %</p>
+          </div>
+        ))}
       </div>
     </div>
   )

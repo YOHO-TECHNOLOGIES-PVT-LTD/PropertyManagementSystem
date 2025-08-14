@@ -13,6 +13,8 @@ import OccupancyReport from '../../components/Reports/OccupancyReport'
 import { useDispatch, useSelector } from 'react-redux'
 import { selectDashboardData } from '../../features/Dashboard/Reducer/Selector'
 import { DashboardThunks } from '../../features/Dashboard/Reducer/DashboardThunk'
+import { fetchGetProperties } from '../../features/Properties/Reducers/PropertiesThunk'
+import { selectProperties } from '../../features/Properties/Reducers/Selectors'
 
 
 function Reports() {
@@ -27,12 +29,13 @@ function Reports() {
   const [selectedOption, setSelectedOption] = useState('Last 30 Days');
 
   const ReportsData = useSelector(selectDashboardData);
+  const properties = useSelector(selectProperties);
   const dispatch = useDispatch<any>();
 
-  console.log("ReportsData", ReportsData);
 
   useEffect(() => {
     dispatch(DashboardThunks());
+    dispatch(fetchGetProperties());
   }, [dispatch]);
 
   const options = [
