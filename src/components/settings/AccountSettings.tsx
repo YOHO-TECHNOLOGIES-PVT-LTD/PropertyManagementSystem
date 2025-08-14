@@ -38,7 +38,7 @@ export default function AccountSettings() {
     } else {
       toast.error("Please upload a valid image file (JPG or PNG).");
     }
-  };
+  };git 
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();

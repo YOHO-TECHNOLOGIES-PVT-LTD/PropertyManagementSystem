@@ -9,7 +9,7 @@ import { FONTS } from "../../constants/ui constants";
 import { useDispatch, useSelector } from "react-redux";
 import { getRent } from "../../features/Rent/selector";
 import { fetchRentThunk } from "../../features/Rent/thunks";
-import { downloadRent, updateRent } from "../../features/Rent/service";
+import { deleteRent, downloadRent, updateRent } from "../../features/Rent/service";
 import toast from "react-hot-toast";
 
 
@@ -47,7 +47,6 @@ interface RentState {
 const Rent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
-  const [monthFilter, setMonthFilter] = useState("All Months");
   const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState<boolean>(false);
   const [isStatusDropdownOpen, setIsStatusDropdownOpen] = useState<boolean>(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
@@ -58,12 +57,13 @@ const Rent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedRent, setSelectedRent] = useState<RentItem | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+const [deletingId, setDeletingId] = useState<string | null>(null);
+const [isDeleting, setIsDeleting] = useState(false);
 const [isModalOpen, setIsModalOpen] = useState(false);
+const today = new Date();
 
-  const badgeRef = useRef<HTMLDivElement | null>(null);
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
-
-  const months = [
+ const months = [
     "All Months",
     "January",
     "February",
@@ -79,20 +79,30 @@ const [isModalOpen, setIsModalOpen] = useState(false);
     "December",
   ];
 
+const currentMonthIndex = today.getMonth(); 
+const currentMonthName = months[currentMonthIndex + 1]; 
+
+const [monthFilter, setMonthFilter] = useState(currentMonthName);
+
+
+  const badgeRef = useRef<HTMLDivElement | null>(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+
+ 
   const statusOptions = ["paid", "pending", "overdue"];
     const filterStatusOptions = ["All Status","paid", "pending", "overdue"];
-  const rowsPerPageOptions = [5, 10, 15, 20];
+  const rowsPerPageOptions = [5, 10, 15, 20, 25];
 
   const getStatusStyle = (status: string) => {
     switch (status) {
-      case "Paid":
+      case "paid":
         return "bg-[#1CAF191A] border-[#1CAF19] text-[#1CAF19]";
-      case "Pending":
+      case "pending":
         return "bg-[#FFC3001A] border-[#FFC300] text-[#FFC300]";
-      case "Overdue":
+      case "overdue":
         return "bg-[#E212691A] border-[#E21269] text-[#E21269]";
       default:
-        return "bg-gray-100 text-gray-600";
+        return "bg-gray-100 text-[#7D7D7D]";
     }
   };
 
@@ -125,31 +135,40 @@ const [isModalOpen, setIsModalOpen] = useState(false);
   const dispatch = useDispatch<any>();
   const rents = useSelector(getRent);
 
-  useEffect(() => {
-    const fetchRentData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const params = {
-          month: "8",
-          year: "2025"
-        };
-        await dispatch(fetchRentThunk(params));
-      } catch (err) {
-        setError("Failed to fetch rent data. Please try again.");
-        console.error("Error fetching rent data:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
 
-    fetchRentData();
-  }, [dispatch]);
+useEffect(() => {
+  const fetchRentData = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      // Month index for API (1-12)
+      const monthNumber = today.getMonth() + 1;
+      const yearNumber = today.getFullYear();
+
+      const params = {
+        month: monthNumber.toString(),
+        year: yearNumber.toString(),
+      };
+
+      await dispatch(fetchRentThunk(params));
+    } catch (err) {
+      setError("Failed to fetch rent data. Please try again.");
+      console.error("Error fetching rent data:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchRentData();
+}, [dispatch]);
+
 
   const handleDownload = async (uuid: string) => {
     try {
       setDownloadingId(uuid);
       const response = await downloadRent(uuid);
+      toast.success("File downloaded Successfuly")
 
       const url = window.URL.createObjectURL(response?.data);
       const link = document.createElement("a");
@@ -162,7 +181,7 @@ const [isModalOpen, setIsModalOpen] = useState(false);
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Download failed:", error);
-     
+      toast.error('Failed to download');
     } finally {
       setDownloadingId(null);
     }
@@ -193,21 +212,69 @@ const [isModalOpen, setIsModalOpen] = useState(false);
   setOpenDropdownId(null);
 };
 
-  const filteredData = useMemo(() => {
-    if (!rents?.rents) return [];
-    return rents.rents.filter((item: RentItem) => {
-      const matchesSearch = item.tenantId?.personal_information?.full_name
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      const matchesStatus =
-        statusFilter === "All Status" ? true : item.status === statusFilter;
-      const matchesMonth =
-        monthFilter === "All Months"
-          ? true
-          : months[new Date(item.paymentDueDay).getMonth() + 1] === monthFilter;
-      return matchesSearch && matchesStatus && matchesMonth;
+
+
+const handleDelete = async () => {
+  if (!deletingId) return;
+  console.log("delete id",deletingId)
+  try {
+    setIsDeleting(true);
+    await deleteRent(deletingId)
+    toast.success('Rent deleted successfully!');
+    
+    const fetchParams = {
+      month: "8",
+      year: "2025"
+    };
+    await dispatch(fetchRentThunk(fetchParams));
+    
+    setIsDeleteModalOpen(false);
+    setIsModalOpen(false);
+  } catch (error) {
+    console.error('Delete failed:', error);
+    toast.error('Failed to delete rent record. Please try again.');
+  } finally {
+    setIsDeleting(false);
+    setDeletingId(null);
+  }
+};
+
+const formatDate = (dateString: string) => {
+  if (!dateString) return "N/A";
+  
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "N/A"; 
+    
+    return date.toLocaleDateString('en-UK', {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric'
     });
-  }, [searchTerm, statusFilter, monthFilter, rents?.rents]);
+  } catch (e) {
+    return "N/A";
+  }
+};
+
+const filteredData = useMemo(() => {
+  if (!rents?.rents) return [];
+  return rents.rents.filter((item: RentItem) => {
+    const matchesSearch = item.tenantId?.personal_information?.full_name
+      ?.toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    const matchesStatus =
+      statusFilter === "All Status" ? true : item.status === statusFilter;
+
+    const matchesMonth =
+      monthFilter === "All Months"
+        ? true
+        : months[new Date(item.paymentDueDay).getMonth() + 1] === monthFilter;
+
+    return matchesSearch && matchesStatus && matchesMonth;
+  });
+}, [searchTerm, statusFilter, monthFilter, rents?.rents]);
+
 
   const totalItems = filteredData.length;
   const totalPages = Math.ceil(totalItems / rowsPerPage);
@@ -229,16 +296,14 @@ const [isModalOpen, setIsModalOpen] = useState(false);
   };
 
   const totalDue = rents?.rents?.reduce(
-    (sum: number, item: RentItem) => sum + (Number(item.tenantId?.rent) || 0),
-    0
-  ) || 0;
+    (sum: number, item: RentItem) => sum + (Number(item.tenantId?.rent) || 0), 0) || 0;
 
   const totalPaid = rents?.rents
-    ?.filter((item: RentItem) => item.status === "Paid")
+    ?.filter((item: RentItem) => item.status === "paid")
     ?.reduce((sum: number, item: RentItem) => sum + (Number(item.tenantId?.rent) || 0), 0) || 0;
 
   const totalPending = rents?.rents
-    ?.filter((item: RentItem) => item.status === "Pending")
+    ?.filter((item: RentItem) => item.status === "pending")
     ?.reduce((sum: number, item: RentItem) => sum + (Number(item.tenantId?.rent) || 0), 0) || 0;
 
 
@@ -248,7 +313,7 @@ const [isModalOpen, setIsModalOpen] = useState(false);
         <div className="font-bold">
           <span className="text-3xl"> Rent Management </span>
           <br />
-          <span className="text-md font-normal text-gray-600">
+          <span className="text-md font-normal text-[#7D7D7D]">
             Track and Manage Rent Payments
           </span>
         </div>
@@ -422,8 +487,10 @@ const [isModalOpen, setIsModalOpen] = useState(false);
                     ₹{item.tenantId?.rent || "0"}
                   </td>
 
-                  <td className="px-6 py-4 border-t border-b border-gray-200">
-                    {item.paymentDueDay || "N/A"}
+                  <td className="px-6 py-4  border-t border-b border-gray-200">
+                    
+                       <span> {formatDate(item.paymentDueDay)}</span>
+                    
                   </td>
 
                   <td className="px-6 py-4 border-t border-b border-gray-200 relative">
@@ -443,7 +510,7 @@ const [isModalOpen, setIsModalOpen] = useState(false);
                       )} min-w-[100px] ${updatingId === item.uuid ? 'opacity-50 pointer-events-none' : ''}`}
                     >
                       <span className="flex items-center gap-2 truncate">
-                        <span>{updatingId === item.uuid ? 'Updating...' : item.status || "N/A"}</span>
+                        <span>{item.status}</span>
                       </span>
 
                       <svg
@@ -508,7 +575,7 @@ const [isModalOpen, setIsModalOpen] = useState(false);
                         onClick={() => handleDownload(item.uuid)}
                         disabled={downloadingId === item.uuid}
                       >
-                        {downloadingId === item.uuid ? 'Downloading...' : 'Download'}
+                        Download
                       </button>
                     </div>
                   </td>
@@ -516,7 +583,7 @@ const [isModalOpen, setIsModalOpen] = useState(false);
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                <td colSpan={5} className="px-6 py-8 text-center text-[#7D7D7D]">
                   No rent data found
                 </td>
               </tr>
@@ -527,7 +594,7 @@ const [isModalOpen, setIsModalOpen] = useState(false);
         {totalItems > 0 && (
           <div className="flex flex-col sm:flex-row items-center justify-between mt-6 pt-4 border-t border-gray-200 gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Rows per page:</span>
+              <span className="text-sm text-[#7D7D7D]">Rows per page:</span>
               <select
                 value={rowsPerPage}
                 onChange={(e) => handleRowsPerPageChange(Number(e.target.value))}
@@ -541,7 +608,7 @@ const [isModalOpen, setIsModalOpen] = useState(false);
               </select>
             </div>
 
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-[#7D7D7D]">
               Showing {startIndex + 1} to {Math.min(endIndex, totalItems)} of {totalItems} entries
             </div>
 
@@ -600,98 +667,199 @@ const [isModalOpen, setIsModalOpen] = useState(false);
         )}
       </div>
 
-      {isModalOpen && selectedRent && (
-  <div className="fixed inset-0 bg-black text-[#7D7D7D] bg-opacity-50 flex items-center justify-center z-50 p-4">
-    <div className="bg-white rounded-xl shadow-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto">
-      <div className="flex justify-between items-center p-4 border-b">
-        <h2 className="text-xl font-bold">Rent Details</h2>
+      {/* Delete Confirmation Modal */}
+{isDeleteModalOpen && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+    <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+      <div className="p-6">
+        <h3 className="text-xl font-bold text-gray-900 mb-2">Confirm Deletion</h3>
+        <p className="text-[#7D7D7D] mb-6">
+          Are you sure you want to delete this rent record? This action cannot be undone.
+        </p>
+        
+        <div className="flex justify-end space-x-3">
+          <button
+            className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+            onClick={() => setIsDeleteModalOpen(false)}
+            disabled={isDeleting}
+          >
+            Cancel
+          </button>
+          <button
+            className="px-6 py-2.5 bg-red-600 rounded-lg text-white hover:bg-red-700 transition-colors"
+            onClick={handleDelete}
+            disabled={isDeleting}
+          >
+            {isDeleting ? 'Deleting...' : 'Delete'}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
+
+
+{isModalOpen && selectedRent && (
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+    <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div className="sticky top-0 bg-white z-10 p-6 pb-4 border-b flex justify-between items-start">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Rent Payment Details</h2>
+          <p className="text-[#7D7D7D] mt-1">{formatDate(selectedRent.paymentDueDay) || "N/A"}</p>
+        </div>
         <button
-          className="text-gray-500 hover:text-gray-700"
+          className="text-gray-400 hover:text-[#7D7D7D] transition-colors p-1 -mr-2"
           onClick={() => setIsModalOpen(false)}
         >
-          ✕
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
         </button>
       </div>
 
-      <div className="p-6 space-y-4">
-        <div className="flex  items-start gap-4 mb-6">
-          <div className={`rounded-lg p-3 ${getStatusStyle(selectedRent.status)}`}>
-            <BiSolidBuildings className="text-3xl" />
+      <div className="p-6 space-y-8">
+        <div className="flex items-center gap-5">
+          <div className={`rounded-xl p-4 ${getStatusStyle(selectedRent.status)}`}>
+            <BiSolidBuildings className="text-4xl text-white" />
           </div>
           <div>
-            <h3 className="text-2xl text-black font-bold">
+            <h3 className="text-2xl font-bold text-gray-900">
               {selectedRent.tenantId?.personal_information?.full_name || "N/A"}
             </h3>
-            <p className="text-gray-600">{selectedRent.tenantId?.unit.unit_name || "N/A"}</p>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
+              <span className="flex items-center text-[#7D7D7D]">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                </svg>
+                {selectedRent.tenantId?.unit.unit_name || "N/A"}
+              </span>
+              <span className="flex items-center text-[#7D7D7D]">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                  <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                </svg>
+                {selectedRent.tenantId?.personal_information?.email || "N/A"}
+              </span>
+              <span className="flex items-center text-[#7D7D7D]">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1.5" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                </svg>
+                {selectedRent.tenantId?.personal_information?.phone || "N/A"}
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <div>
-              <h4 className="font-semibold text-2xl border-b mb-2">Tenant Information</h4>
-              <div className="space-y-2">
-                <p><span className="text-xl">Email:</span> {selectedRent.tenantId?.personal_information?.email || "N/A"}</p>
-                <p><span className="text-xl">Phone:</span> {selectedRent.tenantId?.personal_information?.phone || "N/A"}</p>
-                <p><span className="text-xl">Address:</span> {selectedRent.tenantId?.personal_information?.address || "N/A"}</p>
+        
+
+   
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-6">
+            <div className="bg-gray-50 p-5 rounded-lg border">
+              <h4 className="font-semibold text-lg text-gray-900 mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                </svg>
+                Tenant Information
+              </h4>
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm text-[#7D7D7D]">Full Address</p>
+                  <p className="text-gray-800">{selectedRent.tenantId?.personal_information?.address || "N/A"}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-[#7D7D7D]">Lease Start</p>
+                    <p className="text-gray-800">{formatDate(selectedRent.tenantId?.lease_duration.start_date) || "N/A"}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-[#7D7D7D]">Lease End</p>
+                    <p className="text-gray-800">{formatDate(selectedRent.tenantId?.lease_duration.end_date) || "N/A"}</p>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div>
-              <h4 className="font-semibold text-2xl border-b mb-2">Lease Information</h4>
-              <div className="space-y-2">
-                <p><span className="text-xl">Start Date:</span> {selectedRent.tenantId?.lease_duration.start_date || "N/A"}</p>
-                <p><span className="text-xl">End Date:</span> {selectedRent.tenantId?.lease_duration.end_date || "N/A"}</p>
+              <div className="bg-gray-50 p-5 rounded-lg border">
+              <h4 className="font-semibold text-lg text-gray-900 mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                </svg>
+                Payment Status
+              </h4>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <span className={`inline-block w-3 h-3 rounded-full mr-2 ${getStatusStyle(selectedRent.status)}`}></span>
+                  <span className="font-medium capitalize">{selectedRent.status || "N/A"}</span>
+                </div>
+                <div>
+                  <span className="text-sm text-[#7D7D7D]">Security Deposit:</span>
+                  <span className="ml-2 font-medium">₹{selectedRent.tenantId?.deposit || "0"}</span>
+                </div>
               </div>
             </div>
+
           </div>
 
-          <div className="space-y-4">
-            <div>
-              <h4 className="font-semibold text-2xl border-b mb-2">Payment Details</h4>
-              <div className="space-y-2">
-                <p><span className="text-xl">Amount:</span> ₹{selectedRent.tenantId?.rent || "0"}</p>
-                <p><span className="text-xl">Due Date:</span> {selectedRent.paymentDueDay || "N/A"}</p>
-                <p>
-                  <span className="text-xl">Status:</span> 
-                  <span className={`ml-2 px-2 py-1 rounded-md text-sm ${getStatusStyle(selectedRent.status)}`}>
-                    {selectedRent.status || "N/A"}
-                  </span>
-                </p>
-                <p><span className="text-xl">Security Deposit:</span> ₹{selectedRent.tenantId?.security_deposit || "0"}</p>
+          <div className="space-y-6">
+            <div className="bg-gray-50 p-5 rounded-lg border">
+              <h4 className="font-semibold text-lg text-gray-900 mb-4 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                  <path fillRule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clipRule="evenodd" />
+                </svg>
+                Rent Details
+              </h4>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-[#7D7D7D]">Base Rent</span>
+                  <span className="font-medium">₹{selectedRent.tenantId?.financial_information?.rent || "0"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#7D7D7D]">Maintenance</span>
+                  <span className="font-medium">₹{selectedRent.tenantId?.financial_information?.maintanence || "0"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#7D7D7D]">CGST</span>
+                  <span className="font-medium">₹{selectedRent.tenantId?.financial_information?.cgst || "0"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#7D7D7D]">SGST</span>
+                  <span className="font-medium">₹{selectedRent.tenantId?.financial_information?.sgst || "0"}</span>
+                </div>
+                <div className="flex justify-between pt-2 border-t border-gray-200">
+                  <span className="text-[#7D7D7D]">TDS Deduction</span>
+                  <span className="text-red-500 font-medium">₹{selectedRent.tenantId?.financial_information?.tds || "0"}</span>
+                </div>
+                <div className="flex justify-between pt-3 border-t border-gray-200">
+                  <span className="font-semibold">Total Amount</span>
+                  <span className="font-bold text-lg">₹{selectedRent.tenantId?.rent || "0"}</span>
+                </div>
               </div>
-            </div> 
-
-            <div>
-              <h4 className="font-semibold text-2xl border-b mb-2">Emergency Contact</h4>
-              <p>
-                Relation : {typeof selectedRent.tenantId?.emergency_contact === 'object' 
-                  ? `${selectedRent.tenantId.emergency_contact.relation || 'N/A'} `
-                  : selectedRent.tenantId?.emergency_contact || "N/A"}
-              </p>
             </div>
 
           </div>
         </div>
       </div>
 
-      <div className="flex justify-end p-4 border-t gap-3">
-        {/* <button
-          className="bg-[#B200FF] text-white px-4 py-2 rounded-lg hover:bg-[#9800cc] transition-colors"
-          onClick={() => {
-            handleDownload(selectedRent.uuid);
-            setIsModalOpen(false);
-          }}
-        >
-          Download Receipt
-        </button> */}
-        <button
-          className="bg-gray-200 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
-          onClick={() => setIsModalOpen(false)}
-        >
-          Close
-        </button>
-      </div>
+     <div className="sticky bottom-0 bg-white border-t p-4 flex justify-end space-x-3">
+  <button
+    className="px-6 py-2.5 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+    onClick={() => setIsModalOpen(false)}
+  >
+    Close
+  </button>
+  <button
+    className="px-6 py-2.5 bg-red-600 rounded-lg text-white hover:bg-red-700 transition-colors"
+    onClick={() => {
+      setDeletingId(selectedRent.uuid);
+       setIsModalOpen(false);
+      setIsDeleteModalOpen(true);
+    }}
+  >
+    Delete
+  </button>
+</div>
     </div>
   </div>
 )}
