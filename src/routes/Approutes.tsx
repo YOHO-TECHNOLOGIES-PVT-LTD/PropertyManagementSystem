@@ -13,6 +13,7 @@ import Maintenance from '../pages/maintenance/Maintenance';
 import Login from '../pages/auth/login/Login';
 import { useAuth } from '../components/auth/AuthContext';
 import ViewAllUnits from '../components/property/viewallunit/viewallunit';
+import LandHome from '../pages/Land/LandHome';
 
 function Approutes() {
 	const { isAuthenticated, isLoading } = useAuth();
@@ -44,6 +45,7 @@ function Approutes() {
 
 
 
+        <Route path='/lands' element={<LandHome />} />
       </Route>
     </Routes>
   )

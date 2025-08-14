@@ -1,4 +1,3 @@
-
 import HttpClient from "./httpClient";
 import { HTTP_END_POINTS } from "./httpEndpoints";
 
@@ -17,8 +16,8 @@ class Client {
 	dashboard={
 		get:(data:any)=>HttpClient.get(HTTP_END_POINTS.DashBoard.get,data),
 	}
-    property = {
-        getAll: (params: string) =>
+	property = {
+		getAll: (params: string) =>
 			HttpClient.get(HTTP_END_POINTS.property.getAll, params),
 		create: (params: string) =>
 			HttpClient.post(HTTP_END_POINTS.property.create, params),
@@ -27,18 +26,15 @@ class Client {
 		delete: (params: string) => HttpClient.delete(HTTP_END_POINTS.property.delete+ params.uuid),
 		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.property.get + params.uuid),
 		getProperty: (data: any) => HttpClient.get(HTTP_END_POINTS.property.getProperty, data),
-    };
-    land = {
-        getAll: (params: string) =>
+	};
+	land = {
+		getAll: (params: string) =>
 			HttpClient.get(HTTP_END_POINTS.land.getAll, params),
-		create: (params: string) =>
+		create: (params: any) =>
 			HttpClient.post(HTTP_END_POINTS.land.create, params),
-		edit: (data: any, params: string) =>
-			HttpClient.update(HTTP_END_POINTS.land.update, params, data),
-		delete: (params: string) =>
-			HttpClient.delete(HTTP_END_POINTS.land.delete, params),
-		getByid: (params: string) =>
-			HttpClient.get(HTTP_END_POINTS.land.get, params),
+		edit: (data: any, params: string) => HttpClient.update(HTTP_END_POINTS.land.update.replace(":uuid", params), data),
+		delete: (params: string) => HttpClient.delete(HTTP_END_POINTS.land.delete.replace(":uuid", params)),
+		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.land.get, params),
 	};
 	tenant = {
 		getAll: (data: string) =>
@@ -92,7 +88,7 @@ class Client {
 		edit: (data: any, params: string) => HttpClient.update(HTTP_END_POINTS.maintenance.update, params, data),
 		delete: (params: string) => HttpClient.delete(HTTP_END_POINTS.maintenance.delete, params),
 		getByid: (params: string) => HttpClient.get(HTTP_END_POINTS.maintenance.get, params),
-    };
+	};
 
 	notification ={
 		getAll:(params:string)=>
