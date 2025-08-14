@@ -4,13 +4,18 @@ import { FaRegBell } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Profileicon from "../../assets/profileicon.png";
 import pmsicon from "../../assets/pmsicon (2).png";
+import { useDispatch, useSelector } from "react-redux";
+import { selectNotification } from "../../features/notification/redecures/selectors";
 
 export default function Navbar({ isSidebarOpen, toggleSidebar }) {
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
   const profileRef = useRef(null);
   const notificationRef = useRef(null);
   const navigate = useNavigate();
-
+  const dispatch = useDispatch()
+  
+ 
+  const notifications = useSelector(selectNotification ) || []
   // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -78,7 +83,7 @@ export default function Navbar({ isSidebarOpen, toggleSidebar }) {
 
         {/* Notification + Profile */}
         <div className="flex items-center gap-6">
-          {/* Notification */}
+          
           <div className="relative" ref={notificationRef}>
             <div
               className="h-10 w-10 flex items-center justify-center rounded-full bg-[#B200FF] text-white cursor-pointer hover:bg-purple-700 transition-colors"
@@ -87,42 +92,48 @@ export default function Navbar({ isSidebarOpen, toggleSidebar }) {
               <FaRegBell className="h-[20px] w-[20px]" />
             </div>
 
-            {showNotificationDropdown && (
-              <div className="absolute right-0 mt-2 w-[300px] bg-white rounded-md shadow-lg z-20 p-4">
-                <h3 className="font-semibold text-sm mb-2">All Notifications</h3>
-                <div className="space-y-3">
-                  {[
-                    {
-                      name: "Chendran",
-                      message: "It is a long established fact that...",
-                      time: "2 minutes ago",
-                    },
-                    {
-                      name: "Store Verification Done",
-                      message: "We have successfully received your request.",
-                      time: "1 Month Ago",
-                    },
-                    {
-                      name: "Check Your Mail",
-                      message: "All done! Now check your inbox...",
-                      time: "4 Months Ago",
-                    },
-                  ].map((item, i) => (
-                    <div key={i} className="border-b pb-2">
-                      <div className="text-sm font-medium">{item.name}</div>
-                      <p className="text-xs text-gray-600">{item.message}</p>
-                      <div className="text-[10px] text-gray-400">{item.time}</div>
-                    </div>
-                  ))}
-                </div>
-                <p
-                  onClick={handleViewNotification}
-                  className="cursor-pointer block mt-4 text-center text-[#68B39F] text-sm font-medium"
-                >
-                  View All
-                </p>
+         {showNotificationDropdown && (
+  <div className="absolute right-0 mt-2 w-[300px] bg-white rounded-md shadow-lg z-20 p-4">
+    <h3 className="font-semibold text-sm mb-2">Recent Notifications</h3>
+
+    <div className="space-y-3">
+      {notifications.length > 0 ? (
+        [...notifications]
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          ) 
+          .slice(0, 3) 
+          .map((item: any, i: number) => (
+            <div key={item._id || i} className="border-b pb-2">
+              <div className="text-sm font-medium">
+                {item.title || "No Title"}
               </div>
-            )}
+              <p className="text-xs text-gray-600">
+                {item.message || item.description || ""}
+              </p>
+              <div className="text-[10px] text-gray-400">
+                {item.createdAt
+                  ? new Date(item.createdAt).toLocaleString()
+                  : ""}
+              </div>
+            </div>
+          ))
+      ) : (
+        <p className="text-xs text-gray-500">No notifications found</p>
+      )}
+    </div>
+
+    <p
+      onClick={handleViewNotification}
+      className="cursor-pointer block mt-4 text-center text-[#68B39F] text-sm font-medium"
+    >
+      View All
+    </p>
+  </div>
+)}
+
+
           </div>
 
           {/* Divider */}
