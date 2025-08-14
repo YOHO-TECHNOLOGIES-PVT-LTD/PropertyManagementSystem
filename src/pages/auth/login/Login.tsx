@@ -6,6 +6,7 @@ import buildingImage from "../../../assets/loginimg.png";
 import { useNavigate } from "react-router-dom";
 import { loginService } from "../../../features/auth/login/service"; // <-- your service
 import { useAuth } from "../../../components/auth/AuthContext";
+import LoadingOverlay from "../../../components/Loading/Loading";
 
 function Login() {
   const [email, setEmail] = useState("owner@gmail.com");
@@ -45,7 +46,7 @@ function Login() {
 
   return (
     <div className="flex h-screen">
-      {/* Left form */}
+  
       <div className="flex flex-col justify-center px-10 w-1/2">
         <h1 className="text-3xl font-bold text-[64px] text-[#B200FF] text-center mb-2">
           MGM - ANAND
@@ -55,7 +56,6 @@ function Login() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Email */}
           <div>
             <label className="block text-[18px] mb-1">Email Address</label>
             <Input
@@ -68,7 +68,6 @@ function Login() {
             />
           </div>
 
-          {/* Password */}
           <div>
             <label className="block text-[18px] mb-1">Password</label>
             <div className="relative">
@@ -94,7 +93,6 @@ function Login() {
             </div>
           </div>
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
@@ -105,7 +103,6 @@ function Login() {
         </form>
       </div>
 
-      {/* Right image */}
       <div className="w-1/2">
         <img
           src={buildingImage}

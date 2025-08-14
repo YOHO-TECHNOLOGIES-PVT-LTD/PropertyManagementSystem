@@ -39,3 +39,17 @@
       scrollbar-width: none;
       /* Firefox */
     }
+
+
+    @keyframes slow-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-slow-spin {
+  animation: slow-spin 2s linear infinite; 
+}

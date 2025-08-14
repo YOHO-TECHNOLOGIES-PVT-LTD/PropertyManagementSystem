@@ -13,9 +13,10 @@ import ActivityTabs from "../../components/dashboard/RecentActivity&task/Activit
 import RadialChart from "../../components/dashboard/PaymentCharts/RadicalChart";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../../store/store";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { DashboardThunks } from "../../features/Dashboard/Reducer/DashboardThunk";
 import { selectDashboardData } from "../../features/Dashboard/Reducer/Selector";
+import LoadingOverlay from "../../components/Loading/Loading";
 
 // Types
 export interface PropertyTotal {
@@ -129,11 +130,24 @@ const sampleTaskData = [
 
 const DashBoard = () => {
   const dispatch = useDispatch<AppDispatch>();
+   const [loading, setLoading] = useState(true);
   const dashboardData = useSelector(selectDashboardData);
 
+ 
   useEffect(() => {
     dispatch(DashboardThunks());
+
+   
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
   }, [dispatch]);
+
+  if (loading) {
+    return <LoadingOverlay />; 
+  }
 
   const totalProperties =
     dashboardData?.PropertiesTotal?.reduce(
@@ -205,6 +219,7 @@ const DashBoard = () => {
 
   return (
     <div className="p-3 flex flex-col gap-6">
+       
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
