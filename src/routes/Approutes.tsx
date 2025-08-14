@@ -10,6 +10,7 @@ import LeaseManagement from '../pages/lease management/LeaseManagement';
 import FinancialReports from '../pages/financial reports/Reports';
 import Settings from '../pages/settings/Settings';
 import Maintenance from '../pages/maintenance/Maintenance';
+import LandHome from '../pages/Land/LandHome';
 
 function Approutes() {
   return (
@@ -26,6 +27,7 @@ function Approutes() {
           <Route path='/finance' element={<FinancialReports />} />
           <Route path='/settings' element={<Settings />} />
           <Route path='/maintenance' element={<Maintenance />} />
+          <Route path='/lands' element={<LandHome />} />
 
         </Route>
       </Routes>
