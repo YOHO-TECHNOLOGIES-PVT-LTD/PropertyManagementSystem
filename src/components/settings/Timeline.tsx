@@ -69,7 +69,16 @@ export default function Timeline() {
                 <p className="font-semibold">Note</p>
                 <p className="text-sm text-gray-600">{item.details}</p>
               </div>
-              <p className="text-xs text-gray-500">{item.date}</p>
+             <p className="text-xs text-gray-500">
+  {new Date(item.date).toLocaleString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  })}
+</p>
+
             </CardContent>
           </Card>
         </div>
