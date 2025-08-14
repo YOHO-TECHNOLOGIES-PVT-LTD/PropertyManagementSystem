@@ -13,9 +13,6 @@ import {
 } from "../../components/ui/select";
 import { useEffect, useState } from "react";
 import propertyImg1 from "../../assets/properties/property1.png";
-import propertyImg2 from "../../assets/properties/property2.png";
-import propertyImg3 from "../../assets/properties/property3.png";
-import propertyImg4 from "../../assets/properties/property4.png";
 import buildingBlue from "../../assets/properties/building-blue.png";
 import buildingGreen from "../../assets/properties/building-green.png";
 import buildingPink from "../../assets/properties/building-pink.png";
@@ -40,16 +37,15 @@ import {
   fetchGetProperties,
   fetchCreateProperty,
   fetchEditProperty,
+  fetchDeleteProperty,
+  fetchCreateUnit,
 } from "../../features/Properties/Reducers/PropertiesThunk";
-import { editProperty } from "../../features/Properties/Services";
-import { GetallPropertyThunks } from "../../features/maintenance/reducers/thunks";
-import { useNavigate } from "react-router-dom";
-
-
 type ModalMode = "add" | "view" | "edit";
+type UnitModalMode = "add" | "edit";
 
 interface Property {
   id: number;
+  _id?:string;
   uuid?: string;
   name: string;
   location: string;
@@ -72,99 +68,19 @@ interface Property {
   };
 }
 
-const initialProperties: Property[] = [
-  {
-    id: 1,
-    name: "Sunrise Apartments",
-    location: "123 Main Street, Downtown",
-    image: propertyImg1,
-    tag: "Apartments",
-    owner: {
-      name: "John Smith",
-      role: "OWNER/RENTAL",
-      avatar: "/professional-man.png",
-      phone: "+91 9876543210",
-      email: "john@example.com",
-      address: "123 Owner Street, Downtown",
-    },
-    stats: {
-      totalUnits: 55,
-      totalSquareFeet: 3000,
-      occupiedUnits: 50,
-      vacantUnits: 5,
-      occupancyRate: 83.3,
-    },
-  },
-  {
-    id: 2,
-    name: "Green Valley Complex",
-    location: "789 Pine Avenue, Westside",
-    image: propertyImg2,
-    tag: "Apartments",
-    owner: {
-      name: "Sarah Johnson",
-      role: "OWNER/RENTAL",
-      avatar: "/professional-woman-diverse.png",
-      phone: "+91 9876543210",
-      email: "sarah@example.com",
-      address: "789 Owner Avenue, Westside",
-    },
-    stats: {
-      totalUnits: 36,
-      totalSquareFeet: 4500,
-      occupiedUnits: 34,
-      vacantUnits: 2,
-      occupancyRate: 94.4,
-    },
-  },
-  {
-    id: 3,
-    name: "Rose Cottage Villa",
-    location: "123 Main Street, Downtown",
-    image: propertyImg3,
-    tag: "Villa",
-    owner: {
-      name: "William",
-      role: "OWNER/RENTAL",
-      avatar: "/bearded-man.png",
-      phone: "+91 9876543210",
-      email: "william@example.com",
-      address: "123 Owner Street, Downtown",
-    },
-    stats: {
-      totalUnits: 12,
-      totalSquareFeet: 6000,
-      occupiedUnits: 12,
-      vacantUnits: 0,
-      occupancyRate: 48.3,
-    },
-  },
-  {
-    id: 4,
-    name: "Orchard House",
-    location: "789 Pine Avenue, Westside",
-    image: propertyImg4,
-    tag: "House",
-    owner: {
-      name: "Michael",
-      role: "OWNER/RENTAL",
-      avatar: "/young-professional-man.png",
-      phone: "+91 9876543210",
-      email: "michael@example.com",
-      address: "789 Owner Avenue, Westside",
-    },
-    stats: {
-      totalUnits: 43,
-      totalSquareFeet: 2000,
-      occupiedUnits: 39,
-      vacantUnits: 4,
-      occupancyRate: 72.3,
-    },
-  },
-];
+interface Unit {
+  id?: string;
+  property: string;
+  propertyId?: string;
+  propertyUuid?: string;
+  name: string;
+  sqFeet: string;
+  address: string;
+  image?: string;
+}
 
 function Properties() {
-  const [selectedType, setSelectedType] = useState<string>("All Types");
+  const [selectedType, setSelectedType] = useState<string>("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(
@@ -177,49 +93,19 @@ function Properties() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  // const [properties, setProperties] = useState<Property[]>(initialProperties);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const dispatch = useDispatch<any>();
   const properties = useSelector(selectProperties);
-  const [addunits, setaddunits] = useState(false)
-  const [propertyTypes, setPropertyTypes] = useState<string[]>([])
-  const [preview, setPreview] = useState<string | null>(null);
-  const [openunits, setopenunits] = useState(false)
-  const navigate = useNavigate();
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setPreview(URL.createObjectURL(file)); // show preview
-      setFormData((prev) => ({ ...prev, unit_image: file })); // store file
-    }
-  };
-
-  const units = [
-    {
-      id: 1,
-      property_name: "Adamsmith",
-      unit_name: "101",
-      unit_sq_feet: 1880,
-      unit_address: "12, Main Road, OMR Chennai",
-    },
-    {
-      id: 2,
-      property_name: "Sunrise Apartments",
-      unit_name: "B-204",
-      unit_sq_feet: 1250,
-      unit_address: "45, Beach Road, Chennai",
-    },
-  ];
-
-
-
-  useEffect(() => {
-    ; (async () => {
-      const maintenancedata = await dispatch(GetallPropertyThunks({ property_type: "commercial" }))
-      console.log("commercial:", maintenancedata)
-      setPropertyTypes(maintenancedata)
-    })()
-  }, [dispatch])
+  const [isUnitModalOpen, setIsUnitModalOpen] = useState(false);
+  const [unitModalMode, setUnitModalMode] = useState<UnitModalMode>("add");
+  const [editingUnit, setEditingUnit] = useState<Unit | null>(null);
+  const [unitForm, setUnitForm] = useState<Unit>({
+    property: "",
+    propertyId: "",
+    name: "",
+    sqFeet: "",
+    address: "",
+  });
 
   useEffect(() => {
     dispatch(fetchGetProperties());
@@ -237,62 +123,95 @@ function Properties() {
     ownerAddress: "",
   });
 
-  // const filteredProperties = properties.filter((property) => {
-  // 	// Filter by type
-  // 	const typeMatch =
-  // 		selectedType === 'All Types' || property.tag === selectedType;
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
 
-  // 	// Filter by search term
-  // 	const searchMatch =
-  // 		searchTerm === '' ||
-  // 		property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  // 		property.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  // 		property.owner.name.toLowerCase().includes(searchTerm.toLowerCase());
+    if (!formData.propertyName.trim()) {
+      newErrors.propertyName = "Property name is required";
+    }
 
-  // 	return typeMatch && searchMatch;
-  // });
-  // Step 1: Map API data to UI-friendly shape
-  const mappedProperties: Property[] = properties?.map(
-    (p: any, index: number) => ({
+    if (!formData.propertyType) {
+      newErrors.propertyType = "Property type is required";
+    }
+
+    if (!formData.squareFeet.trim()) {
+      newErrors.squareFeet = "Square feet is required";
+    } else if (isNaN(Number(formData.squareFeet))) {
+      newErrors.squareFeet = "Square feet must be a number";
+    }
+
+    if (!formData.address.trim()) {
+      newErrors.address = "Property address is required";
+    }
+
+    if (!formData.ownerName.trim()) {
+      newErrors.ownerName = "Owner name is required";
+    }
+
+    if (formData.email && !/^\S+@\S+\.\S+$/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+    }
+
+    if (formData.phone && !/^[0-9+\- ]+$/.test(formData.phone)) {
+      newErrors.phone = "Please enter a valid phone number";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const mappedProperties: Property[] =
+    properties?.map((p: any, index: number) => ({
       id: index + 1,
       name: p.property_name,
-      location: p.owner_information?.address ?? "",
-      image: p.image ?? propertyImg1,
+      location: p.property_address || p.owner_information?.address || "",
+      image: p.image || propertyImg1,
       tag: p.property_type,
       owner: {
-        name: p.owner_information?.full_name ?? "",
+        name: p.owner_information?.full_name || "",
         role: "OWNER/RENTAL",
         avatar: "/professional-man.png",
-        phone: p.owner_information?.phone ?? "",
-        email: p.owner_information?.email ?? "",
-        address: p.owner_information?.address ?? "",
+        phone: p.owner_information?.phone || "",
+        email: p.owner_information?.email || "",
+        address: p.owner_information?.address || "",
       },
       stats: {
-        totalUnits: p.total_units,
+        totalUnits: p.total_units || 0,
         totalSquareFeet: Number(p.square_feet) || 0,
-        occupiedUnits: p.occupied_units,
-        vacantUnits: p.vacant_units,
-        occupancyRate: p.occupancy_rate,
+        occupiedUnits: p.occupied_units || 0,
+        vacantUnits: p.vacant_units || 0,
+        occupancyRate: p.occupancy_rate || 0,
       },
-    })
-  );
+      uuid: p.uuid,
+      _id:p._id
+    })) || [];
 
-  // Step 2: Apply your filter
   const filteredProperties = mappedProperties.filter((property) => {
+    const propertyTag = property.tag?.toLowerCase() || "";
+    const searchTermLower = searchTerm.toLowerCase();
+
     const typeMatch =
-      selectedType === "All Types" || property.tag === selectedType;
+      selectedType === "all" || propertyTag === selectedType.toLowerCase();
 
     const searchMatch =
       searchTerm === "" ||
-      property.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      property.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      property.owner.name.toLowerCase().includes(searchTerm.toLowerCase());
+      (property.name?.toLowerCase() || "").includes(searchTermLower) ||
+      (property.location?.toLowerCase() || "").includes(searchTermLower) ||
+      (property.owner?.name?.toLowerCase() || "").includes(searchTermLower);
 
     return typeMatch && searchMatch;
   });
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    // Clear error when user starts typing
+    if (errors[field]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -324,6 +243,7 @@ function Properties() {
     });
     setUploadedImage(null);
     setImageFile(null);
+    setErrors({});
     setIsModalOpen(true);
   };
 
@@ -343,6 +263,7 @@ function Properties() {
     });
     setUploadedImage(property.image);
     setImageFile(null);
+    setErrors({});
     setIsModalOpen(true);
   };
 
@@ -362,50 +283,49 @@ function Properties() {
     });
     setUploadedImage(property.image);
     setImageFile(null);
+    setErrors({});
     setIsModalOpen(true);
   };
 
   const handleSubmit = async () => {
-    if (!formData.propertyName || !formData.propertyType || !formData.address) {
-      toast.error("Please fill in all required fields");
+    if (!validateForm()) {
       return;
     }
 
     try {
       const formPayload = {
-        name: formData.propertyName,
-        location: formData.address,
-        tag: formData.propertyType,
+        property_name: formData.propertyName,
+        property_type: formData.propertyType,
+        square_feet: formData.squareFeet,
+        total_units: formData.totalUnits || "1",
+        property_address: formData.address,
         image: uploadedImage || null,
-        owner: {
-          name: formData.ownerName,
-          email: formData.email,
-          phone: formData.phone,
-          address: formData.ownerAddress,
-        },
-        stats: {
-          totalUnits: parseInt(formData.totalUnits) || 0,
-          totalSquareFeet: parseInt(formData.squareFeet) || 0,
+        owner_information: {
+          full_name: formData.ownerName,
+          email: formData.email || "",
+          phone: formData.phone || "",
+          address: formData.ownerAddress || formData.address,
         },
       };
 
       if (modalMode === "edit" && selectedProperty) {
-        const payload = {
-          uuid: ""
+        const params = {
+          uuid: selectedProperty?.uuid,
         };
-        await dispatch(
-          editProperty(String(selectedProperty.id), formPayload)
-        );
+
+        if (!params.uuid) {
+          toast.error("Property UUID not found");
+          return;
+        }
+
+        await dispatch(fetchEditProperty(params, formPayload));
         toast.success(`${formData.propertyName} details updated`);
       } else {
         await dispatch(fetchCreateProperty(formPayload));
         toast.success("New property added successfully!");
       }
 
-      // Refresh property list
       await dispatch(fetchGetProperties());
-
-      // Reset form
       setIsModalOpen(false);
       setUploadedImage(null);
       setImageFile(null);
@@ -426,21 +346,26 @@ function Properties() {
     }
   };
 
-
-
-
   const handleDeleteClick = (property: Property) => {
     setPropertyToDelete(property);
     setIsDeleteModalOpen(true);
   };
 
-  const handleDeleteProperty = () => {
-    if (propertyToDelete) {
-      properties.filter((property: any) => property.id !== propertyToDelete.id)
+  const handleDeleteProperty = async () => {
+    if (!propertyToDelete?.uuid) {
+      toast.error("Property UUID not found");
+      return;
+    }
 
+    try {
+      await dispatch(fetchDeleteProperty(propertyToDelete.uuid));
+      toast.success(`${propertyToDelete.name} deleted successfully`);
       setIsDeleteModalOpen(false);
       setPropertyToDelete(null);
-      toast.success(`${propertyToDelete.name} deleted`);
+      await dispatch(fetchGetProperties());
+    } catch (error) {
+      console.error("Error deleting property:", error);
+      toast.error("Failed to delete property");
     }
   };
 
@@ -461,6 +386,92 @@ function Properties() {
     setSearchTerm("");
   };
 
+  const handleUnitImageUpload = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setUnitForm({ ...unitForm, image: e.target?.result as string });
+      };
+      reader.readAsDataURL(file);
+      toast.success("Image Uploaded");
+    }
+  };
+
+  const openAddUnitModal = () => {
+    setUnitModalMode("add");
+    setEditingUnit(null);
+    setUnitForm({
+      property: "",
+      propertyId: "",
+      name: "",
+      sqFeet: "",
+      address: "",
+      image: "",
+    });
+    setIsUnitModalOpen(true);
+  };
+
+  const openEditUnitModal = (unit: Unit) => {
+    setUnitModalMode("edit");
+    setEditingUnit(unit);
+    setUnitForm({
+      property: unit.property,
+      propertyId: unit.propertyId,
+      name: unit.name,
+      sqFeet: unit.sqFeet,
+      address: unit.address,
+      image: unit.image || "",
+    });
+    setIsUnitModalOpen(true);
+  };
+  const handleSubmitUnit = async () => {
+  // if (
+  //   !unitForm.propertyUuid || // Validate UUID exists
+  //   !unitForm.name ||
+  //   !unitForm.sqFeet ||
+  //   !unitForm.address
+  // ) {
+  //   toast.error("Please fill all required fields");
+  //   return;
+  // }
+
+  try {
+    const unitData = {
+      propertyId: unitForm.propertyId, 
+      unit_name: unitForm.name,
+      unit_sqft: unitForm.sqFeet,
+      unit_address: unitForm.address,
+      image: unitForm.image || null,
+    };
+
+    if (unitModalMode === "edit" && editingUnit) {
+      toast.success("Unit updated successfully");
+    } else {
+      console.log("uuid",unitData.propertyId)
+      await dispatch(fetchCreateUnit(unitData));
+      toast.success("Unit added successfully");
+    }
+    await dispatch(fetchGetProperties());
+
+    setIsUnitModalOpen(false);
+    setUnitForm({
+      property: "",
+      propertyId: "",
+      propertyUuid: "",
+      name: "",
+      sqFeet: "",
+      address: "",
+      image: "",
+    });
+  } catch (error) {
+    console.error("Error submitting unit:", error);
+    toast.error("Failed to submit unit. Please try again.");
+  }
+};
+
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -470,12 +481,11 @@ function Properties() {
             <div>
               <h1 className="text-2xl font-bold text-[#000000]">Properties</h1>
               <p className="text-gray-600 text-sm mt-2">
-                Manage Your Property Portfolio ({properties.length} Properties)
+                Manage Your Property Portfolio ({mappedProperties.length}{" "}
+                Properties)
               </p>
             </div>
-
-
-            <div className="flex gap-2">
+            <div className="flex gap-3">
               <Button
                 className="bg-[#B200FF] hover:bg-[#B200FF] text-white px-6"
                 onClick={openAddModal}
@@ -485,221 +495,13 @@ function Properties() {
               </Button>
               <Button
                 className="bg-[#B200FF] hover:bg-[#B200FF] text-white px-6"
-                onClick={() => { setaddunits(true) }}
+                onClick={openAddUnitModal}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Add Unit
               </Button>
             </div>
-
-
           </div>
-
-          {addunits && (
-            <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-              <form
-                onSubmit={handleSubmit} // <-- your submit function
-                className="bg-white rounded-lg shadow-xl w-[650px] max-h-[90vh] overflow-y-auto"
-              >
-                {/* Header */}
-                <div className="flex justify-between items-center border-b px-6 py-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-semibold flex items-center gap-2">
-                      🏢 Add New Unit
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setaddunits(false);
-                    }}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    ✖
-                  </button>
-                </div>
-
-                {/* Body */}
-                <div className="px-6 py-4">
-                  {/* Upload image */}
-                  <div className="flex items-center gap-3 mb-6">
-                    {/* Preview circle */}
-                    <div className="w-20 h-20 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center">
-                      {preview ? (
-                        <img
-                          src={preview}
-                          alt="Unit preview"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <span className="text-gray-400 text-sm">No image</span>
-                      )}
-                    </div>
-
-                    {/* File upload */}
-                    <label className="mt-3">
-                      <input
-                        type="file"
-                        name="unit_image"
-                        onChange={handleFileChange}
-                        className="hidden"
-                        accept="image/*"
-                      />
-                      <span className="px-4 py-2 bg-teal-500 text-white rounded-lg cursor-pointer hover:bg-teal-600">
-                        ⬆ Upload Image
-                      </span>
-                    </label>
-                  </div>
-
-
-                  {/* Unit Information */}
-                  <h2 className="font-semibold text-lg flex items-center gap-2 mb-4">
-                    🏢 Unit Information
-                  </h2>
-
-                  {/* Form Fields */}
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    {/* Property */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Property
-                      </label>
-                      <select
-                        name="property"
-
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                      >
-                        <option value="">Select Property</option>
-                        {properties.map((item: any) => (
-                          <option key={item._id} value={item.uuid}>
-                            {item.property_name}
-                          </option>
-                        ))}
-                      </select>
-
-                    </div>
-
-                    {/* Unit Name */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Unit Name
-                      </label>
-                      <input
-                        type="text"
-                        name="unit_name"
-
-                        placeholder="Unit Name"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                      />
-
-                    </div>
-                  </div>
-
-                  {/* Sq Feet */}
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Unit Sq Feet
-                    </label>
-                    <input
-                      type="number"
-                      name="unit_sq_feet"
-
-                      placeholder="23456"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                    />
-
-                  </div>
-
-                  {/* Address */}
-                  <div className="mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Unit Address
-                    </label>
-                    <textarea
-                      name="unit_address"
-
-                      placeholder="Enter Complete Address"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm resize-none"
-                    ></textarea>
-
-                  </div>
-                </div>
-
-                {/* Footer */}
-                <div className="flex justify-between border-t px-6 py-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setaddunits(false);
-                    }}
-                    className="px-4 py-2 border rounded-lg text-gray-700 hover:bg-gray-100"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-6 py-2 rounded-lg text-white"
-                    style={{
-                      background: "linear-gradient(to right, #9b30ff, #8000ff)",
-                    }}
-                  >
-                    Create Unit
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {openunits && (
-            <div className="fixed inset-0 bg-black bg-opacity-40 backdrop-blur-sm flex justify-center items-center z-50">
-
-              <div className="p-4 rounded-xl  bg-white shadow-lg w-[80%] max-w-4xl">
-
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setopenunits(false);
-                      // setIsModalOpen(true)
-                    }}
-                    className="w-8 h-8 flex items-center justify-center rounded-full bg-black text-white hover:bg-gray-800"
-                  >
-                    ✕
-                  </button>
-                </div>
-
-                {/* Header */}
-                <div className="grid grid-cols-5 bg-purple-600 text-white rounded-t-xl font-semibold text-center">
-                  <div className="py-3 rounded-tl-xl">Property Name</div>
-                  <div className="py-3">Unit Name</div>
-                  <div className="py-3">Unit Sq Feet</div>
-                  <div className="py-3">Unit Address</div>
-                  <div className="py-3 rounded-tr-xl">Actions</div>
-                </div>
-
-                {/* Rows */}
-                {units.map((unit) => (
-                  <div
-                    key={unit.id}
-                    className="grid grid-cols-5 items-center text-center border-t border-gray-200"
-                  >
-                    <div className="py-4">{unit.property_name}</div>
-                    <div className="py-4">{unit.unit_name}</div>
-                    <div className="py-4">{unit.unit_sq_feet}</div>
-                    <div className="py-4">{unit.unit_address}</div>
-                    <div className="py-4">
-                      <button
-                        className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600"
-                      >
-                        ✏️
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
 
           {/* Search Bar and Filter */}
           <div className="flex items-center gap-4 justify-between">
@@ -727,40 +529,40 @@ function Properties() {
               <SelectTrigger className="w-[140px] bg-[#B200FF1A] border-[#B200FF1A] text-[#B200FF] hover:bg-[#B200FF1A]">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-white border border-gray-200 shadow-lg">
+              <SelectContent>
                 <SelectItem
-                  value="All Types"
+                  value="all"
                   className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1"
                 >
-                  All Types
+                  all
                 </SelectItem>
                 <SelectItem
-                  value="Apartments"
-                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1"
+                  value="apartment"
+                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white"
                 >
-                  Apartments
+                  Apartment
                 </SelectItem>
                 <SelectItem
-                  value="Commercial"
-                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1"
+                  value="commercial"
+                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white"
                 >
                   Commercial
                 </SelectItem>
                 <SelectItem
-                  value="Villa"
-                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1"
+                  value="villa"
+                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white"
                 >
                   Villa
                 </SelectItem>
                 <SelectItem
-                  value="House"
-                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1"
+                  value="house"
+                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white"
                 >
                   House
                 </SelectItem>
                 <SelectItem
-                  value="Land"
-                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg"
+                  value="land"
+                  className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg bg-white"
                 >
                   Land
                 </SelectItem>
@@ -772,7 +574,7 @@ function Properties() {
 
 
         {/* Properties Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {filteredProperties.length ? (
             filteredProperties?.map((property) => (
               <Card
@@ -955,7 +757,7 @@ function Properties() {
                   className="text-[#B200FF]"
                   onClick={() => {
                     setSearchTerm("");
-                    setSelectedType("All Types");
+                    setSelectedType("all");
                   }}
                 >
                   Clear filters
@@ -967,7 +769,7 @@ function Properties() {
 
         {/* Add/Edit/View Property Modal */}
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-          <DialogContent className="min-w-2xl max-h-[90vh] overflow-y-auto fixed top-11/12 left-13/16 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-lg shadow-xl no-scrollbar">
+          <DialogContent className="min-w-2xl max-h-[90vh] overflow-y-auto fixed top-11/12 left-12/16 transform -translate-x-1/2 -translate-y-1/2 z-50 bg-white rounded-lg shadow-xl no-scrollbar">
             <DialogHeader className="flex flex-row items-center justify-between space-y-0">
               <div className="flex items-center gap-2">
                 <div className="p-2 bg-[#3065A426] rounded-full">
@@ -1048,9 +850,16 @@ function Properties() {
                       onChange={(e) =>
                         handleInputChange("propertyName", e.target.value)
                       }
-                      className="bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000]"
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
+                        errors.propertyName ? "border-red-500" : ""
+                      }`}
                       disabled={modalMode === "view"}
                     />
+                    {errors.propertyName && (
+                      <p className="text-red-500 text-xs">
+                        {errors.propertyName}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-[#7D7D7D]">
@@ -1063,96 +872,77 @@ function Properties() {
                       }
                       disabled={modalMode === "view"}
                     >
-                      <SelectTrigger className="bg-white border border-[#E5E5E5] shadow-lg text-[#7D7D7D] font-semibold">
+                      <SelectTrigger
+                        className={`bg-white border border-[#E5E5E5] shadow-lg text-[#7D7D7D] font-semibold ${
+                          errors.propertyType ? "border-red-500" : ""
+                        }`}
+                      >
                         <SelectValue placeholder="Property Type" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem
-                          value="Apartments"
+                          value="apartment"
                           className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white"
                         >
-                          Apartments
+                          Apartment
                         </SelectItem>
                         <SelectItem
-                          value="Commercial"
+                          value="commercial"
                           className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white"
                         >
                           Commercial
                         </SelectItem>
                         <SelectItem
-                          value="Villa"
+                          value="villa"
                           className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white"
                         >
                           Villa
                         </SelectItem>
                         <SelectItem
-                          value="House"
+                          value="house"
                           className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1 bg-white"
                         >
                           House
                         </SelectItem>
                         <SelectItem
-                          value="Land"
+                          value="land"
                           className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg bg-white"
                         >
                           Land
                         </SelectItem>
                       </SelectContent>
                     </Select>
+                    {errors.propertyType && (
+                      <p className="text-red-500 text-xs">
+                        {errors.propertyType}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  {/* <div className='space-y-2'>
-										<label className='text-sm font-medium text-[#7D7D7D]'>
-											Total Units
-										</label>
-										<Input
-											placeholder='Enter Total Units'
-											value={formData.totalUnits}
-											onChange={(e) =>
-												handleInputChange('totalUnits', e.target.value)
-											}
-											className='bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000]'
-											disabled={modalMode === 'view'}
-											type='number'
-										/>
-									</div> */}
-                  <div className="space-y-2 flex">
-                    <div>
-                      <label className="text-sm font-medium text-[#7D7D7D]">
-                        Square Feet
-                      </label>
-                      <Input
-                        placeholder="Enter Square Feet"
-                        value={formData.squareFeet}
-                        onChange={(e) =>
-                          handleInputChange("squareFeet", e.target.value)
-                        }
-                        className="bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000]"
-                        disabled={modalMode === "view"}
-                        type="number"
-                      />
-                    </div>
-                    {/* <button
-                      onClick={() => {
-                        setopenunits(true);
-                        setIsModalOpen(false);
-                      }}
-                      className="text-[#5EABD6]"
-                    >
-                      View All Units
-                    </button> */}
-
-                    <button
-                      className="text-[#5EABD6]"
-                      onClick={() => navigate("/view-units")}
-                    >
-                      View All Units
-                    </button>
-
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-[#7D7D7D]">
+                      Square Feet <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      placeholder="Enter Square Feet"
+                      value={formData.squareFeet}
+                      onChange={(e) =>
+                        handleInputChange("squareFeet", e.target.value)
+                      }
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
+                        errors.squareFeet ? "border-red-500" : ""
+                      }`}
+                      disabled={modalMode === "view"}
+                      type="number"
+                    />
+                    {errors.squareFeet && (
+                      <p className="text-red-500 text-xs">
+                        {errors.squareFeet}
+                      </p>
+                    )}
                   </div>
-
                 </div>
 
                 <div className="space-y-2">
@@ -1165,9 +955,14 @@ function Properties() {
                     onChange={(e) =>
                       handleInputChange("address", e.target.value)
                     }
-                    className="bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] min-h-[80px]"
+                    className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] min-h-[80px] ${
+                      errors.address ? "border-red-500" : ""
+                    }`}
                     disabled={modalMode === "view"}
                   />
+                  {errors.address && (
+                    <p className="text-red-500 text-xs">{errors.address}</p>
+                  )}
                 </div>
               </div>
 
@@ -1189,7 +984,7 @@ function Properties() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-[#7D7D7D]">
-                      Owner Name
+                      Owner Name <span className="text-red-500">*</span>
                     </label>
                     <Input
                       placeholder="Enter Owner Name"
@@ -1197,9 +992,14 @@ function Properties() {
                       onChange={(e) =>
                         handleInputChange("ownerName", e.target.value)
                       }
-                      className="bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000]"
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
+                        errors.ownerName ? "border-red-500" : ""
+                      }`}
                       disabled={modalMode === "view"}
                     />
+                    {errors.ownerName && (
+                      <p className="text-red-500 text-xs">{errors.ownerName}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-[#7D7D7D]">
@@ -1212,9 +1012,14 @@ function Properties() {
                       onChange={(e) =>
                         handleInputChange("email", e.target.value)
                       }
-                      className="bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000]"
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
+                        errors.email ? "border-red-500" : ""
+                      }`}
                       disabled={modalMode === "view"}
                     />
+                    {errors.email && (
+                      <p className="text-red-500 text-xs">{errors.email}</p>
+                    )}
                   </div>
                 </div>
 
@@ -1229,9 +1034,14 @@ function Properties() {
                       onChange={(e) =>
                         handleInputChange("phone", e.target.value)
                       }
-                      className="bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000]"
+                      className={`bg-white border-[#e5e5e5] focus-visible:ring-[#000] focus-visible:border-[#000] ${
+                        errors.phone ? "border-red-500" : ""
+                      }`}
                       disabled={modalMode === "view"}
                     />
+                    {errors.phone && (
+                      <p className="text-red-500 text-xs">{errors.phone}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-[#7D7D7D]">
@@ -1319,6 +1129,160 @@ function Properties() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Unit Edit and Delete */}
+        {isUnitModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 no-scrollbar">
+            <div className="max-w-[650px] w-full bg-white rounded-lg shadow-xl p-6 overflow-y-auto max-h-[90vh]">
+              {/* Header */}
+              <div className="pb-2 border-b border-gray-200 mb-4">
+                <h2 className="text-xl font-semibold text-black flex items-center gap-2">
+                  🏢 {unitModalMode === "edit" ? "Edit Unit" : "Add New Unit"}
+                </h2>
+              </div>
+
+              <div className="space-y-4">
+                {/* Upload Image */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-20 h-20 bg-gray-200 rounded-full overflow-hidden flex items-center justify-center">
+                    {unitForm.image ? (
+                      <img
+                        src={unitForm.image}
+                        alt="unit"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-gray-400">No Image</span>
+                    )}
+                  </div>
+                  <div>
+                    <input
+                      type="file"
+                      id="unit-image-upload"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={handleUnitImageUpload}
+                    />
+                    <label
+                      htmlFor="unit-image-upload"
+                      className="px-4 py-2 bg-[#13A5A5] hover:bg-[#13A5A5]/90 text-white rounded-lg cursor-pointer flex items-center gap-2"
+                    >
+                      <img src={uploadImg} alt="upload" className="w-4 h-4" />
+                      Upload Image
+                    </label>
+                  </div>
+                </div>
+
+                {/* Unit Information */}
+                <h2 className="font-semibold text-lg flex items-center gap-2 mb-2">
+                  🏢 Unit Information
+                </h2>
+
+                {/* Form Fields */}
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                  {/* Property */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-[#7D7D7D]">
+                      Property <span className="text-red-500">*</span>
+                    </label>
+                    <Select
+                      value={unitForm.property}
+                      onValueChange={(value) => {
+                        const selectedProp = mappedProperties.find(
+                          (p) => p.name === value
+                        );
+                        setUnitForm({
+                          ...unitForm,
+                          property: value,
+                          propertyUuid: selectedProp?.uuid || "",
+                          propertyId: selectedProp?._id || "",
+                        });
+                      }}
+                    >
+                      <SelectTrigger className="bg-white border-[#e5e5e5]">
+                        <SelectValue placeholder="Select Property" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {mappedProperties.map((property) => (
+                          <SelectItem
+                            key={property._id}
+                            value={property.name}
+                            className="text-[#7D7D7D]"
+                          >
+                            {property.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Unit Name */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-[#7D7D7D]">
+                      Unit Name <span className="text-red-500">*</span>
+                    </label>
+                    <Input
+                      placeholder="Unit Name"
+                      value={unitForm.name}
+                      onChange={(e) =>
+                        setUnitForm({ ...unitForm, name: e.target.value })
+                      }
+                      className="bg-white border-[#e5e5e5]"
+                    />
+                  </div>
+                </div>
+
+                {/* Sq Feet */}
+                <div className="space-y-2 mb-4">
+                  <label className="block text-sm font-medium text-[#7D7D7D]">
+                    Unit Sq Feet <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="number"
+                    placeholder="23456"
+                    value={unitForm.sqFeet}
+                    onChange={(e) =>
+                      setUnitForm({ ...unitForm, sqFeet: e.target.value })
+                    }
+                    className="bg-white border-[#e5e5e5]"
+                  />
+                </div>
+
+                {/* Address */}
+                <div className="space-y-2 mb-4">
+                  <label className="block text-sm font-medium text-[#7D7D7D]">
+                    Unit Address <span className="text-red-500">*</span>
+                  </label>
+                  <Textarea
+                    placeholder="Enter Complete Address"
+                    value={unitForm.address}
+                    onChange={(e) =>
+                      setUnitForm({ ...unitForm, address: e.target.value })
+                    }
+                    className="bg-white border-[#e5e5e5] min-h-[100px]"
+                  />
+                </div>
+
+                {/* Footer */}
+                <div className="flex justify-end gap-3 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsUnitModalOpen(false)}
+                    className="px-6 rounded-lg bg-[#EBEFF3] text-[#7D7D7D] border border-[#7D7D7D]"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    className="bg-[#B200FF] hover:bg-[#B200FF] text-white px-6 rounded-lg"
+                    onClick={handleSubmitUnit}
+                  >
+                    {unitModalMode === "edit" ? "Update Unit" : "Create Unit"}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
