@@ -16,9 +16,14 @@ export const updateProfileData = async (uuid: string, data: any) => {
 };
 
 
-    export const getallactivity = async ( data: any) => { 
+  export const getallactivity = async ( data: any) => {
+    try{
       const response = await Client.auth.activity(data);
   if (response) {
     return response;
   }
+}
+catch(err){
+  console.log(err,'error')
+}
 };
