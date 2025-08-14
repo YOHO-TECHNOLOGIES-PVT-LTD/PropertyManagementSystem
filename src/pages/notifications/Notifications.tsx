@@ -406,9 +406,19 @@ const markAsRead = async (uuid: string) => {
                       <p className={`text-sm mb-2 ${!notification.isRead ? "text-gray-700" : "text-gray-500"}`}>
                         {notification.description}
                       </p>
-                      <p className={`text-xs ${!notification.isRead ? "text-gray-600" : "text-gray-400"}`}>
-                        {notification.timestamp}
-                      </p>
+                     <p
+                          className={`text-xs ${!notification.isRead ? "text-gray-600" : "text-gray-400"}`}
+                        >
+                          {new Date(notification.timestamp).toLocaleString("en-GB", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true
+                          })}
+                        </p>
+
                     </div>
                     <div className="flex gap-3 items-start">
                       <Button
