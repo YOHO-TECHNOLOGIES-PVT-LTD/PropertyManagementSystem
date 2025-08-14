@@ -302,14 +302,14 @@ const markAsRead = async (uuid: string) => {
 
               <div className="absolute inset-0 bg-white opacity-30"></div>
 
-              <CardContent className="relative h-full flex flex-col justify-between p-6">
-                <div className="flex items-center gap-4">
+              <CardContent className="relative h-full -mt-5 flex flex-col justify-between p-6">
+                <div className="flex items-center  gap-4">
                   <div className={`p-2 ${card.iconBgColor} rounded-lg`}>
                     <IconComponent className="w-5 h-5  text-white" />
                   </div>
                   <span className="text-sm font-medium text-gray-700 " style={{...FONTS.card_headers}}>{card.title}</span>
                 </div>
-                <div className="text-3xl font-bold  text-gray-900 ">{card.value}</div>
+                <div className="text-3xl font-bold mt-5 text-gray-900 ">{card.value}</div>
               </CardContent>
             </Card>
           )
