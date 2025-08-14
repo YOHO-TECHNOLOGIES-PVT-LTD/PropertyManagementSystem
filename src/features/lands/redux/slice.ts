@@ -46,10 +46,7 @@ const landstore = createSlice({
         },
         deleteLandsDetails: (state, action: PayloadAction<string>) => {
             const data = action.payload
-            console.log(data, "slice")
             const index = state.lands.findIndex((item: LandsDetails) => item.uuid === data)
-
-            console.log(index, "slice")
             state.lands.splice(index, 1)
         },
     }

@@ -25,7 +25,6 @@ export const UpdateLandsThunks = (data: LandsDetails, params: string) => async (
 export const DeleteLandsThunks = (params: string) => async (dispatch: AppDispatch) => {
     try {
         await DeleteLandsService(params)
-        console.log(params, "thunk")
         dispatch(deleteLandsDetails(params))
     } catch (error) {
         console.log(error, "land thunks")
