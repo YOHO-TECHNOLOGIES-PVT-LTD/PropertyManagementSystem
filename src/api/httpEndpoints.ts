@@ -64,6 +64,7 @@ const generateEndPoints = () => {
             getAll:"/api/notification/",
             delete:"/api/notification/",
             update:"/api/notification/",
+            updateAll:"/api/notification/read/all",
         }
     }
 }

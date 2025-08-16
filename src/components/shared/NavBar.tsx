@@ -13,7 +13,7 @@ export default function Navbar({ isSidebarOpen, toggleSidebar }) {
   const notificationRef = useRef(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  
+
   const notifications = useSelector(selectNotification) || [];
 
   // Calculate unread count
@@ -41,7 +41,7 @@ export default function Navbar({ isSidebarOpen, toggleSidebar }) {
   };
 
   const handleViewProfile = () => {
-    navigate("/profile");
+    navigate("/settings/account");
   };
 
   return (
@@ -59,9 +59,8 @@ export default function Navbar({ isSidebarOpen, toggleSidebar }) {
           onClick={(e) => e.stopPropagation()}
         />
         <span
-          className={`ml-3 text-lg font-semibold text-gray-800 whitespace-nowrap transition-all duration-300 ${
-            isSidebarOpen ? "opacity-100" : "opacity-0"
-          }`}
+          className={`ml-3 text-lg font-semibold text-gray-800 whitespace-nowrap transition-all duration-300 ${isSidebarOpen ? "opacity-100" : "opacity-0"
+            }`}
         >
           MGM Properties
         </span>

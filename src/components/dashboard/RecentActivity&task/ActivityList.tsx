@@ -1,14 +1,12 @@
 import { Building2 } from "lucide-react";
+import dayjs from "dayjs"
 
 interface ActivityItem {
-  id: string;
-  companyName: string;
-  name: string;
-  unit: string;
-  time: string;
-  amount?: string;
-  status: "Completed" | "Pending" | "Urgent";
+  title: string;
+  details: string;
+  createdAt: string;
   icon: string;
+  action: string;
 }
 
 interface ActivityListProps {
@@ -22,27 +20,26 @@ export default function ActivityList({
   getIconStyles,
   getStatusBadgeStyles,
 }: ActivityListProps) {
+
   return (
     <div>
       {/* Headers */}
-      <div className="hidden md:grid grid-cols-[250px_1fr_1fr_1fr_1fr_120px] gap-4 text-gray-600 font-medium mb-4 border shadow-lg p-4 rounded-lg">
-        <div>Company Name</div>
-        <div>Name</div>
-        <div>Unit</div>
-        <div>Time</div>
-        <div>Amount</div>
-        <div>Action</div>
+      <div className="hidden md:grid grid-cols-[2fr,3fr,1fr,1fr] gap-4 text-gray-600 font-medium mb-4 border shadow-lg p-4 rounded-lg items-center text-center">
+        <div className="text-left">Title</div>
+        <div className="text-left">Details</div>
+        <div className="text-center">Time</div>
+        <div className="text-center">Action</div>
       </div>
 
       {/* Cards */}
-      <div className="flex flex-col gap-4">
-        {data.map((item) => (
+      <div className="flex flex-col gap-4 justify-center">
+        {data?.slice(0, 5).map((item) => (
           <div
             key={item.id}
-            className="grid grid-cols-[250px_1fr_1fr_1fr_1fr_120px] gap-4 p-4 border rounded-lg shadow-lg hover:shadow-md transition items-center"
+            className="grid grid-cols-[2fr,3fr,1fr,1fr] gap-4 p-4 border rounded-lg shadow-lg hover:shadow-md transition items-center"
           >
-            {/* Company + icon */}
-            <div className="flex items-center gap-3">
+            {/* Title with icon */}
+            <div className="flex items-center gap-3 text-left">
               <div
                 className={`w-10 h-10 rounded-lg flex items-center justify-center ${getIconStyles(
                   item.icon
@@ -50,25 +47,25 @@ export default function ActivityList({
               >
                 <Building2 />
               </div>
-              <span className="font-medium text-gray-900">
-                {item.companyName}
-              </span>
+              <span className="font-medium text-gray-900">{item.title}</span>
             </div>
 
-            <div className="text-gray-700">{item.name}</div>
-            <div className="text-gray-700">{item.unit}</div>
-            <div className="text-gray-700">{item.time}</div>
-            <div className="text-gray-900 font-medium">
-              {item.amount || "-"}
+            {/* Details */}
+            <div className="text-gray-700 text-left">{item.details}</div>
+
+            {/* Time */}
+            <div className="text-gray-700 text-center">
+              {dayjs(item.createdAt).format("hh:mm A")}
             </div>
 
-            <div>
+            {/* Action */}
+            <div className="text-center">
               <span
                 className={`px-3 py-1 rounded-lg text-sm font-medium ${getStatusBadgeStyles(
-                  item.status
+                  item.action
                 )}`}
               >
-                {item.status}
+                {item.action}
               </span>
             </div>
           </div>

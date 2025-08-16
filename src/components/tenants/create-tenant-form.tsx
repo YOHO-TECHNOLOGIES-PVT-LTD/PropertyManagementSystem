@@ -135,11 +135,11 @@ export default function AddTenantForm({
 			case 'unit':
 				if (!value.trim()) error = 'Unit is required';
 				break;
-			case 'rent':
-				if (!value.trim()) error = 'Rent amount is required';
-				else if (isNaN(Number(value))) error = 'Rent must be a number';
-				else if (Number(value) <= 0) error = 'Rent must be greater than 0';
-				break;
+			// case 'rent':
+			// 	if (formData.tenantType === "rent" && !value.trim()) error = 'Rent amount is required';
+			// 	else if (isNaN(Number(value))) error = 'Rent must be a number';
+			// 	else if (Number(value) <= 0) error = 'Rent must be greater than 0';
+			// 	break;
 			case 'securityDeposit':
 				if (!value.trim()) error = 'Security deposit is required';
 				else if (isNaN(Number(value)))
@@ -247,22 +247,34 @@ export default function AddTenantForm({
 		const sgstPercentage = parseFloat(formData.sgst) || 0;
 		const tdsPercentage = parseFloat(formData.tds) || 0;
 
-		let total = rent + maintenance;
+		let subtotal = rent + maintenance;
+
+		let cgstAmount = 0;
+		let sgstAmount = 0;
+		let tdsAmount = 0;
+		let total = subtotal;
 
 		if (formData.hasGst) {
-			const cgstAmount = (rent * cgstPercentage) / 100;
-			const sgstAmount = (rent * sgstPercentage) / 100;
-			total += cgstAmount + sgstAmount;
-		}
+			cgstAmount = (subtotal * cgstPercentage) / 100;
+			sgstAmount = (subtotal * sgstPercentage) / 100;
 
-		const tdsAmount = (total * Math.abs(tdsPercentage)) / 100;
-		total -= tdsAmount;
+			total = subtotal + cgstAmount + sgstAmount;
+
+			tdsAmount = (total * Math.abs(tdsPercentage)) / 100;
+			total -= tdsAmount;
+		}
 
 		setFormData((prev) => ({
 			...prev,
+			subtotal: subtotal.toFixed(2),
+			cgstAmount: cgstAmount.toFixed(2),
+			sgstAmount: sgstAmount.toFixed(2),
+			tdsAmount: tdsAmount.toFixed(2),
 			totalmonthlyrent: total.toFixed(2),
 		}));
 	};
+
+
 
 	useEffect(() => {
 		getUnit();
@@ -563,9 +575,8 @@ export default function AddTenantForm({
 											}}
 										>
 											<SelectTrigger
-												className={`w-full ${
-													errors.propertytype ? 'border-red-500' : ''
-												}`}
+												className={`w-full ${errors.propertytype ? 'border-red-500' : ''
+													}`}
 											>
 												<SelectValue placeholder='Select Property type' />
 											</SelectTrigger>
@@ -594,9 +605,8 @@ export default function AddTenantForm({
 											}}
 										>
 											<SelectTrigger
-												className={`w-full ${
-													errors.propertyName ? 'border-red-500' : ''
-												}`}
+												className={`w-full ${errors.propertyName ? 'border-red-500' : ''
+													}`}
 											>
 												<SelectValue placeholder='Select Property' />
 											</SelectTrigger>
@@ -623,9 +633,8 @@ export default function AddTenantForm({
 											}
 										>
 											<SelectTrigger
-												className={`w-full ${
-													errors.tenantType ? 'border-red-500' : ''
-												}`}
+												className={`w-full ${errors.tenantType ? 'border-red-500' : ''
+													}`}
 											>
 												<SelectValue placeholder='Select tenant type' />
 											</SelectTrigger>
@@ -649,9 +658,8 @@ export default function AddTenantForm({
 											}
 										>
 											<SelectTrigger
-												className={`w-full ${
-													errors.unit ? 'border-red-500' : ''
-												}`}
+												className={`w-full ${errors.unit ? 'border-red-500' : ''
+													}`}
 											>
 												<SelectValue placeholder='Select Unit' />
 											</SelectTrigger>
@@ -682,7 +690,7 @@ export default function AddTenantForm({
 							</CardHeader>
 							<CardContent className='p-6 space-y-4'>
 								<div className='grid grid-cols-3 gap-4'>
-									<div className='space-y-2'>
+									{formData.tenantType === "rent" &&(<div className='space-y-2'>
 										<Label htmlFor='rent'>Monthly Rent *</Label>
 										<Input
 											id='rent'
@@ -696,7 +704,7 @@ export default function AddTenantForm({
 										{errors.rent && (
 											<p className='text-red-500 text-xs mt-1'>{errors.rent}</p>
 										)}
-									</div>
+									</div>)}
 									<div className='space-y-2'>
 										<Label htmlFor='securityDeposit'>Security Deposit *</Label>
 										<Input
@@ -841,9 +849,8 @@ export default function AddTenantForm({
 											onChange={(e: any) =>
 												handleInputChange('leaseStartDate', e.target.value)
 											}
-											className={`pr-10 gap-3 ${
-												errors.leaseStartDate ? 'border-red-500' : ''
-											}`}
+											className={`pr-10 gap-3 ${errors.leaseStartDate ? 'border-red-500' : ''
+												}`}
 										/>
 										{errors.leaseStartDate && (
 											<p className='text-red-500 text-xs mt-1'>
@@ -860,9 +867,8 @@ export default function AddTenantForm({
 											onChange={(e: any) =>
 												handleInputChange('leaseEndDate', e.target.value)
 											}
-											className={`pr-10 ${
-												errors.leaseEndDate ? 'border-red-500' : ''
-											}`}
+											className={`pr-10 ${errors.leaseEndDate ? 'border-red-500' : ''
+												}`}
 										/>
 										{errors.leaseEndDate && (
 											<p className='text-red-500 text-xs mt-1'>

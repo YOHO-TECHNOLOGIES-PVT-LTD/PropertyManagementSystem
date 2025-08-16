@@ -55,7 +55,7 @@ export default function Timeline() {
   }
 
   return (
-    <div className="space-y-8 relative">
+    <div className="space-y-8 relative h-105 overflow-auto scrollbar-hide">
       {activityList.map((item, index) => (
         <div key={index} className="flex items-start gap-4 relative items-center">
         

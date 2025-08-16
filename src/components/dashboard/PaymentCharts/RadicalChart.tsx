@@ -50,7 +50,7 @@ const RadialChart: React.FC<RadialChartProps> = ({ data }) => {
         </div>
       ) : (
         <div className="flex items-center justify-center flex-1">
-          <ResponsiveContainer width={300} height={300}>
+          <ResponsiveContainer width="100%" height={300}>
             <RadialBarChart
               cx="50%"
               cy="50%"

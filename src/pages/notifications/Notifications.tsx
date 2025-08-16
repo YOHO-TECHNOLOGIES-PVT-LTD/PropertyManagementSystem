@@ -24,7 +24,7 @@ import cardimg4 from "../../assets/cardimg4.png"
 import { FONTS } from '../../constants/ui constants'
 import { selectNotification } from "../../features/notification/redecures/selectors"
 import { getNotificationAll } from "../../features/notification/redecures/thunks"
-import { deleteNotification, updateStatusNotification } from "../../features/notification/services"
+import { deleteNotification, updateStatusAllNotification, updateStatusNotification } from "../../features/notification/services"
 
 
 interface NotificationItem {
@@ -33,7 +33,7 @@ interface NotificationItem {
   title: string
   description: string
   timestamp: string
-  isRead: boolean
+  is_read: boolean
 }
 
 const cardData = [
@@ -114,7 +114,7 @@ function Notifications() {
           limit: 100, 
         }
         
-        await dispatch(getNotificationAll(params))
+        dispatch(getNotificationAll(params))
         
       } catch (err) {
         setError('Failed to fetch notifications')
@@ -177,9 +177,7 @@ const markAsRead = async (uuid: string) => {
 
   const markAllAsRead = async () => {
     try {
-      const unreadIds = notificationList.filter(n => !n.is_read).map(n => n.id)
-      
-     
+      const response = await updateStatusAllNotification(); 
       setNotificationList(prev =>
         prev.map(notification => ({ ...notification, is_read: true }))
       )
@@ -270,7 +268,7 @@ const markAsRead = async (uuid: string) => {
           onClick={markAllAsRead}
           disabled={notificationList.filter(n => !n.is_read).length === 0}
         >
-          Mark All Read
+          Mark as All Read
         </Button>
       </div>
 

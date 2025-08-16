@@ -36,3 +36,15 @@ export const  updateStatusNotification = async (params:any)=>{
         console.log(err,'error ')
     }
 }
+
+export const  updateStatusAllNotification = async ()=>{
+    try{
+        const response =await Client.notification.updateAllstatus()
+        if(response){
+            return response
+        }
+    }
+    catch(err){
+        console.log(err,'error ')
+    }
+}

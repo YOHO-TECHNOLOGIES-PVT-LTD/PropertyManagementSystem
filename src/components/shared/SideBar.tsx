@@ -30,7 +30,7 @@ const Sidebar = ({ isOpen, setIsOpen } : any) => {
     { icon: LandPlot, path: "/lands", label: "Land" },
     { icon: TrendingUp, path: "/reports", label: "Reports" },
     { icon: Bell, path: "/notifications", label: "Notifications" },
-    { icon: Settings, path: "/settings", label: "Settings" },
+    { icon: Settings, path: "/settings/account", label: "Settings" },
   ];
 
  

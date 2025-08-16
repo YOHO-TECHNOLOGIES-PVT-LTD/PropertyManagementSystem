@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import { DashboardThunks } from "../../features/Dashboard/Reducer/DashboardThunk";
 import { selectDashboardData } from "../../features/Dashboard/Reducer/Selector";
 import LoadingOverlay from "../../components/Loading/Loading";
+import { getallactivity } from "../../features/settings/service";
 
 // Types
 export interface PropertyTotal {
@@ -57,87 +58,25 @@ export interface DashboardApiResponse {
   data: DashboardData;
 }
 
-// Dummy data only for Activity & Task section
-const sampleActivityData = [
-  {
-    id: "1",
-    companyName: "Rent Payment Received",
-    name: "John Doe",
-    unit: "John Doe - Unit 101",
-    time: "2 Minutes Ago",
-    amount: "₹25,000",
-    status: "Completed" as const,
-    icon: "pink",
-  },
-  {
-    id: "2",
-    companyName: "Maintenance Request",
-    name: "Plumbing Issue",
-    unit: "Plumbing Issue - Unit 205",
-    time: "1 Hour Ago",
-    amount: "",
-    status: "Pending" as const,
-    icon: "blue",
-  },
-  {
-    id: "3",
-    companyName: "New Tenant Added",
-    name: "Sarah Wilson",
-    unit: "Sarah Wilson - Unit 304",
-    time: "2 Hour Ago",
-    amount: "",
-    status: "Urgent" as const,
-    icon: "red",
-  },
-  {
-    id: "4",
-    companyName: "Lease Renewal",
-    name: "Mike Johnson",
-    unit: "Mike Johnson - Unit 102",
-    time: "3 Hour Ago",
-    amount: "",
-    status: "Completed" as const,
-    icon: "yellow",
-  },
-];
-
-const sampleTaskData = [
-  {
-    id: "1",
-    companyName: "Lease Renewal - Unit 101",
-    name: "John Doe",
-    dueDate: "Due: 2024-02-15",
-    priority: "Low" as const,
-    icon: "pink",
-  },
-  {
-    id: "2",
-    companyName: "Rent Collection Follow-Up",
-    name: "Sarah Wilson",
-    dueDate: "Due: 2024-02-15",
-    priority: "Medium" as const,
-    icon: "blue",
-  },
-  {
-    id: "3",
-    companyName: "Property Inspection",
-    name: "Building A",
-    dueDate: "Due: 2024-02-15",
-    priority: "High" as const,
-    icon: "red",
-  },
-];
-
 const DashBoard = () => {
   const dispatch = useDispatch<AppDispatch>();
-   const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const dashboardData = useSelector(selectDashboardData);
+  const [activityData, setActivityData] = useState();
 
- 
+  useEffect(()=>{
+    const fetchAllActivity = async()=> {
+      const response = await getallactivity({});
+      setActivityData(response?.data)
+    }
+    fetchAllActivity();
+  },[activityData])
+
+
   useEffect(() => {
     dispatch(DashboardThunks());
 
-   
+
     const timer = setTimeout(() => {
       setLoading(false);
     }, 3000);
@@ -146,7 +85,7 @@ const DashBoard = () => {
   }, [dispatch]);
 
   if (loading) {
-    return <LoadingOverlay />; 
+    return <LoadingOverlay />;
   }
 
   const totalProperties =
@@ -175,7 +114,7 @@ const DashBoard = () => {
 
   // Process Occupancy Graph
   const processedOccupancyGraph =
-    dashboardData?.occupancyGraph?.data?.map((item:any) => ({
+    dashboardData?.occupancyGraph?.data?.map((item: any) => ({
       ...item,
       occupancyRate: Number(item.occupancyRate.toFixed(1)), // 1 decimal place
     })) || [];
@@ -201,7 +140,7 @@ const DashBoard = () => {
 
   // Rent Collection Graph stays the same
   const rentCollectionData =
-    dashboardData?.rentCollectionGraph?.data?.map((item:any) => {
+    dashboardData?.rentCollectionGraph?.data?.map((item: any) => {
       const monthName = new Date(
         item._id.year,
         item._id.month - 1
@@ -219,7 +158,7 @@ const DashBoard = () => {
 
   return (
     <div className="p-3 flex flex-col gap-6">
-       
+
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -355,8 +294,7 @@ const DashBoard = () => {
 
       {/* Last section stays dummy */}
       <ActivityTabs
-        activityData={sampleActivityData}
-        taskData={sampleTaskData}
+        activityData={activityData}
       />
     </div>
   );

@@ -532,12 +532,12 @@ function Properties() {
               <SelectTrigger className="w-[140px] bg-[#B200FF1A] border-[#B200FF1A] text-[#B200FF] hover:bg-[#B200FF1A]">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-white">
                 <SelectItem
                   value="all"
                   className="text-[#7D7D7D] font-semibold border-2 border-[#E5E5E5] rounded-lg mb-1"
                 >
-                  all
+                  All
                 </SelectItem>
                 <SelectItem
                   value="apartment"
@@ -633,10 +633,9 @@ function Properties() {
                       variant="secondary"
                       className="absolute top-3 right-3 bg-white text-[#B200FF] hover:bg-white/90"
                     >
-                      {property?.tag}
+                      {property?.tag.charAt(0).toUpperCase() + property?.tag.slice(1).toLowerCase()}
                     </Badge>
                   </div>
-
                   <div className="p-2">
                     {/* Property Info */}
                     <div className="mb-4 flex items-center justify-between mx-1">

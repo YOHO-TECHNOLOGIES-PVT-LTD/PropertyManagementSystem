@@ -14,6 +14,7 @@ import Login from '../pages/auth/login/Login';
 import { useAuth } from '../components/auth/AuthContext';
 import ViewAllUnits from '../components/property/viewallunit/viewallunit';
 import LandHome from '../pages/Land/LandHome';
+import Timeline from '../components/settings/Timeline';
 
 function Approutes() {
 	const { isAuthenticated, isLoading } = useAuth();
@@ -42,6 +43,8 @@ function Approutes() {
         <Route path='/settings' element={<Settings />} />
         <Route path='/maintenance' element={<Maintenance />} />
         <Route path='/viewunits' element={<ViewAllUnits />} />
+        <Route path="/settings/*" element={<Settings />} />
+        <Route path="*" element={<Navigate to="/settings/account" />} />
 
 
 
