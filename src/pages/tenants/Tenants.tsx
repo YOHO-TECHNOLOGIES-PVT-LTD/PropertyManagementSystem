@@ -1,8 +1,10 @@
-import React from 'react'
+import TenantManagement from "./TenantUI"
 
 function Tenants() {
   return (
-    <div>Tenants</div>
+    <div>
+      <TenantManagement />
+    </div>
   )
 }
 
