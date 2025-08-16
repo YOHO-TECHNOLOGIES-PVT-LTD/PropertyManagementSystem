@@ -1204,14 +1204,14 @@ function Properties() {
                       }}
                     >
                       <SelectTrigger className="bg-white border-[#e5e5e5]">
-                        <SelectValue placeholder="Select Property" />
+                        <SelectValue placeholder="Select Property" className="bg-[#B200FF"/>
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent className="bg-white">
                         {mappedProperties.map((property) => (
                           <SelectItem
                             key={property._id}
                             value={property.name}
-                            className="text-[#7D7D7D]"
+                            className="text-[#7D7D7D] hover:bg-[#B200FF] hover:text-white"
                           >
                             {property.name}
                           </SelectItem>
